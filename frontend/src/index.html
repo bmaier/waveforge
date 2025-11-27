@@ -166,6 +166,39 @@
             border-bottom: 1px solid rgba(255, 215, 0, 0.3);
         }
 
+        /* DELETE MODAL SPECIFIC */
+        .delete-modal .modal-content {
+            border-color: var(--neon-red);
+            box-shadow: 0 0 40px rgba(255, 51, 51, 0.25);
+            max-width: 400px;
+        }
+        .delete-btn {
+            background: rgba(255, 51, 51, 0.1);
+            color: var(--neon-red);
+            border: 1px solid var(--neon-red);
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .delete-btn:hover {
+            background: var(--neon-red);
+            color: black;
+            box-shadow: 0 0 15px var(--neon-red);
+        }
+        .cancel-btn {
+            background: transparent;
+            color: #9ca3af;
+            border: 1px solid #4b5563;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
         /* UPLOAD STATUS STYLES (NEW) */
         .upload-status-bar {
             height: 4px;
@@ -604,6 +637,28 @@
 
     <!-- FLOATING PLAYER DOCK -->
     <div id="playerDock">
+        <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+                <label for="playbackSpeed" class="text-[10px] text-gray-500 font-mono">SPEED:</label>
+                <select id="playbackSpeed" 
+                        onchange="changePlaybackSpeed(this.value)"
+                        class="cyber-select text-xs px-2 py-1 border-gray-700"
+                        aria-label="Wiedergabegeschwindigkeit">
+                    <option value="0.25">0.25x</option>
+                    <option value="0.5">0.5x</option>
+                    <option value="0.75">0.75x</option>
+                    <option value="1" selected>1x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="1.75">1.75x</option>
+                    <option value="2">2x</option>
+                </select>
+            </div>
+            <button onclick="closeDock()" 
+                    class="player-btn text-xs w-6 h-6" 
+                    aria-label="Player schließen"
+                    type="button">×</button>
+        </div>
         <div class="flex items-center gap-3 w-full mb-1">
             <span id="currentTime" class="text-xs font-mono text-cyan-400 w-12 text-right" aria-label="Aktuelle Zeit">00:00</span>
             <div class="flex-grow relative">
@@ -911,51 +966,79 @@
             </div>
 
             <!-- PREVIEW WARNING -->
-            <div class="mt-6 bg-gradient-to-r from-orange-900/20 to-red-900/20 border border-orange-700/50 p-4 rounded">
-                <h3 class="font-bold text-orange-400 mb-2 flex items-center gap-2 text-sm uppercase tracking-wide">
-                    <span aria-hidden="true">⚠</span> Preview Version - Einschränkungen
+            <div class="mt-6 bg-gray-800/30 border border-gray-700 p-4 rounded">
+                <h3 class="font-bold text-gray-200 mb-3 text-sm uppercase tracking-wide">
+                    Preview Version - Limitations
                 </h3>
                 <p class="text-sm text-gray-300 mb-3">
-                    Dies ist eine <strong>Vorschau-Version (Preview)</strong> zur Demonstration der Kernfunktionalität. 
-                    Folgende Features sind aktuell <strong>nicht implementiert</strong>:
+                    This is a preview version to demonstrate core functionality. The following features are currently <strong>not implemented</strong>:
                 </p>
-                <ul class="space-y-1.5 text-xs text-gray-400">
+                <ul class="space-y-2 text-xs text-gray-400">
                     <li class="flex items-start gap-2">
-                        <span class="text-orange-400 mt-0.5">✗</span>
-                        <div><strong class="text-gray-300">Authentifizierung:</strong> Kein Login-System, keine Benutzerkonten</div>
+                        <span class="text-gray-500 mt-0.5">▸</span>
+                        <div><strong class="text-gray-200">Authentication:</strong> No login system, no user accounts</div>
                     </li>
                     <li class="flex items-start gap-2">
-                        <span class="text-orange-400 mt-0.5">✗</span>
-                        <div><strong class="text-gray-300">Autorisierung:</strong> Keine Rollen- oder Rechteverwaltung</div>
+                        <span class="text-gray-500 mt-0.5">▸</span>
+                        <div><strong class="text-gray-200">Authorization:</strong> No role or permission management</div>
                     </li>
                     <li class="flex items-start gap-2">
-                        <span class="text-orange-400 mt-0.5">✗</span>
-                        <div><strong class="text-gray-300">Verschlüsselung:</strong> Datenübertragung unverschlüsselt (kein TLS/SSL)</div>
+                        <span class="text-gray-500 mt-0.5">▸</span>
+                        <div><strong class="text-gray-200">Encryption:</strong> Data transmission is per TLS/SSL encrypted, however no encrypted contents in local browser databases</div>
                     </li>
                     <li class="flex items-start gap-2">
-                        <span class="text-orange-400 mt-0.5">✗</span>
-                        <div><strong class="text-gray-300">Framework-Integration:</strong> WebComponent für Angular/React noch nicht verfügbar</div>
+                        <span class="text-gray-500 mt-0.5">▸</span>
+                        <div><strong class="text-gray-200">Framework Integration:</strong> WebComponent for Angular/React not yet available</div>
                     </li>
                 </ul>
-                <div class="mt-3 pt-3 border-t border-orange-800/50">
-                    <p class="text-xs text-orange-300 font-bold">⚠ Diese Version ist ausschließlich für Test- und Demonstrationszwecke bestimmt und nicht für den Produktivbetrieb geeignet.</p>
+                <div class="mt-3 pt-3 border-t border-gray-700">
+                    <p class="text-xs text-gray-400">⚠ This version is exclusively for testing and demonstration purposes and not suitable for production use.</p>
                 </div>
             </div>
 
             <!-- LICENSE -->
-            <div class="mt-6 space-y-3">
-                <h3 class="font-bold text-white uppercase tracking-wider text-xs border-b border-gray-700 pb-1">LIZENZ & NUTZUNGSRECHTE</h3>
-                <div class="bg-yellow-900/10 border border-yellow-700/30 p-4 rounded">
-                    <h4 class="font-bold text-yellow-500 mb-2">Herausgeber</h4>
-                    <p class="text-sm">Berthold Maier<br>
-                    <a href="https://www.linkedin.com/in/berthold-maier-b44a361/" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">https://www.linkedin.com/in/berthold-maier-b44a361/</a></p>
+            <div class="mt-6 bg-gray-800/30 border border-gray-700 p-4 rounded">
+                <h3 class="font-bold text-gray-200 uppercase tracking-wide text-sm border-b border-gray-700 pb-2 mb-4">Lizenz & Nutzungsrechte</h3>
+                
+                <div class="space-y-3 text-sm text-gray-300">
+                    <div>
+                        <h4 class="font-bold text-gray-200 mb-1">Herausgeber</h4>
+                        <p class="text-xs">Berthold Maier - Herrsching<br>
+                        <a href="https://github.com/bmaier/" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">https://github.com/bmaier/</a><br>
+                        <span class="text-gray-500">© 2025 All Rights Reserved</span></p>
+                    </div>
+                    
+                    <div class="pt-2 border-t border-gray-700">
+                        <h4 class="font-bold text-gray-200 mb-2">Business Source License 1.1</h4>
+                        <p class="text-xs text-gray-400 mb-3">Diese Software unterliegt der Business Source License 1.1 mit Dual-Lizenzierungsoptionen.</p>
+                        
+                        <div class="space-y-2 text-xs">
+                            <div>
+                                <strong class="text-gray-150">A) Nicht-kommerzielle Nutzung – Apache 2.0</strong>
+                                <p class="text-gray-400 mt-1">Die Software darf für nicht-kommerzielle Zwecke (privat, Forschung, Bildung) unter der Apache License 2.0 genutzt werden.</p>
+                            </div>
+                            
+                            <div class="pt-2 border-t border-gray-700">
+                                <strong class="text-gray-150">B) Kommerzielle Nutzung – Business Source License 1.1</strong>
+                                <div class="space-y-1 text-gray-400 mt-1">
+                                    <div><span class="text-gray-300">Unmodifiziert:</span> Die Software darf unverändert für kommerzielle Zwecke frei eingesetzt werden.</div>
+                                    <div><span class="text-gray-300">Open-Source Umsetzung:</span> Neue Anforderungen und Pull-Requests können nach Ermessen des Autors kostenlos umgesetzt werden.</div>
+                                    <div><span class="text-gray-300">Mit Modifikationen:</span> Jede externe Änderung oder Anpassung erfordert die Zustimmung des Authors und ggf. eine separate, kostenpflichtige kommerzielle Lizenz.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-2 border-t border-gray-700">
+                                <strong class="text-gray-150">Change Date & Change License</strong>
+                                <p class="text-gray-400 mt-1">Vier Jahre nach der ersten öffentlichen Veröffentlichung werden die Rechte automatisch auf Apache License 2.0 übergeleitet.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-2 border-t border-gray-700">
+                        <strong class="text-gray-150">Haftungsausschluss</strong>
+                        <p class="text-xs text-gray-400 mt-1">Die Software wird „wie besehen" (AS-IS) ohne jegliche Gewährleistung bereitgestellt. Der Lizenzgeber haftet nicht für direkte, indirekte oder Folgeschäden aus der Nutzung.</p>
+                    </div>
                 </div>
-                <p class="text-sm text-gray-300">Diese Software wird als <span class="text-green-400 font-bold">"Freeware für kommerzielle Nutzung"</span> bereitgestellt.</p>
-                <ul class="list-disc pl-5 space-y-2 text-xs text-gray-400">
-                    <li><strong class="text-gray-200">Kostenfreie Nutzung:</strong> Die Nutzung der kompilierten/bereitgestellten Software ist sowohl für private als auch für kommerzielle Zwecke kostenfrei gestattet.</li>
-                    <li><strong class="text-gray-200">Quellcode-Schutz:</strong> Der Quellcode darf nicht verändert, dekompiliert, disassembliert oder für abgeleitete Werke genutzt werden, ohne eine kostenpflichtige Lizenz zu erwerben.</li>
-                    <li><strong class="text-gray-200">Lizenzgebühren:</strong> Bei jeglicher Modifikation des Codes muss eine Wandel der gemäß Dual Buiness License .</li>
-                </ul>
             </div>
 
             <!-- FOOTER -->
@@ -970,6 +1053,34 @@
         </div>
     </div>
 
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div id="deleteModal" class="modal-overlay delete-modal" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+            <h2 id="deleteModalTitle" class="text-xl font-bold text-red-500 mb-4 border-b border-red-900 pb-2 flex items-center gap-2">
+                <span aria-hidden="true">⚠</span> DELETE RECORDING
+            </h2>
+            <p class="text-sm text-gray-300 mb-4">
+                Are you sure you want to delete this recording?
+            </p>
+            
+            <div class="bg-red-900/20 border border-red-900/50 p-3 rounded mb-6">
+                <div class="text-[10px] text-red-400 font-mono mb-1">RECORDING NAME:</div>
+                <div id="deleteRecordingName" class="text-xs font-mono text-white truncate">...</div>
+            </div>
+
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeDeleteModal()" 
+                        class="cancel-btn text-sm"
+                        aria-label="Abbrechen"
+                        type="button">CANCEL</button>
+                <button onclick="confirmDelete()" 
+                        class="delete-btn text-sm"
+                        aria-label="Löschen bestätigen"
+                        type="button">DELETE</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900/90 border border-cyan-500 text-cyan-400 px-6 py-3 rounded-full shadow-[0_0_20px_rgba(0,243,255,0.2)] transition-all duration-300 opacity-0 translate-y-10 z-[200] font-mono text-sm pointer-events-none">
         Notification
@@ -977,6 +1088,11 @@
 
     <script>
         // --- 1. UTILS & UI LOGIC ---
+        
+        // DELETE MODAL VARIABLES
+        let deleteModal = null;
+        let trackToDelete = null;
+        let currentPlaybackRate = 1.0;
         
         // EMBEDDED SERVICE WORKER CODE TO FIX BLOB URL ISSUES & UPLOAD LOGIC
         const SW_CODE = `
@@ -2134,6 +2250,7 @@
                 if (isPlaying && (audioContext.currentTime - playbackStartTime >= currentAudioBuffer.duration - playbackOffset - 0.1)) stopAudio(true);
             };
             applyOutputEQ();
+            playbackSource.playbackRate.value = currentPlaybackRate; // Apply playback speed
             playbackSource.start(0, offset);
             playbackStartTime = audioContext.currentTime;
             playbackOffset = offset;
@@ -2197,7 +2314,14 @@
             const dock = document.getElementById('playerDock');
             const clickedInsideDock = dock.contains(e.target);
             const clickedPlayBtn = e.target.closest('button') && e.target.closest('button').className.includes('play-btn-');
-            if (dock.classList.contains('active') && !clickedInsideDock && !clickedPlayBtn) dock.classList.remove('active');
+            if (dock.classList.contains('active') && !clickedInsideDock && !clickedPlayBtn) {
+                dock.classList.remove('active');
+                // Stop playback when dock closes
+                if (isPlaying) {
+                    stopAudio();
+                    playbackOffset = 0;
+                }
+            }
         });
 
         // EQ Updates
@@ -2251,7 +2375,7 @@
                 c.appendChild(el);
                 el.querySelector(`.play-btn-${t.id}`).onclick = () => loadTrack(t.id, t.name, t.blob);
                 el.querySelector(`.dl-btn-${t.id}`).onclick = () => { const u = URL.createObjectURL(t.blob); const a=document.createElement('a'); a.href=u; a.download=`${t.name}.${ext}`; a.click(); URL.revokeObjectURL(u); };
-                el.querySelector(`.del-btn-${t.id}`).onclick = () => { if(confirm('Delete?')) deleteTrackFromDB(t.id); };
+                el.querySelector(`.del-btn-${t.id}`).onclick = () => openDeleteModal(t.id, t.name);
                 el.querySelector(`.up-btn-${t.id}`).onclick = () => { 
                     document.getElementById(`progress-bar-${t.id}`).style.display = 'block';
                     const metadata = {
@@ -2268,6 +2392,57 @@
 
         function startTimer() { startTime = Date.now(); timerInterval = setInterval(() => { document.getElementById('timerDisplay').textContent = new Date(Date.now() - startTime).toISOString().substr(11, 8); }, 100); }
         function stopTimer() { clearInterval(timerInterval); }
+
+        // DELETE MODAL FUNCTIONS
+        function openDeleteModal(trackId, trackName) {
+            deleteModal = document.getElementById('deleteModal');
+            trackToDelete = trackId;
+            document.getElementById('deleteRecordingName').textContent = trackName;
+            deleteModal.style.display = 'flex';
+            deleteModal.classList.add('modal-open');
+            deleteModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeDeleteModal() {
+            if (deleteModal) {
+                deleteModal.style.display = 'none';
+                deleteModal.classList.remove('modal-open');
+                deleteModal.setAttribute('aria-hidden', 'true');
+                trackToDelete = null;
+            }
+        }
+
+        function confirmDelete() {
+            if (trackToDelete) {
+                deleteTrackFromDB(trackToDelete);
+                closeDeleteModal();
+            }
+        }
+
+        // PLAYBACK SPEED CONTROL
+        function changePlaybackSpeed(speed) {
+            currentPlaybackRate = parseFloat(speed);
+            if (playbackSource && isPlaying) {
+                // Restart playback with new speed
+                const currentPos = playbackOffset + (audioContext.currentTime - playbackStartTime);
+                stopAudio();
+                playAudio(currentPos);
+            }
+        }
+
+        // CLOSE DOCK FUNCTION
+        function closeDock() {
+            const dock = document.getElementById('playerDock');
+            dock.classList.remove('active');
+            // Stop playback when dock closes
+            if (isPlaying) {
+                stopAudio();
+                playbackOffset = 0;
+            }
+            // Reset playback speed
+            currentPlaybackRate = 1.0;
+            document.getElementById('playbackSpeed').value = '1';
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             initDB().catch(err => {
@@ -2302,6 +2477,7 @@
                 if (e.key === 'Escape') {
                     if (modal.style.display === 'flex') closeSaveModal();
                     else if (infoModal.style.display === 'flex') closeInfoModal();
+                    else if (document.getElementById('deleteModal')?.style.display === 'flex') closeDeleteModal();
                     else if (document.getElementById('recoveryModal').style.display === 'flex') {
                         // Recovery modal doesn't have close function, but we can discard
                         CrashGuard.discardSession();
@@ -2396,7 +2572,7 @@
                 // Info Modal Sections
                 'info.title': 'WAVEFORGE PRO - INFO',
                 'info.close': 'Schließen',
-                'info.introduction': 'Professionelle Audio-Workstation für Browser',
+                'info.introduction': 'Professionelle Offline Audio-Workstation im Browser',
                 'info.introText': 'WaveForge Pro ist eine hochmoderne Digital Audio Workstation (DAW) für den Browser, optimiert für lange Aufnahmen (8+ Stunden) mit intelligentem CrashGuard-System, Cloud-Synchronisation und vollständiger BITV 2.0 Barrierefreiheit.',
                 'info.offlineCapable': 'Offline-fähig',
                 'info.multiBrowser': 'Multi-Browser',
@@ -2449,13 +2625,13 @@
                 
                 // Preview Warning
                 'preview.title': 'Preview Version - Einschränkungen',
-                'preview.intro': 'Dies ist eine Vorschau-Version (Preview) zur Demonstration der Kernfunktionalität. Folgende Features sind aktuell nicht implementiert:',
+                'preview.intro': 'Dies ist eine Preview-Version zur Demonstration der Kernfunktionalität. Folgende Features sind aktuell nicht implementiert:',
                 'preview.noAuth': 'Authentifizierung',
                 'preview.noAuthDesc': 'Kein Login-System, keine Benutzerkonten',
                 'preview.noAuthz': 'Autorisierung',
                 'preview.noAuthzDesc': 'Keine Rollen- oder Rechteverwaltung',
-                'preview.noEncrypt': 'Verschlüsselung',
-                'preview.noEncryptDesc': 'Datenübertragung unverschlüsselt (kein TLS/SSL)',
+                'preview.noEncrypt': 'Inhaltsverschlüsselung',
+                'preview.noEncryptDesc': 'Datenübertragung ist per TLS/SSL verschlüsselt, jedoch nicht die DB-Inhalte in lokalen Browser-Datenbanken',
                 'preview.noIntegration': 'Framework-Integration',
                 'preview.noIntegrationDesc': 'WebComponent für Angular/React noch nicht verfügbar',
                 'preview.disclaimer': '⚠ Diese Version ist ausschließlich für Test- und Demonstrationszwecke bestimmt und nicht für den Produktivbetrieb geeignet.',
@@ -2558,7 +2734,7 @@
                 // Info Modal Sections
                 'info.title': 'WAVEFORGE PRO - INFO',
                 'info.close': 'Close',
-                'info.introduction': 'Professional Browser-Based Audio Workstation',
+                'info.introduction': 'Professional Browser-Based Offline Audio Workstation',
                 'info.introText': 'WaveForge Pro is a cutting-edge Digital Audio Workstation (DAW) for browsers, optimized for long recordings (8+ hours) with intelligent CrashGuard system, cloud synchronization, and full BITV 2.0 accessibility compliance.',
                 'info.offlineCapable': 'Offline-Capable',
                 'info.multiBrowser': 'Multi-Browser',
@@ -2617,7 +2793,7 @@
                 'preview.noAuthz': 'Authorization',
                 'preview.noAuthzDesc': 'No role or permission management',
                 'preview.noEncrypt': 'Encryption',
-                'preview.noEncryptDesc': 'Unencrypted data transmission (no TLS/SSL)',
+                'preview.noEncryptDesc': 'Encrypted data transmission is per TLS/SSL implemented, however no encrypted contents in local browser databases',
                 'preview.noIntegration': 'Framework Integration',
                 'preview.noIntegrationDesc': 'WebComponent for Angular/React not yet available',
                 'preview.disclaimer': '⚠ This version is exclusively for testing and demonstration purposes and not suitable for production use.',
