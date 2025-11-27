@@ -1,0 +1,18 @@
+{
+  "name": "WaveForge DAW - Preview Edition",
+  "short_name": "WaveForge",
+  "description": "Professionelle Audio-Aufnahmesoftware mit CrashGuard und Cloud-Synchronisation",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050510",
+  "theme_color": "#00f3ff",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

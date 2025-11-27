@@ -18,10 +18,8 @@ app.add_middleware(
 )
 
 # 2. Storage Configuration
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-UPLOAD_DIR = BASE_DIR / "backend" / "uploaded_data"
-STATIC_DIR = BASE_DIR / "frontend" / "public"
-FRONTEND_SRC = BASE_DIR / "frontend" / "src"
+UPLOAD_DIR = Path("./uploaded_data")
+STATIC_DIR = Path("./static")
 CHUNKS_PER_SHARD = 1000  # Max chunks per subdirectory
 
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
@@ -258,42 +256,27 @@ async def recording_complete(
     
     return {"status": "assembly_queued", "session_id": session_id, "file_name": file_name}
 
-# 5. Frontend Serving
-# Mount static assets (favicon, etc.)
-app.mount("/assets", StaticFiles(directory=str(STATIC_DIR)), name="assets")
-
-# Serve index.html and sw.js from frontend/src
-from fastapi.responses import FileResponse
-
-@app.get("/")
-async def serve_index():
-    return FileResponse(FRONTEND_SRC / "index.html")
-
-@app.get("/sw.js")
-async def serve_service_worker():
-    return FileResponse(FRONTEND_SRC / "sw.js", media_type="application/javascript")
-
+# Explicit route for manifest.json (before static mount)
 @app.get("/manifest.json")
 async def serve_manifest():
-    return FileResponse(FRONTEND_SRC / "manifest.json", media_type="application/json")
+    """Serve manifest.json for PWA support"""
+    from fastapi.responses import FileResponse
+    manifest_path = STATIC_DIR / "manifest.json"
+    if not manifest_path.exists():
+        raise HTTPException(status_code=404, detail="Manifest not found")
+    return FileResponse(manifest_path, media_type="application/json")
 
-@app.get("/favicon.svg")
-async def serve_favicon():
-    return FileResponse(STATIC_DIR / "favicon.svg", media_type="image/svg+xml")
+# 5. Frontend Serving
+# This mounts the 'static' directory to root.
+# Ensure 'index.html' and 'sw.js' are inside the 'static' folder.
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
-    print("--- WAVEFORGE PRO SERVER ---")
-    print(f"Frontend Source: {FRONTEND_SRC.absolute()}")
-    print(f"Static Assets:   {STATIC_DIR.absolute()}")
-    print(f"Storage Path:    {UPLOAD_DIR.absolute()}")
-    print("")
-    print("🌐 Server URLs:")
-    print("   Local:   http://localhost:8000")
-    print("   Network: http://0.0.0.0:8000")
-    print("")
-    print("📝 Note: In production, use HTTPS with TLS/SSL certificates")
-    print("         (automatically handled by Kubernetes Ingress)")
+    print("--- WAVEFORGE SERVER ---")
+    print(f"Serving Static: {STATIC_DIR.absolute()}")
+    print(f"Storage Path:   {UPLOAD_DIR.absolute()}")
+    print("Running on http://localhost:8000")
     
     uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
     
