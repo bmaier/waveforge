@@ -6,6 +6,7 @@
     <meta name="description" content="WaveForge DAW - Professionelle Audio-Aufnahmesoftware mit CrashGuard und Cloud-Synchronisation">
     <title>WaveForge DAW - Preview Edition</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
@@ -49,7 +50,7 @@
             left: 50%;
             transform: translateX(-50%) translateY(150%);
             width: 90%;
-            max-width: 800px;
+            max-width: 820px;
             background: rgba(10, 10, 26, 0.95);
             border: 1px solid var(--neon-cyan);
             box-shadow: 0 0 40px rgba(0, 243, 255, 0.15);
@@ -164,6 +165,39 @@
         .license-header {
             color: #ffd700;
             border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        /* DELETE MODAL SPECIFIC */
+        .delete-modal .modal-content {
+            border-color: var(--neon-red);
+            box-shadow: 0 0 40px rgba(255, 51, 51, 0.25);
+            max-width: 400px;
+        }
+        .delete-btn {
+            background: rgba(255, 51, 51, 0.1);
+            color: var(--neon-red);
+            border: 1px solid var(--neon-red);
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .delete-btn:hover {
+            background: var(--neon-red);
+            color: black;
+            box-shadow: 0 0 15px var(--neon-red);
+        }
+        .cancel-btn {
+            background: transparent;
+            color: #9ca3af;
+            border: 1px solid #4b5563;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
         }
 
         /* UPLOAD STATUS STYLES (NEW) */
@@ -604,6 +638,28 @@
 
     <!-- FLOATING PLAYER DOCK -->
     <div id="playerDock">
+        <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+                <label for="playbackSpeed" class="text-[10px] text-gray-500 font-mono">SPEED:</label>
+                <select id="playbackSpeed"  
+                        onchange="changePlaybackSpeed(this.value)"
+                        class="cyber-select text-xs px-2 py-1 border-gray-700"
+                        aria-label="Wiedergabegeschwindigkeit">
+                    <option value="0.25">0.25x</option>
+                    <option value="0.5">0.5x</option>
+                    <option value="0.75">0.75x</option>
+                    <option value="1" selected>1x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="1.75">1.75x</option>
+                    <option value="2">2x</option>
+                </select>
+            </div>
+            <button onclick="closeDock()" 
+                    class="player-btn text-xs w-6 h-6" 
+                    aria-label="Player schließen"
+                    type="button">×</button>
+        </div>
         <div class="flex items-center gap-3 w-full mb-1">
             <span id="currentTime" class="text-xs font-mono text-cyan-400 w-12 text-right" aria-label="Aktuelle Zeit">00:00</span>
             <div class="flex-grow relative">
@@ -614,7 +670,12 @@
                        min="0" 
                        max="100" 
                        value="0" 
-                       step="0.1"
+                       step="0.01"
+                       oninput="playerSeek(this.value)"
+                       onmousedown="window.isSeekDragging=true"
+                       onmouseup="window.isSeekDragging=false"
+                       ontouchstart="window.isSeekDragging=true"
+                       ontouchend="window.isSeekDragging=false"
                        aria-label="Wiedergabeposition"
                        aria-valuemin="0"
                        aria-valuemax="100"
@@ -742,7 +803,7 @@
                         <span class="text-cyan-400">✓</span> <strong class="text-white">Multi-Browser</strong>
                     </div>
                     <div class="bg-black/40 p-2 rounded border border-gray-700">
-                        <span class="text-cyan-400">✓</span> <strong class="text-white">Speicheroptimiert</strong>
+                        <span class="text-cyan-400">✓</span> <strong class="text-white">Speicher-optimiert</strong>
                     </div>
                     <div class="bg-black/40 p-2 rounded border border-gray-700">
                         <span class="text-cyan-400">✓</span> <strong class="text-white">Lokaler Download</strong>
@@ -911,61 +972,117 @@
             </div>
 
             <!-- PREVIEW WARNING -->
-            <div class="mt-6 bg-gradient-to-r from-orange-900/20 to-red-900/20 border border-orange-700/50 p-4 rounded">
-                <h3 class="font-bold text-orange-400 mb-2 flex items-center gap-2 text-sm uppercase tracking-wide">
-                    <span aria-hidden="true">⚠</span> Preview Version - Einschränkungen
+            <div class="mt-6 bg-gray-800/30 border border-gray-700 p-4 rounded">
+                <h3 class="font-bold text-gray-200 mb-3 text-sm uppercase tracking-wide">
+                    Preview Version - Limitations
                 </h3>
                 <p class="text-sm text-gray-300 mb-3">
-                    Dies ist eine <strong>Vorschau-Version (Preview)</strong> zur Demonstration der Kernfunktionalität. 
-                    Folgende Features sind aktuell <strong>nicht implementiert</strong>:
+                    This is a preview version to demonstrate core functionality. The following features are currently <strong>not implemented</strong>:
                 </p>
-                <ul class="space-y-1.5 text-xs text-gray-400">
+                <ul class="space-y-2 text-xs text-gray-400">
                     <li class="flex items-start gap-2">
-                        <span class="text-orange-400 mt-0.5">✗</span>
-                        <div><strong class="text-gray-300">Authentifizierung:</strong> Kein Login-System, keine Benutzerkonten</div>
+                        <span class="text-gray-500 mt-0.5">▸</span>
+                        <div><strong class="text-gray-200">Authentication:</strong> No login system, no user accounts</div>
                     </li>
                     <li class="flex items-start gap-2">
-                        <span class="text-orange-400 mt-0.5">✗</span>
-                        <div><strong class="text-gray-300">Autorisierung:</strong> Keine Rollen- oder Rechteverwaltung</div>
+                        <span class="text-gray-500 mt-0.5">▸</span>
+                        <div><strong class="text-gray-200">Authorization:</strong> No role or permission management</div>
                     </li>
                     <li class="flex items-start gap-2">
-                        <span class="text-orange-400 mt-0.5">✗</span>
-                        <div><strong class="text-gray-300">Verschlüsselung:</strong> Datenübertragung unverschlüsselt (kein TLS/SSL)</div>
+                        <span class="text-gray-500 mt-0.5">▸</span>
+                        <div><strong class="text-gray-200">Encryption:</strong> Data transmission is per TLS/SSL encrypted, however no encrypted contents in local browser databases</div>
                     </li>
                     <li class="flex items-start gap-2">
-                        <span class="text-orange-400 mt-0.5">✗</span>
-                        <div><strong class="text-gray-300">Framework-Integration:</strong> WebComponent für Angular/React noch nicht verfügbar</div>
+                        <span class="text-gray-500 mt-0.5">▸</span>
+                        <div><strong class="text-gray-200">Framework Integration:</strong> WebComponent for Angular/React not yet available</div>
                     </li>
                 </ul>
-                <div class="mt-3 pt-3 border-t border-orange-800/50">
-                    <p class="text-xs text-orange-300 font-bold">⚠ Diese Version ist ausschließlich für Test- und Demonstrationszwecke bestimmt und nicht für den Produktivbetrieb geeignet.</p>
+                <div class="mt-3 pt-3 border-t border-gray-700">
+                    <p class="text-xs text-gray-400">⚠ This version is exclusively for testing and demonstration purposes and not suitable for production use.</p>
                 </div>
             </div>
 
             <!-- LICENSE -->
-            <div class="mt-6 space-y-3">
-                <h3 class="font-bold text-white uppercase tracking-wider text-xs border-b border-gray-700 pb-1">LIZENZ & NUTZUNGSRECHTE</h3>
-                <div class="bg-yellow-900/10 border border-yellow-700/30 p-4 rounded">
-                    <h4 class="font-bold text-yellow-500 mb-2">Herausgeber</h4>
-                    <p class="text-sm">Berthold Maier<br>
-                    <a href="https://github.com/bmaier/" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">https://github.com/bmaier/</a></p>
+            <div class="mt-6 bg-gray-800/30 border border-gray-700 p-4 rounded">
+                <h3 class="font-bold text-gray-200 uppercase tracking-wide text-sm border-b border-gray-700 pb-2 mb-4">Lizenz & Nutzungsrechte</h3>
+                
+                <div class="space-y-3 text-sm text-gray-300">
+                    <div>
+                        <h4 class="font-bold text-gray-200 mb-1">Herausgeber</h4>
+                        <p class="text-xs">Berthold Maier - Herrsching<br>
+                        <a href="https://github.com/bmaier/" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">https://github.com/bmaier/</a><br>
+                        <span class="text-gray-500">© 2025 All Rights Reserved</span></p>
+                    </div>
+                    
+                    <div class="pt-2 border-t border-gray-700">
+                        <h4 class="font-bold text-gray-200 mb-2">Business Source License 1.1</h4>
+                        <p class="text-xs text-gray-400 mb-3">Diese Software unterliegt der Business Source License 1.1 mit Dual-Lizenzierungsoptionen.</p>
+                        
+                        <div class="space-y-2 text-xs">
+                            <div>
+                                <strong class="text-gray-150">A) Nicht-kommerzielle Nutzung – Apache 2.0</strong>
+                                <p class="text-gray-400 mt-1">Die Software darf für nicht-kommerzielle Zwecke (privat, Forschung, Bildung) unter der Apache License 2.0 genutzt werden.</p>
+                            </div>
+                            
+                            <div class="pt-2 border-t border-gray-700">
+                                <strong class="text-gray-150">B) Kommerzielle Nutzung – Business Source License 1.1</strong>
+                                <div class="space-y-1 text-gray-400 mt-1">
+                                    <div><span class="text-gray-300">Unmodifiziert:</span> Die Software darf unverändert für kommerzielle Zwecke frei eingesetzt werden.</div>
+                                    <div><span class="text-gray-300">Open-Source Umsetzung:</span> Neue Anforderungen und Pull-Requests können nach Ermessen des Autors kostenlos umgesetzt werden.</div>
+                                    <div><span class="text-gray-300">Mit Modifikationen:</span> Jede externe Änderung oder Anpassung erfordert die Zustimmung des Authors und ggf. eine separate, kostenpflichtige kommerzielle Lizenz.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-2 border-t border-gray-700">
+                                <strong class="text-gray-150">Change Date & Change License</strong>
+                                <p class="text-gray-400 mt-1">Vier Jahre nach der ersten öffentlichen Veröffentlichung werden die Rechte automatisch auf Apache License 2.0 übergeleitet.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-2 border-t border-gray-700">
+                        <strong class="text-gray-150">Haftungsausschluss</strong>
+                        <p class="text-xs text-gray-400 mt-1">Die Software wird „wie besehen" (AS-IS) ohne jegliche Gewährleistung bereitgestellt. Der Lizenzgeber haftet nicht für direkte, indirekte oder Folgeschäden aus der Nutzung.</p>
+                    </div>
                 </div>
-                <p class="text-sm text-gray-300">Diese Software wird als <span class="text-green-400 font-bold">"Freeware für kommerzielle Nutzung"</span> bereitgestellt.</p>
-                <ul class="list-disc pl-5 space-y-2 text-xs text-gray-400">
-                    <li><strong class="text-gray-200">Kostenfreie Nutzung:</strong> Die Nutzung der kompilierten/bereitgestellten Software ist sowohl für private als auch für kommerzielle Zwecke kostenfrei gestattet.</li>
-                    <li><strong class="text-gray-200">Quellcode-Schutz:</strong> Der Quellcode darf nicht verändert, dekompiliert, disassembliert oder für abgeleitete Werke genutzt werden, ohne eine kostenpflichtige Lizenz zu erwerben.</li>
-                    <li><strong class="text-gray-200">Lizenzgebühren:</strong> Bei jeglicher Modifikation des Codes fallen sofortige Lizenzgebühren gemäß individuelle Lizenzvereinbarung an.</li>
-                </ul>
             </div>
 
             <!-- FOOTER -->
             <div class="mt-8 text-center pt-4 border-t border-gray-800">
-                <p class="text-[10px] text-gray-500 font-mono mb-2">© 2025 Berthold Maier. All Rights Reserved.</p>
+                <p class="text-[10px] text-gray-500 font-mono mb-2">© 2025 Berthold Maier - Herrsching. All Rights Reserved.</p>
                 <p class="text-[9px] text-gray-600 mb-4">Version 1.0.0-preview | Build 2025.11.27</p>
                 <button onclick="closeInfoModal()" 
                         class="px-6 py-2 rounded border border-cyan-600/50 text-cyan-400 hover:bg-cyan-600/10 text-xs font-bold tracking-wider"
                         aria-label="Informationen schließen"
                         type="button">SCHLIESSEN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div id="deleteModal" class="modal-overlay delete-modal" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+            <h2 id="deleteModalTitle" class="text-xl font-bold text-red-500 mb-4 border-b border-red-900 pb-2 flex items-center gap-2">
+                <span aria-hidden="true">⚠</span> DELETE RECORDING
+            </h2>
+            <p class="text-sm text-gray-300 mb-4">
+                Are you sure you want to delete this recording?
+            </p>
+            
+            <div class="bg-red-900/20 border border-red-900/50 p-3 rounded mb-6">
+                <div class="text-[10px] text-red-400 font-mono mb-1">RECORDING NAME:</div>
+                <div id="deleteRecordingName" class="text-xs font-mono text-white truncate">...</div>
+            </div>
+
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeDeleteModal()" 
+                        class="cancel-btn text-sm"
+                        aria-label="Abbrechen"
+                        type="button">CANCEL</button>
+                <button onclick="confirmDelete()" 
+                        class="delete-btn text-sm"
+                        aria-label="Löschen bestätigen"
+                        type="button">DELETE</button>
             </div>
         </div>
     </div>
@@ -977,6 +1094,12 @@
 
     <script>
         // --- 1. UTILS & UI LOGIC ---
+        
+        // DELETE MODAL VARIABLES
+        let deleteModal = null;
+        let trackToDelete = null;
+        let currentPlaybackRate = 1.0;
+        let crossfadeGainNode = null; // For smooth speed transitions
         
         // EMBEDDED SERVICE WORKER CODE TO FIX BLOB URL ISSUES & UPLOAD LOGIC
         const SW_CODE = `
@@ -1621,6 +1744,18 @@
                         // Open save modal first
                         openSaveModal(isRecovery);
                         
+                        // Disable save button during recovery upload
+                        if (isRecovery) {
+                            const saveBtn = document.querySelector('#saveModal button[onclick="confirmSave()"]');
+                            if (saveBtn) {
+                                saveBtn.disabled = true;
+                                saveBtn.style.opacity = '0.5';
+                                saveBtn.style.cursor = 'not-allowed';
+                            }
+                            document.getElementById('processingIndicator').classList.remove('hidden');
+                            document.getElementById('processingIndicator').textContent = 'UPLOADING RECOVERY DATA...';
+                        }
+                        
                         // Upload and assemble in background (non-blocking)
                         this.uploadAndAssembleRecoveredChunks(chunks, currentSessionId).catch(err => {
                             console.error('Error uploading recovered chunks:', err);
@@ -1664,6 +1799,16 @@
                     
                     console.log('✅ Recovery upload and assembly complete!');
                     showToast('Recovery upload complete!');
+                    
+                    // Re-enable save button
+                    const saveBtn = document.querySelector('#saveModal button[onclick="confirmSave()"]');
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.style.opacity = '1';
+                        saveBtn.style.cursor = 'pointer';
+                    }
+                    document.getElementById('processingIndicator').classList.add('hidden');
+                    document.getElementById('processingIndicator').textContent = 'PROCESSING AUDIO... PLEASE WAIT';
                     
                     // Clean up recovery chunks after successful upload
                     this.clearSession(sessionId);
@@ -1877,6 +2022,7 @@
         let audioContext, analyser, dataArray, canvas, canvasCtx;
         let inputSource, mediaRecorder, recordingNodes = {}, isRecording = false, startTime, timerInterval;
         let currentAudioBuffer = null, playbackSource = null, outputNodes = {}, isPlaying = false, playbackStartTime = 0, playbackOffset = 0, playbackRafId = null;
+        let audioElement = null, mediaElementSource = null, currentBlobUrl = null;
 
         function initAudioEngine() {
             if (!audioContext) {
@@ -2021,6 +2167,9 @@
             const fmt = document.getElementById('recordingFormat').value;
             const w = document.getElementById('processingWarning');
             if(fmt !== 'webm') w.classList.remove('hidden'); else w.classList.add('hidden');
+            
+            // Update format display
+            document.getElementById('saveFormatDisplay').textContent = fmt.toUpperCase();
 
             modal.style.display = 'flex'; 
             modal.setAttribute('aria-hidden', 'false');
@@ -2062,9 +2211,10 @@
                     extension = 'wav';
                 } else if (fmt === 'mp3') {
                     blobToSave = tempBlob;
-                    mimeType = preferredMimeType;
+                    mimeType = 'audio/mpeg';
                     extension = 'mp3';
                 } else {
+                    // WebM format
                     blobToSave = tempBlob;
                     mimeType = preferredMimeType;
                     extension = preferredExt;
@@ -2091,105 +2241,237 @@
             stopAudio();
             showToast("Loading audio...");
             try {
-                const buffer = await blob.arrayBuffer();
-                currentAudioBuffer = await audioContext.decodeAudioData(buffer);
+                // Clean up old blob URL
+                if (currentBlobUrl) {
+                    URL.revokeObjectURL(currentBlobUrl);
+                }
+                
+                // Create NEW Audio Element for each track (MediaElementSource can only be created once per element)
+                currentBlobUrl = URL.createObjectURL(blob);
+                
+                // Clean up old audio element
+                if (audioElement) {
+                    audioElement.pause();
+                    audioElement.src = '';
+                }
+                
+                // Create fresh audio element
+                audioElement = new Audio();
+                audioElement.preservesPitch = true; // CRITICAL: Prevents Mickey Mouse effect
+                audioElement.crossOrigin = 'anonymous';
+                audioElement.playbackRate = currentPlaybackRate; // Restore speed setting
+                
+                // Reset MediaElementSource so it gets recreated in playAudio()
+                if (mediaElementSource) {
+                    mediaElementSource.disconnect();
+                    mediaElementSource = null;
+                }
+                
+                audioElement.src = currentBlobUrl;
+                audioElement.preload = 'auto'; // Force full preload
+                
+                // Wait for audio to be fully loaded
+                await new Promise((resolve, reject) => {
+                    // Use canplaythrough for complete loading
+                    audioElement.oncanplaythrough = resolve;
+                    audioElement.onerror = reject;
+                    audioElement.load(); // Explicitly trigger load
+                });
+                
+                // Extra safety: Wait until duration is actually available and valid
+                let retries = 0;
+                while ((!audioElement.duration || !isFinite(audioElement.duration)) && retries < 100) {
+                    await new Promise(resolve => setTimeout(resolve, 20));
+                    retries++;
+                }
+                
+                console.log('Audio loaded, duration:', audioElement.duration, 'readyState:', audioElement.readyState);
+                
+                audioElement.currentTime = 0;
                 
                 const dock = document.getElementById('playerDock');
                 dock.classList.add('active');
                 
                 document.getElementById('nowPlayingText').textContent = name;
                 playbackOffset = 0;
-                updateDurationDisplay(currentAudioBuffer.duration);
+                updateDurationDisplay(audioElement.duration);
                 updateCurrentTimeDisplay(0);
                 document.getElementById('seekSlider').value = 0;
-                document.getElementById('seekSlider').max = currentAudioBuffer.duration;
-                playAudio(0);
+                await playAudio(0);
             } catch (e) { console.error(e); showToast("Error loading audio", true); }
         }
 
-        function playAudio(offset) {
+        async function playAudio(offset) {
             // FIXED: Disable Playback if Recording
             if(isRecording) return;
             
-            if (!currentAudioBuffer) return;
-            if (playbackSource) { try { playbackSource.stop(); } catch(e){} playbackSource.disconnect(); }
-            playbackSource = audioContext.createBufferSource();
-            playbackSource.buffer = currentAudioBuffer;
+            if (!audioElement) return;
             
-            ['low', 'mid', 'high', 'gain'].forEach(k => { outputNodes[k] = audioContext.createBiquadFilter(); });
-            outputNodes.low.type = "lowshelf"; outputNodes.low.frequency.value = 320;
-            outputNodes.mid.type = "peaking"; outputNodes.mid.frequency.value = 1000;
-            outputNodes.high.type = "highshelf"; outputNodes.high.frequency.value = 3200;
-            outputNodes.gain = audioContext.createGain(); 
-
-            playbackSource.connect(outputNodes.low);
-            outputNodes.low.connect(outputNodes.mid); outputNodes.mid.connect(outputNodes.high);
-            outputNodes.high.connect(outputNodes.gain); 
+            // Create MediaElementSource if not exists
+            if (!mediaElementSource) {
+                mediaElementSource = audioContext.createMediaElementSource(audioElement);
+                
+                // Setup EQ chain
+                ['low', 'mid', 'high', 'gain'].forEach(k => { outputNodes[k] = audioContext.createBiquadFilter(); });
+                outputNodes.low.type = "lowshelf"; outputNodes.low.frequency.value = 320;
+                outputNodes.mid.type = "peaking"; outputNodes.mid.frequency.value = 1000;
+                outputNodes.high.type = "highshelf"; outputNodes.high.frequency.value = 3200;
+                outputNodes.gain = audioContext.createGain();
+                
+                // Create crossfade gain node
+                crossfadeGainNode = audioContext.createGain();
+                crossfadeGainNode.gain.value = 1;
+                
+                // Connect audio chain
+                mediaElementSource.connect(outputNodes.low);
+                outputNodes.low.connect(outputNodes.mid);
+                outputNodes.mid.connect(outputNodes.high);
+                outputNodes.high.connect(outputNodes.gain);
+                outputNodes.gain.connect(crossfadeGainNode);
+                crossfadeGainNode.connect(analyser);
+                analyser.connect(audioContext.destination);
+                
+                applyOutputEQ();
+            }
             
-            // Connect to visualizer AND destination
-            outputNodes.gain.connect(analyser); 
-            analyser.connect(audioContext.destination); 
-
-            playbackSource.onended = () => {
-                if (isPlaying && (audioContext.currentTime - playbackStartTime >= currentAudioBuffer.duration - playbackOffset - 0.1)) stopAudio(true);
-            };
-            applyOutputEQ();
-            playbackSource.start(0, offset);
+            // Set playback position and speed
+            audioElement.currentTime = offset || 0;
+            audioElement.playbackRate = currentPlaybackRate;
+            audioElement.preservesPitch = true; // Always preserve pitch!
+            
+            // Set state BEFORE starting playback
             playbackStartTime = audioContext.currentTime;
-            playbackOffset = offset;
+            playbackOffset = offset || 0;
             isPlaying = true;
             updatePlayPauseButtonUI();
-            startSeekLoop();
+            
+            // Start playback and seek loop
+            try {
+                await audioElement.play();
+                startSeekLoop();
+            } catch (e) {
+                console.error('Play error:', e);
+                isPlaying = false;
+                updatePlayPauseButtonUI();
+            }
         }
 
-        function stopAudio(reachedEnd = false) {
-            if (playbackSource) { try { playbackSource.stop(); } catch(e){} playbackSource.disconnect(); playbackSource = null; }
+        function stopAudio(reachedEnd = false, skipFade = false) {
+            if (audioElement) {
+                // Smooth fade-out to prevent clicks (10ms) unless skipping
+                if (crossfadeGainNode && !skipFade) {
+                    const now = audioContext.currentTime;
+                    crossfadeGainNode.gain.cancelScheduledValues(now);
+                    crossfadeGainNode.gain.setValueAtTime(crossfadeGainNode.gain.value, now);
+                    crossfadeGainNode.gain.linearRampToValueAtTime(0.01, now + 0.01);
+                    
+                    setTimeout(() => {
+                        audioElement.pause();
+                        crossfadeGainNode.gain.setValueAtTime(1, audioContext.currentTime);
+                    }, 15);
+                } else {
+                    audioElement.pause();
+                }
+            }
             isPlaying = false;
             cancelAnimationFrame(playbackRafId);
             updatePlayPauseButtonUI();
-            if (reachedEnd) { playbackOffset = 0; document.getElementById('seekSlider').value = 0; updateCurrentTimeDisplay(0); }
+            if (reachedEnd) { 
+                if (audioElement) audioElement.currentTime = 0;
+                playbackOffset = 0; 
+                document.getElementById('seekSlider').value = 0; 
+                updateCurrentTimeDisplay(0); 
+            }
         }
 
         function togglePlayPause() {
             if(isRecording) return; // Guard
-            if (!currentAudioBuffer) return;
+            if (!audioElement) return;
+            
             if (isPlaying) {
-                playbackOffset += audioContext.currentTime - playbackStartTime;
                 stopAudio(); 
             } else {
-                if (playbackOffset >= currentAudioBuffer.duration) playbackOffset = 0;
-                playAudio(playbackOffset);
+                // Start from current position or beginning if at end
+                const currentPos = audioElement.currentTime;
+                if (currentPos >= audioElement.duration - 0.1) {
+                    playAudio(0);
+                } else {
+                    playAudio(currentPos);
+                }
             }
         }
 
-        function playerSeek(time) {
-            if (!currentAudioBuffer) return;
-            time = Math.max(0, Math.min(time, currentAudioBuffer.duration));
-            playbackOffset = time;
-            if (isPlaying) playAudio(time);
-            else { updateCurrentTimeDisplay(time); document.getElementById('seekSlider').value = time; }
+        function playerSeek(percentage) {
+            if (!audioElement) return;
+            // Convert percentage (0-100) to actual time
+            const time = (percentage / 100) * audioElement.duration;
+            if (isPlaying) {
+                audioElement.currentTime = time;
+            } else {
+                audioElement.currentTime = time;
+                updateCurrentTimeDisplay(time);
+                document.getElementById('seekSlider').value = percentage;
+            }
         }
-        function playerSkip(s) { if(currentAudioBuffer) playerSeek(playbackOffset + (isPlaying ? audioContext.currentTime - playbackStartTime : 0) + s); }
+        function playerSkip(s) { 
+            if(audioElement && audioElement.duration && isFinite(audioElement.duration)) {
+                const newTime = audioElement.currentTime + s;
+                const clampedTime = Math.max(0, Math.min(newTime, audioElement.duration));
+                const percentage = (clampedTime / audioElement.duration) * 100;
+                playerSeek(percentage);
+            }
+        }
         function playerSeekStart() { playerSeek(0); }
-        function playerSeekEnd() { if(currentAudioBuffer) { stopAudio(); playbackOffset = currentAudioBuffer.duration; updateCurrentTimeDisplay(playbackOffset); document.getElementById('seekSlider').value = playbackOffset; } }
+        function playerSeekEnd() { if(audioElement) { audioElement.currentTime = audioElement.duration; updateCurrentTimeDisplay(audioElement.duration); document.getElementById('seekSlider').value = 100; } }
 
         function startSeekLoop() {
             cancelAnimationFrame(playbackRafId);
+            let durationDiscovered = false;
+            
             function loop() {
-                if (isPlaying && currentAudioBuffer) {
-                    const pos = playbackOffset + (audioContext.currentTime - playbackStartTime);
-                    if (pos <= currentAudioBuffer.duration) {
-                        document.getElementById('seekSlider').value = pos;
-                        updateCurrentTimeDisplay(pos);
+                if (isPlaying && audioElement) {
+                    const pos = audioElement.currentTime;
+                    const dur = audioElement.duration;
+                    
+                    // Always update current time display
+                    updateCurrentTimeDisplay(pos);
+                    
+                    // Check if we got a valid duration
+                    if (dur && isFinite(dur) && dur > 0) {
+                        if (!durationDiscovered) {
+                            durationDiscovered = true;
+                            updateDurationDisplay(dur);
+                        }
+                        
+                        // Convert time to percentage (0-100)
+                        const percentage = (pos / dur) * 100;
+                        // Only update slider if user is not dragging it
+                        if (!window.isSeekDragging) {
+                            document.getElementById('seekSlider').value = percentage;
+                        }
+                    }
+                    // If duration not available yet, slider stays at 0 (no confusing estimates)
+                    
+                    // Continue loop if not at end
+                    if (!audioElement.ended && !audioElement.paused) {
                         playbackRafId = requestAnimationFrame(loop);
+                    } else if (audioElement.ended) {
+                        // Audio zu Ende
+                        stopAudio(true);
                     }
                 }
             }
             loop();
         }
 
-        function updateDurationDisplay(d) { document.getElementById('totalTime').textContent = `${Math.floor(d/60).toString().padStart(2,'0')}:${Math.floor(d%60).toString().padStart(2,'0')}`; }
-        function updateCurrentTimeDisplay(t) { document.getElementById('currentTime').textContent = `${Math.floor(t/60).toString().padStart(2,'0')}:${Math.floor(t%60).toString().padStart(2,'0')}`; }
+        function updateDurationDisplay(d) { 
+            if (!d || !isFinite(d)) { document.getElementById('totalTime').textContent = '00:00'; return; }
+            document.getElementById('totalTime').textContent = `${Math.floor(d/60).toString().padStart(2,'0')}:${Math.floor(d%60).toString().padStart(2,'0')}`; 
+        }
+        function updateCurrentTimeDisplay(t) { 
+            if (!t || !isFinite(t)) { document.getElementById('currentTime').textContent = '00:00'; return; }
+            document.getElementById('currentTime').textContent = `${Math.floor(t/60).toString().padStart(2,'0')}:${Math.floor(t%60).toString().padStart(2,'0')}`; 
+        }
         function updatePlayPauseButtonUI() { document.getElementById('dockPlayBtn').innerHTML = isPlaying ? '❚❚' : '▶'; }
         document.getElementById('seekSlider').addEventListener('change', (e) => playerSeek(parseFloat(e.target.value)));
 
@@ -2197,7 +2479,14 @@
             const dock = document.getElementById('playerDock');
             const clickedInsideDock = dock.contains(e.target);
             const clickedPlayBtn = e.target.closest('button') && e.target.closest('button').className.includes('play-btn-');
-            if (dock.classList.contains('active') && !clickedInsideDock && !clickedPlayBtn) dock.classList.remove('active');
+            if (dock.classList.contains('active') && !clickedInsideDock && !clickedPlayBtn) {
+                dock.classList.remove('active');
+                // Stop playback when dock closes
+                if (isPlaying) {
+                    stopAudio();
+                    playbackOffset = 0;
+                }
+            }
         });
 
         // EQ Updates
@@ -2251,7 +2540,7 @@
                 c.appendChild(el);
                 el.querySelector(`.play-btn-${t.id}`).onclick = () => loadTrack(t.id, t.name, t.blob);
                 el.querySelector(`.dl-btn-${t.id}`).onclick = () => { const u = URL.createObjectURL(t.blob); const a=document.createElement('a'); a.href=u; a.download=`${t.name}.${ext}`; a.click(); URL.revokeObjectURL(u); };
-                el.querySelector(`.del-btn-${t.id}`).onclick = () => { if(confirm('Delete?')) deleteTrackFromDB(t.id); };
+                el.querySelector(`.del-btn-${t.id}`).onclick = () => openDeleteModal(t.id, t.name);
                 el.querySelector(`.up-btn-${t.id}`).onclick = () => { 
                     document.getElementById(`progress-bar-${t.id}`).style.display = 'block';
                     const metadata = {
@@ -2268,6 +2557,58 @@
 
         function startTimer() { startTime = Date.now(); timerInterval = setInterval(() => { document.getElementById('timerDisplay').textContent = new Date(Date.now() - startTime).toISOString().substr(11, 8); }, 100); }
         function stopTimer() { clearInterval(timerInterval); }
+
+        // DELETE MODAL FUNCTIONS
+        function openDeleteModal(trackId, trackName) {
+            deleteModal = document.getElementById('deleteModal');
+            trackToDelete = trackId;
+            document.getElementById('deleteRecordingName').textContent = trackName;
+            deleteModal.style.display = 'flex';
+            deleteModal.classList.add('modal-open');
+            deleteModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeDeleteModal() {
+            if (deleteModal) {
+                deleteModal.style.display = 'none';
+                deleteModal.classList.remove('modal-open');
+                deleteModal.setAttribute('aria-hidden', 'true');
+                trackToDelete = null;
+            }
+        }
+
+        function confirmDelete() {
+            if (trackToDelete) {
+                deleteTrackFromDB(trackToDelete);
+                closeDeleteModal();
+            }
+        }
+
+        // PLAYBACK SPEED CONTROL - Native HTML5 Audio mit Pitch Preservation!
+        function changePlaybackSpeed(speed) {
+            const newRate = parseFloat(speed);
+            currentPlaybackRate = newRate;
+            
+            if (audioElement) {
+                // HTML5 Audio Element unterstützt native Pitch Preservation!
+                audioElement.playbackRate = newRate;
+                audioElement.preservesPitch = true; // Verhindert Mickey Mouse Effekt
+            }
+        }
+
+        // CLOSE DOCK FUNCTION
+        function closeDock() {
+            const dock = document.getElementById('playerDock');
+            dock.classList.remove('active');
+            // Stop playback when dock closes
+            if (isPlaying) {
+                stopAudio();
+                playbackOffset = 0;
+            }
+            // Reset playback speed
+            currentPlaybackRate = 1.0;
+            document.getElementById('playbackSpeed').value = '1';
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             initDB().catch(err => {
@@ -2302,6 +2643,7 @@
                 if (e.key === 'Escape') {
                     if (modal.style.display === 'flex') closeSaveModal();
                     else if (infoModal.style.display === 'flex') closeInfoModal();
+                    else if (document.getElementById('deleteModal')?.style.display === 'flex') closeDeleteModal();
                     else if (document.getElementById('recoveryModal').style.display === 'flex') {
                         // Recovery modal doesn't have close function, but we can discard
                         CrashGuard.discardSession();
@@ -2396,7 +2738,7 @@
                 // Info Modal Sections
                 'info.title': 'WAVEFORGE PRO - INFO',
                 'info.close': 'Schließen',
-                'info.introduction': 'Professionelle Audio-Workstation für Browser',
+                'info.introduction': 'Professionelle Offline Audio-Workstation im Browser',
                 'info.introText': 'WaveForge Pro ist eine hochmoderne Digital Audio Workstation (DAW) für den Browser, optimiert für lange Aufnahmen (8+ Stunden) mit intelligentem CrashGuard-System, Cloud-Synchronisation und vollständiger BITV 2.0 Barrierefreiheit.',
                 'info.offlineCapable': 'Offline-fähig',
                 'info.multiBrowser': 'Multi-Browser',
@@ -2449,13 +2791,13 @@
                 
                 // Preview Warning
                 'preview.title': 'Preview Version - Einschränkungen',
-                'preview.intro': 'Dies ist eine Vorschau-Version (Preview) zur Demonstration der Kernfunktionalität. Folgende Features sind aktuell nicht implementiert:',
+                'preview.intro': 'Dies ist eine Preview-Version zur Demonstration der Kernfunktionalität. Folgende Features sind aktuell nicht implementiert:',
                 'preview.noAuth': 'Authentifizierung',
                 'preview.noAuthDesc': 'Kein Login-System, keine Benutzerkonten',
                 'preview.noAuthz': 'Autorisierung',
                 'preview.noAuthzDesc': 'Keine Rollen- oder Rechteverwaltung',
-                'preview.noEncrypt': 'Verschlüsselung',
-                'preview.noEncryptDesc': 'Datenübertragung unverschlüsselt (kein TLS/SSL)',
+                'preview.noEncrypt': 'Inhaltsverschlüsselung',
+                'preview.noEncryptDesc': 'Datenübertragung ist per TLS/SSL verschlüsselt, jedoch nicht die DB-Inhalte in lokalen Browser-Datenbanken',
                 'preview.noIntegration': 'Framework-Integration',
                 'preview.noIntegrationDesc': 'WebComponent für Angular/React noch nicht verfügbar',
                 'preview.disclaimer': '⚠ Diese Version ist ausschließlich für Test- und Demonstrationszwecke bestimmt und nicht für den Produktivbetrieb geeignet.',
@@ -2558,7 +2900,7 @@
                 // Info Modal Sections
                 'info.title': 'WAVEFORGE PRO - INFO',
                 'info.close': 'Close',
-                'info.introduction': 'Professional Browser-Based Audio Workstation',
+                'info.introduction': 'Professional Browser-Based Offline Audio Workstation',
                 'info.introText': 'WaveForge Pro is a cutting-edge Digital Audio Workstation (DAW) for browsers, optimized for long recordings (8+ hours) with intelligent CrashGuard system, cloud synchronization, and full BITV 2.0 accessibility compliance.',
                 'info.offlineCapable': 'Offline-Capable',
                 'info.multiBrowser': 'Multi-Browser',
@@ -2617,7 +2959,7 @@
                 'preview.noAuthz': 'Authorization',
                 'preview.noAuthzDesc': 'No role or permission management',
                 'preview.noEncrypt': 'Encryption',
-                'preview.noEncryptDesc': 'Unencrypted data transmission (no TLS/SSL)',
+                'preview.noEncryptDesc': 'Encrypted data transmission is per TLS/SSL implemented, however no encrypted contents in local browser databases',
                 'preview.noIntegration': 'Framework Integration',
                 'preview.noIntegrationDesc': 'WebComponent for Angular/React not yet available',
                 'preview.disclaimer': '⚠ This version is exclusively for testing and demonstration purposes and not suitable for production use.',
