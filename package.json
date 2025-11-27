@@ -1,0 +1,58 @@
+{
+  "name": "waveforge-pro",
+  "version": "1.0.0",
+  "description": "WaveForge Pro - Professional browser-based DAW with crash recovery and cloud synchronization",
+  "main": "frontend/src/index.html",
+  "scripts": {
+    "start": "./start.sh",
+    "stop": "./stop.sh",
+    "dev": "cd backend/app && python -m uvicorn server:app --host 0.0.0.0 --port 8000 --reload",
+    "test": "pytest tests/",
+    "test:unit": "pytest tests/unit/ -v",
+    "test:integration": "behave tests/integration/",
+    "test:e2e": "pytest tests/e2e/ -v",
+    "test:coverage": "pytest tests/ --cov=backend --cov-report=html",
+    "deploy:dev": "./scripts/deploy-k8s.sh deploy development",
+    "deploy:staging": "./scripts/deploy-k8s.sh deploy staging",
+    "deploy:prod": "./scripts/deploy-k8s.sh deploy production",
+    "docker:build": "docker build -t waveforge-pro -f deployment/docker/Dockerfile .",
+    "docker:up": "cd deployment/docker && docker-compose up -d",
+    "docker:down": "cd deployment/docker && docker-compose down"
+  },
+  "keywords": [
+    "audio",
+    "daw",
+    "recording",
+    "web-audio",
+    "fastapi",
+    "kubernetes",
+    "pwa",
+    "accessibility",
+    "bitv",
+    "crash-recovery"
+  ],
+  "author": "Berthold Maier - Herrsching",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/waveforge-pro.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/waveforge-pro/issues"
+  },
+  "homepage": "https://github.com/yourusername/waveforge-pro#readme",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=16.0.0",
+    "python": ">=3.13.0"
+  },
+  "notes": {
+    "structure": "Professional multi-tier structure with backend/, frontend/, docs/, tests/, deployment/",
+    "frontend": "Vanilla JS with CDN-loaded dependencies (Tailwind CSS, Google Fonts)",
+    "backend": "FastAPI - Python dependencies in backend/requirements.txt",
+    "testing": "pytest (unit), behave (BDD), playwright (E2E)",
+    "deployment": "Kubernetes with Kustomize, Docker support, HTTPS by default",
+    "documentation": "See docs/ directory for architecture, API, and deployment guides"
+  }
+}

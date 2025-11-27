@@ -1,0 +1,41 @@
+# Test Dependencies for WaveForge Pro
+# Install with: pip install -r requirements-test.txt
+
+# Testing Frameworks
+pytest==8.0.0
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+
+# BDD Testing (Behave)
+behave==1.2.6
+parse==1.20.1
+parse-type==0.6.2
+
+# E2E Testing (Playwright)
+playwright==1.41.0
+pytest-playwright==0.4.4
+
+# HTTP Testing
+httpx==0.26.0
+requests==2.31.0
+
+# FastAPI Testing
+fastapi[all]==0.109.0
+
+# Mocking & Fixtures
+faker==22.0.0
+factory-boy==3.3.0
+
+# Code Quality
+pylint==3.0.3
+flake8==7.0.0
+black==24.1.0
+isort==5.13.2
+mypy==1.8.0
+
+# Coverage Reporting
+coverage[toml]==7.4.0
+
+# Utilities
+python-dotenv==1.0.0

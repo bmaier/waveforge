@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: waveforge-pro
+  labels:
+    app: waveforge-pro
+    environment: production

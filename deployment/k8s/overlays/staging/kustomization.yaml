@@ -1,0 +1,55 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Reference the base configuration
+resources:
+  - ../../base
+
+# Namespace for staging
+namespace: waveforge-staging
+
+# Environment-specific labels
+commonLabels:
+  environment: staging
+  tier: staging
+
+# Patch the deployment for staging settings
+patchesStrategicMerge:
+  - deployment-patch.yaml
+  - ingress-patch.yaml
+  - pvc-patch.yaml
+
+# ConfigMap with staging-specific settings
+configMapGenerator:
+  - name: app-config
+    behavior: merge
+    literals:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=info
+      - DEBUG=false
+      - CORS_ORIGINS=https://staging.waveforge-pro.example.com
+      - MAX_UPLOAD_SIZE=104857600
+      - CHUNK_SIZE=2097152
+      - ENABLE_ANALYTICS=true
+      - PROTOCOL=https
+      - FORCE_HTTPS=true
+
+# Replicas for staging (moderate resources)
+replicas:
+  - name: waveforge-pro
+    count: 2
+
+# Use staging image tag
+images:
+  - name: waveforge-pro
+    newName: waveforge-pro
+    newTag: staging-latest
+
+# Name prefix for staging resources
+namePrefix: staging-
+
+# Add staging-specific annotations
+commonAnnotations:
+  environment: staging
+  monitoring: "enabled"
+  backup: "enabled"

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  waveforge-pro:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile
+    container_name: waveforge-pro
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploaded-data:/app/backend/uploaded_data
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - UPLOAD_DIR=/app/backend/uploaded_data
+    restart: unless-stopped
+    networks:
+      - waveforge-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  uploaded-data:
+    driver: local
+
+networks:
+  waveforge-network:
+    driver: bridge

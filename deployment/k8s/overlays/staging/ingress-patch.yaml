@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: waveforge-pro-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  rules:
+    - host: staging.waveforge-pro.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: waveforge-pro-service
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - staging.waveforge-pro.example.com
+      secretName: waveforge-pro-staging-tls

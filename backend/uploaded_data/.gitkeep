@@ -1,0 +1,3 @@
+# This file ensures the uploaded_data directory is tracked by git
+# The directory itself is needed for the application to function
+# but the uploaded files are ignored via .gitignore

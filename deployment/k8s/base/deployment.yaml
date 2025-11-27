@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: waveforge-pro
+  namespace: waveforge-pro
+  labels:
+    app: waveforge-pro
+    version: v1.0.0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: waveforge-pro
+  template:
+    metadata:
+      labels:
+        app: waveforge-pro
+        version: v1.0.0
+    spec:
+      containers:
+      - name: waveforge-pro
+        image: waveforge-pro:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "8000"
+        - name: HOST
+          value: "0.0.0.0"
+        - name: UPLOAD_DIR
+          value: "/app/data/uploaded_data"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: uploaded-data
+          mountPath: /app/data/uploaded_data
+      volumes:
+      - name: uploaded-data
+        persistentVolumeClaim:
+          claimName: waveforge-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: waveforge-pro
+  namespace: waveforge-pro
+  labels:
+    app: waveforge-pro
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: waveforge-pro

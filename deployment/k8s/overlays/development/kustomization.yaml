@@ -1,0 +1,51 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Reference the base configuration
+resources:
+  - ../../base
+
+# Namespace override for development
+namespace: waveforge-dev
+
+# Environment-specific labels
+commonLabels:
+  environment: development
+  tier: dev
+
+# Patch the deployment for development settings
+patchesStrategicMerge:
+  - deployment-patch.yaml
+  - ingress-patch.yaml
+
+# ConfigMap with development-specific settings
+configMapGenerator:
+  - name: app-config
+    behavior: merge
+    literals:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=debug
+      - DEBUG=true
+      - CORS_ORIGINS=https://dev.waveforge-pro.example.com,http://localhost:3000,http://localhost:8000
+      - MAX_UPLOAD_SIZE=52428800
+      - CHUNK_SIZE=1048576
+      - PROTOCOL=https
+
+# Replicas for development (lower resources)
+replicas:
+  - name: waveforge-pro
+    count: 1
+
+# Use development image tag
+images:
+  - name: waveforge-pro
+    newName: waveforge-pro
+    newTag: dev-latest
+
+# Name prefix for development resources
+namePrefix: dev-
+
+# Add development-specific annotations
+commonAnnotations:
+  environment: development
+  auto-deploy: "true"
