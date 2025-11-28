@@ -7,7 +7,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
+# Import TUS Upload Router
+from routes import tus_upload
+
 app = FastAPI()
+
+# Include TUS Upload Router
+app.include_router(tus_upload.router, tags=["TUS Upload"])
 
 # 1. CORS Configuration
 app.add_middleware(
@@ -15,6 +21,7 @@ app.add_middleware(
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Upload-Offset", "Upload-Length", "Tus-Resumable", "Location"],
 )
 
 # 2. Storage Configuration
@@ -272,6 +279,10 @@ async def serve_index():
 @app.get("/sw.js")
 async def serve_service_worker():
     return FileResponse(FRONTEND_SRC / "sw.js", media_type="application/javascript")
+
+@app.get("/tus-upload-manager.js")
+async def serve_tus_upload_manager():
+    return FileResponse(FRONTEND_SRC / "tus-upload-manager.js", media_type="application/javascript")
 
 @app.get("/manifest.json")
 async def serve_manifest():

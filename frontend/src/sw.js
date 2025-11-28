@@ -13,6 +13,14 @@ let isOffline = false; // Track offline state
 let connectionCheckInterval = null; // Connection check timer
 let isProcessingUploads = false; // Prevent concurrent upload processing
 
+// TUS Configuration
+const TUS_ENDPOINT = '/files';
+const MAX_CONCURRENT_UPLOADS = 3;
+let activeUploads = 0;
+
+// Import tus-js-client
+importScripts('https://cdn.jsdelivr.net/npm/tus-js-client@3/dist/tus.min.js');
+
 // Open DB Helper
 function openDB() {
     return new Promise((resolve, reject) => {
@@ -141,6 +149,173 @@ function stopConnectionCheck() {
     }
 }
 
+// TUS Upload Handler
+async function handleTUSChunkUpload(data) {
+    const { sessionId, chunkIndex, totalChunks, blob, recordingName, format, fileId, uploadMethod } = data;
+    
+    console.log(`[SW] Handling TUS chunk upload: ${chunkIndex}/${totalChunks} via ${uploadMethod}`);
+    
+    // Add to upload queue
+    const db = await openDB();
+    const tx = db.transaction(STORE_UPLOAD_QUEUE, 'readwrite');
+    const store = tx.objectStore(STORE_UPLOAD_QUEUE);
+    
+    const queueItem = {
+        id: `${sessionId}_${chunkIndex}`,
+        sessionId,
+        chunkIndex,
+        totalChunks,
+        blob,
+        recordingName,
+        format,
+        fileId,
+        uploadMethod: uploadMethod || 'custom',
+        retryCount: 0,
+        nextRetryAt: 0,
+        addedAt: Date.now()
+    };
+    
+    store.put(queueItem);
+    
+    await new Promise(resolve => tx.oncomplete = resolve);
+    db.close();
+    
+    // Trigger upload processing
+    processUploads();
+}
+
+// Check Upload Status Handler
+async function handleCheckStatus(data) {
+    const { sessionId } = data;
+    const db = await openDB();
+    const queue = await getUploadQueue(db);
+    db.close();
+    
+    const sessionChunks = queue.filter(item => item.sessionId === sessionId);
+    const uploaded = queue.filter(item => item.sessionId === sessionId && item.uploaded).length;
+    
+    broadcastStatus({
+        type: 'UPLOAD_STATUS',
+        sessionId,
+        status: {
+            uploaded,
+            total: sessionChunks.length,
+            pending: sessionChunks.length - uploaded
+        }
+    });
+}
+
+// Cancel Upload Handler
+async function handleCancelUpload(data) {
+    const { sessionId } = data;
+    const db = await openDB();
+    const queue = await getUploadQueue(db);
+    
+    // Remove all chunks for this session
+    const tx = db.transaction(STORE_UPLOAD_QUEUE, 'readwrite');
+    const store = tx.objectStore(STORE_UPLOAD_QUEUE);
+    
+    for (const item of queue) {
+        if (item.sessionId === sessionId) {
+            store.delete(item.id);
+        }
+    }
+    
+    await new Promise(resolve => tx.oncomplete = resolve);
+    db.close();
+    
+    console.log(`[SW] Cancelled all uploads for session ${sessionId}`);
+}
+
+// Check Pending Uploads Handler
+async function handleCheckPendingUploads() {
+    const db = await openDB();
+    const queue = await getUploadQueue(db);
+    db.close();
+    
+    broadcastStatus({
+        type: 'PENDING_UPLOADS_COUNT',
+        count: queue.length
+    });
+}
+
+// Upload Chunk with TUS
+async function uploadChunkWithTUS(item) {
+    return new Promise((resolve, reject) => {
+        if (activeUploads >= MAX_CONCURRENT_UPLOADS) {
+            reject(new Error('Max concurrent uploads reached'));
+            return;
+        }
+        
+        activeUploads++;
+        
+        const upload = new self.tus.Upload(item.blob, {
+            endpoint: `${self.location.origin}${TUS_ENDPOINT}/${item.sessionId}/chunks/`,
+            metadata: {
+                chunkIndex: item.chunkIndex.toString(),
+                totalChunks: item.totalChunks.toString(),
+                sessionId: item.sessionId,
+                recordingName: item.recordingName,
+                format: item.format
+            },
+            chunkSize: 512 * 1024, // 512KB sub-chunks
+            retryDelays: [0, 1000, 3000, 5000, 10000],
+            onProgress: (bytesUploaded, bytesTotal) => {
+                const progress = bytesUploaded / bytesTotal;
+                broadcastStatus({
+                    type: 'UPLOAD_PROGRESS',
+                    sessionId: item.sessionId,
+                    fileId: item.fileId,
+                    chunkIndex: item.chunkIndex,
+                    progress: (item.chunkIndex + progress) / item.totalChunks
+                });
+            },
+            onError: (error) => {
+                activeUploads--;
+                console.error('[SW TUS] Upload error:', error);
+                reject(error);
+            },
+            onSuccess: () => {
+                activeUploads--;
+                console.log(`[SW TUS] Chunk ${item.chunkIndex} uploaded successfully`);
+                broadcastStatus({
+                    type: 'CHUNK_UPLOADED',
+                    sessionId: item.sessionId,
+                    chunkIndex: item.chunkIndex
+                });
+                resolve();
+            }
+        });
+        
+        upload.start();
+    });
+}
+
+// Upload Chunk with Custom Method
+async function uploadChunkCustom(item) {
+    const formData = new FormData();
+    formData.append('session_id', String(item.sessionId));
+    formData.append('chunk_index', String(item.chunkIndex));
+    formData.append('file', item.blob);
+    
+    const response = await fetch('/upload/chunk', {
+        method: 'POST',
+        body: formData
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[SW Custom] Server error ${response.status}: ${errorText}`);
+        throw new Error(`Server error: ${response.status}`);
+    }
+    
+    broadcastStatus({
+        type: 'CHUNK_UPLOADED',
+        sessionId: item.sessionId,
+        chunkIndex: item.chunkIndex
+    });
+}
+
 // Main Upload Logic
 async function processUploads() {
     console.log('[SW] processUploads() called');
@@ -203,11 +378,8 @@ async function processUploads() {
             // Prepare Form Data
             const retryCount = item.retryCount || 0;
             const retryInfo = retryCount > 0 ? ` (attempt ${retryCount + 1})` : '';
-            console.log(`[SW] Uploading chunk ${item.chunkIndex} for session ${item.sessionId}${retryInfo}`);
-            const formData = new FormData();
-            formData.append('session_id', String(item.sessionId));
-            formData.append('chunk_index', String(item.chunkIndex));
-            formData.append('file', item.blob);
+            const uploadMethod = item.uploadMethod || 'custom';
+            console.log(`[SW] Uploading chunk ${item.chunkIndex} for session ${item.sessionId}${retryInfo} via ${uploadMethod}`);
 
             // Notify UI
             broadcastStatus({ 
@@ -217,19 +389,18 @@ async function processUploads() {
                 progress: (item.chunkIndex + 1) / item.totalChunks 
             });
 
-            // Perform Upload
+            // Perform Upload based on method
             console.log(`[SW] 📤 Sending chunk ${item.chunkIndex} to server...`);
-            const response = await fetch('/upload/chunk', {
-                method: 'POST',
-                body: formData
-            });
-
-            console.log(`[SW] 📨 Server response: ${response.status} ${response.statusText}`);
             
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`[SW] Server error ${response.status}: ${errorText}`);
-                throw new Error(`Server error: ${response.status}`);
+            if (uploadMethod === 'tus') {
+                try {
+                    await uploadChunkWithTUS(item);
+                } catch (tusError) {
+                    console.warn(`[SW] TUS upload failed, falling back to custom:`, tusError);
+                    await uploadChunkCustom(item);
+                }
+            } else {
+                await uploadChunkCustom(item);
             }
 
             // Success: Remove chunk from DB
@@ -354,9 +525,37 @@ self.addEventListener('sync', (event) => {
     }
 });
 
-self.addEventListener('message', (event) => {
-    if (event.data === 'TRIGGER_UPLOAD') {
+self.addEventListener('message', async (event) => {
+    const { type, data } = event.data;
+    
+    if (event.data === 'TRIGGER_UPLOAD' || type === 'TRIGGER_UPLOAD') {
         processUploads();
+        return;
+    }
+    
+    switch (type) {
+        case 'UPLOAD_CHUNK_TUS':
+            await handleTUSChunkUpload(data);
+            break;
+            
+        case 'CHECK_UPLOAD_STATUS':
+            await handleCheckStatus(data);
+            break;
+            
+        case 'CANCEL_UPLOAD':
+            await handleCancelUpload(data);
+            break;
+            
+        case 'RETRY_FAILED_UPLOADS':
+            await processUploads();
+            break;
+            
+        case 'CHECK_PENDING_UPLOADS':
+            await handleCheckPendingUploads();
+            break;
+            
+        default:
+            console.warn('[SW] Unknown message type:', type);
     }
 });
 

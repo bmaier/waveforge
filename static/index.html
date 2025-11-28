@@ -10,9 +10,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
-    <!-- TUS Upload Manager -->
-    <script src="/tus-upload-manager.js"></script>
-    
     <style>
         :root {
             --neon-cyan: #00f3ff;
@@ -1012,8 +1009,8 @@
                 <div class="space-y-3 text-sm text-gray-300">
                     <div>
                         <h4 class="font-bold text-gray-200 mb-1">Herausgeber</h4>
-                        <p class="text-xs">Berthold Maier - Herrsching<br>
-                        <a href="https://github.com/bmaier/" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">https://github.com/bmaier/</a><br>
+                        <p class="text-xs">Nina Ennekes<br>
+                        <a href="https://www.xing.com/profile/Nina_Ennekes" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">https://www.xing.com/profile/Nina_Ennekes</a><br>
                         <span class="text-gray-500">© 2025 All Rights Reserved</span></p>
                     </div>
                     
@@ -1052,7 +1049,7 @@
 
             <!-- FOOTER -->
             <div class="mt-8 text-center pt-4 border-t border-gray-800">
-                <p class="text-[10px] text-gray-500 font-mono mb-2">© 2025 Berthold Maier - Herrsching. All Rights Reserved.</p>
+                <p class="text-[10px] text-gray-500 font-mono mb-2">© 2025 Nina Ennekes. All Rights Reserved.</p>
                 <p class="text-[9px] text-gray-600 mb-4">Version 1.0.0-preview | Build 2025.11.27</p>
                 <button onclick="closeInfoModal()" 
                         class="px-6 py-2 rounded border border-cyan-600/50 text-cyan-400 hover:bg-cyan-600/10 text-xs font-bold tracking-wider"
@@ -1747,18 +1744,20 @@
                         // Open save modal first
                         openSaveModal(isRecovery);
                         
-                        // Disable save button during upload (both recovery and normal recording)
-                        const saveBtn = document.querySelector('#saveModal button[onclick="confirmSave()"]');
-                        if (saveBtn) {
-                            saveBtn.disabled = true;
-                            saveBtn.style.opacity = '0.5';
-                            saveBtn.style.cursor = 'not-allowed';
+                        // Disable save button during recovery upload
+                        if (isRecovery) {
+                            const saveBtn = document.querySelector('#saveModal button[onclick="confirmSave()"]');
+                            if (saveBtn) {
+                                saveBtn.disabled = true;
+                                saveBtn.style.opacity = '0.5';
+                                saveBtn.style.cursor = 'not-allowed';
+                            }
+                            document.getElementById('processingIndicator').classList.remove('hidden');
+                            document.getElementById('processingIndicator').textContent = 'UPLOADING RECOVERY DATA...';
                         }
-                        document.getElementById('processingIndicator').classList.remove('hidden');
-                        document.getElementById('processingIndicator').textContent = isRecovery ? 'UPLOADING RECOVERY DATA...' : 'UPLOADING CHUNKS...';
                         
                         // Upload and assemble in background (non-blocking)
-                        this.uploadAndAssembleRecoveredChunks(chunks, currentSessionId, isRecovery).catch(err => {
+                        this.uploadAndAssembleRecoveredChunks(chunks, currentSessionId).catch(err => {
                             console.error('Error uploading recovered chunks:', err);
                             showToast('Upload error: ' + err.message, true);
                         });
@@ -1770,36 +1769,36 @@
                     showToast("Error reading recovery data", true);
                 };
             },
-            uploadAndAssembleRecoveredChunks: async function(chunks, sessionId, isRecovery = true) {
+            uploadAndAssembleRecoveredChunks: async function(chunks, sessionId) {
                 try {
-                    // Upload all chunks to server
-                    console.log(`⬆️ Uploading ${isRecovery ? 'recovered' : 'recorded'} chunks to server...`);
+                    // Upload all recovered chunks to server
+                    console.log('⬆️ Uploading recovered chunks to server...');
                     for (let i = 0; i < chunks.length; i++) {
                         await this.uploadChunkLive(chunks[i].blob, sessionId, i);
                     }
-                    console.log('✓ All chunks queued for upload');
+                    console.log('✓ All recovered chunks queued for upload');
                     
                     // Wait for all chunks to upload, then signal server to assemble
-                    console.log('⏳ Waiting for all chunks to upload...');
+                    console.log('⏳ Waiting for all recovered chunks to upload...');
                     await this.waitForAllChunksUploaded(sessionId, 120000);
                     
-                    // Generate filename
-                    const fileName = isRecovery ? `recovered_${sessionId}.webm` : `recording_${sessionId}.webm`;
-                    const metadata = {
-                        name: isRecovery ? `recovered_${sessionId}` : `recording_${sessionId}`,
+                    // Generate filename for recovered session
+                    const recoveredFileName = `recovered_${sessionId}.webm`;
+                    const recoveredMetadata = {
+                        name: `recovered_${sessionId}`,
                         mimeType: preferredMimeType,
                         extension: preferredExt,
                         recordingCompletedAt: new Date().toISOString(),
                         fileSize: tempBlob.size,
-                        isRecovery: isRecovery
+                        isRecovery: true
                     };
                     
-                    // Signal server to assemble the chunks
-                    console.log('📡 Signaling server to assemble chunks...');
-                    await this.signalRecordingComplete(sessionId, fileName, metadata);
+                    // Signal server to assemble the recovered chunks
+                    console.log('📡 Signaling server to assemble recovered chunks...');
+                    await this.signalRecordingComplete(sessionId, recoveredFileName, recoveredMetadata);
                     
-                    console.log('✅ Upload and assembly complete!');
-                    showToast(isRecovery ? 'Recovery upload complete!' : 'Upload complete!');
+                    console.log('✅ Recovery upload and assembly complete!');
+                    showToast('Recovery upload complete!');
                     
                     // Re-enable save button
                     const saveBtn = document.querySelector('#saveModal button[onclick="confirmSave()"]');
@@ -2611,151 +2610,11 @@
             document.getElementById('playbackSpeed').value = '1';
         }
 
-        // ============================================
-        // TUS UPLOAD MANAGER INTEGRATION
-        // ============================================
-        
-        let tusUploadManager = null;
-        
-        async function initTusUploadManager() {
-            if (typeof TusUploadManager === 'undefined') {
-                console.warn('[TUS] TusUploadManager not loaded, using fallback upload system');
-                return;
-            }
-            
-            tusUploadManager = new TusUploadManager();
-            await tusUploadManager.init();
-            
-            // Setup event listeners
-            tusUploadManager.on('progress', (data) => {
-                if (data.sessionId) {
-                    UploadManager.setUploadStatusForSession(data.sessionId, 'uploading');
-                }
-            });
-            
-            tusUploadManager.on('chunkUploaded', (data) => {
-                console.log(`[TUS] Chunk ${data.chunkIndex}/${data.totalChunks} uploaded`);
-            });
-            
-            tusUploadManager.on('sessionComplete', async (data) => {
-                console.log('[TUS] Session complete:', data.sessionId);
-                UploadManager.setUploadStatusForSession(data.sessionId, 'success');
-                setTimeout(() => {
-                    UploadManager.setUploadStatusForSession(data.sessionId, 'idle');
-                }, 2000);
-                loadTracksFromDB();
-            });
-            
-            tusUploadManager.on('offline', (data) => {
-                if (data.sessionId) {
-                    UploadManager.setUploadStatusForSession(data.sessionId, 'pending');
-                }
-            });
-            
-            tusUploadManager.on('online', () => {
-                console.log('[TUS] Connection restored');
-            });
-            
-            tusUploadManager.on('methodChanged', (data) => {
-                console.log('[TUS] Upload method changed to:', data.method);
-                showToast(`Upload method: ${data.method.toUpperCase()}`);
-            });
-            
-            // Create upload method selector UI
-            createUploadMethodSelector();
-            
-            console.log('[TUS] Upload manager initialized');
-        }
-        
-        function createUploadMethodSelector() {
-            if (!tusUploadManager) return;
-            
-            const selector = document.createElement('div');
-            selector.className = 'upload-method-selector glass-panel';
-            selector.innerHTML = `
-                <label for="uploadMethodSelect" class="text-xs text-gray-400">Upload Method:</label>
-                <select id="uploadMethodSelect" class="cyber-select text-xs">
-                    <option value="tus">TUS (Resumable)</option>
-                    <option value="custom">Custom (Fallback)</option>
-                </select>
-                <div id="pendingUploadsBadge" class="badge hidden"></div>
-            `;
-            
-            // Add CSS if not already present
-            if (!document.getElementById('tus-upload-styles')) {
-                const style = document.createElement('style');
-                style.id = 'tus-upload-styles';
-                style.textContent = `
-                    .upload-method-selector {
-                        position: fixed;
-                        bottom: 20px;
-                        right: 20px;
-                        padding: 12px;
-                        display: flex;
-                        flex-direction: column;
-                        gap: 8px;
-                        z-index: 1000;
-                        min-width: 200px;
-                    }
-                    .upload-method-selector label {
-                        font-size: 10px;
-                        text-transform: uppercase;
-                        letter-spacing: 0.05em;
-                    }
-                    .badge {
-                        background: var(--neon-cyan);
-                        color: black;
-                        font-size: 10px;
-                        padding: 4px 8px;
-                        border-radius: 12px;
-                        font-weight: bold;
-                        text-align: center;
-                    }
-                    .badge.hidden {
-                        display: none;
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-            
-            document.body.appendChild(selector);
-            
-            // Set current method
-            const select = document.getElementById('uploadMethodSelect');
-            select.value = tusUploadManager.getUploadMethod();
-            
-            // Handle changes
-            select.addEventListener('change', (e) => {
-                tusUploadManager.setUploadMethod(e.target.value);
-            });
-            
-            // Listen for pending upload count updates
-            tusUploadManager.on('pendingCount', (data) => {
-                updatePendingUploadsBadge(data.count);
-            });
-        }
-        
-        function updatePendingUploadsBadge(count) {
-            const badge = document.getElementById('pendingUploadsBadge');
-            if (!badge) return;
-            
-            if (count > 0) {
-                badge.textContent = `${count} pending`;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             initDB().catch(err => {
                 console.error('Failed to initialize database:', err);
                 showToast('Database initialization failed!', true);
             });
-            
-            // Initialize TUS Upload Manager
-            initTusUploadManager();
-            
             document.getElementById('recordButton').addEventListener('click', startRecording);
             document.getElementById('stopButton').addEventListener('click', stopRecording);
             ['LowShelf', 'Peaking', 'HighShelf', 'Gain'].forEach(t => {
