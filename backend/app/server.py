@@ -1,30 +1,64 @@
 import os
 import shutil
 import json
+import re
 from datetime import datetime
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
+from typing import List
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse, FileResponse
 from pathlib import Path
+from starlette.middleware.base import BaseHTTPMiddleware
 
 # Import TUS Upload Router
 from routes import tus_upload
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Load configuration from environment variables (or defaults)
+ALLOWED_HOSTS = json.loads(os.getenv("ALLOWED_HOSTS", '["localhost", "127.0.0.1", "testserver"]'))
+CORS_ORIGINS = json.loads(os.getenv("CORS_ORIGINS", '["http://localhost:8000"]'))
+SECRET_KEY = os.getenv("SECRET_KEY", "default_insecure_key_for_dev") # WARN: Change in prod!
 
 app = FastAPI()
+
+# Security Headers Middleware
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self';"
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+# 1. Trusted Host Middleware
+app.add_middleware(
+    TrustedHostMiddleware, 
+    allowed_hosts=ALLOWED_HOSTS
+)
 
 # Include TUS Upload Router
 app.include_router(tus_upload.router, tags=["TUS Upload"])
 
-# 1. CORS Configuration
+# 2. CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS", "HEAD", "PATCH", "DELETE"], # Restrict methods but allow TUS methods
     allow_headers=["*"],
     expose_headers=["Upload-Offset", "Upload-Length", "Tus-Resumable", "Location"],
 )
 
-# 2. Storage Configuration
+# 3. Storage Configuration
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 UPLOAD_DIR = BASE_DIR / "backend" / "uploaded_data"
 STATIC_DIR = BASE_DIR / "frontend" / "public"
@@ -33,6 +67,20 @@ CHUNKS_PER_SHARD = 1000  # Max chunks per subdirectory
 
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
+
+# Input Validation Helpers
+def validate_session_id(session_id: str):
+    if not re.match(r"^[a-zA-Z0-9_-]+$", session_id):
+        raise HTTPException(status_code=400, detail="Invalid session_id format")
+    # Prevent path traversal
+    if ".." in session_id or "/" in session_id or "\\" in session_id:
+        raise HTTPException(status_code=400, detail="Invalid session_id path")
+
+def validate_file_name(file_name: str):
+    if not re.match(r"^[a-zA-Z0-9._-]+$", file_name):
+        raise HTTPException(status_code=400, detail="Invalid file_name format")
+    if ".." in file_name or "/" in file_name or "\\" in file_name:
+        raise HTTPException(status_code=400, detail="Invalid file_name path")
 
 # Helper function for sharded chunk paths
 def get_chunk_path(session_id: str, chunk_index: int, temp_suffix: str = "") -> Path:
@@ -49,19 +97,27 @@ def get_chunk_path(session_id: str, chunk_index: int, temp_suffix: str = "") -> 
     Returns:
         Path to the chunk file in its appropriate shard directory
     """
+    validate_session_id(session_id) # Validate input
     session_dir = UPLOAD_DIR / session_id
     shard_num = chunk_index // CHUNKS_PER_SHARD
     shard_dir = session_dir / "temp" / f"shard_{shard_num:04d}"
     shard_dir.mkdir(parents=True, exist_ok=True)
     return shard_dir / f"{chunk_index}.part{temp_suffix}"
 
-# 3. File Assembly Logic
+# 4. File Assembly Logic
 def assemble_file(session_id: str, file_name: str, metadata: dict = None):
     """
     Background task to assemble chunks into the final file with metadata.
     Called when client signals recording is complete.
     Handles sharded directory structure efficiently.
     """
+    try:
+        validate_session_id(session_id)
+        validate_file_name(file_name)
+    except HTTPException as e:
+        print(f"❌ Assembly aborted: {e.detail}")
+        return
+
     session_dir = UPLOAD_DIR / session_id
     temp_dir = session_dir / "temp"
     completed_dir = session_dir / "completed"
@@ -158,7 +214,7 @@ def assemble_file(session_id: str, file_name: str, metadata: dict = None):
     except Exception as e:
         print(f"❌ Error assembling file: {e}")
 
-# 4. API Endpoints
+# 5. API Endpoints
 @app.head("/health")
 @app.get("/health")
 async def health_check():
@@ -179,6 +235,8 @@ async def upload_chunk(
     Chunks are stored in sharded subdirectories (1000 chunks per shard).
     Supports delayed/out-of-order chunk uploads.
     """
+    validate_session_id(session_id) # Validate input
+
     # Use sharded path - automatically creates shard directory if needed
     chunk_path = get_chunk_path(session_id, chunk_index)
     chunk_path_tmp = get_chunk_path(session_id, chunk_index, temp_suffix=".tmp")
@@ -215,6 +273,8 @@ async def debug_session(session_id: str):
     """
     Debug endpoint to check which chunks have been received for a session.
     """
+    validate_session_id(session_id) # Validate input
+
     session_dir = UPLOAD_DIR / session_id
     temp_dir = session_dir / "temp"
     
@@ -250,6 +310,9 @@ async def recording_complete(
     Called when recording is complete on the client.
     Triggers assembly of all chunks for this session.
     """
+    validate_session_id(session_id) # Validate input
+    validate_file_name(file_name) # Validate input
+
     print(f"📢 Recording complete signal received for session {session_id}")
     
     # Parse metadata if provided
@@ -265,13 +328,11 @@ async def recording_complete(
     
     return {"status": "assembly_queued", "session_id": session_id, "file_name": file_name}
 
-# 5. Frontend Serving
+# 6. Frontend Serving
 # Mount static assets (favicon, etc.)
 app.mount("/assets", StaticFiles(directory=str(STATIC_DIR)), name="assets")
 
 # Serve index.html and sw.js from frontend/src
-from fastapi.responses import FileResponse
-
 @app.get("/")
 async def serve_index():
     return FileResponse(FRONTEND_SRC / "index.html")

@@ -50,6 +50,18 @@ if [ ! -d ".venv" ]; then
     echo -e "${YELLOW}→ Creating virtual environment...${NC}"
     uv venv
     echo -e "${GREEN}✓ Virtual environment created${NC}"
+
+fi
+
+# Check for .env file
+if [ ! -f "backend/.env" ]; then
+    if [ -f "backend/.env.example" ]; then
+        echo -e "${YELLOW}→ Creating .env from example...${NC}"
+        cp backend/.env.example backend/.env
+        echo -e "${GREEN}✓ Created backend/.env${NC}"
+    else
+        echo -e "${YELLOW}⚠ No .env file found and no example available.${NC}"
+    fi
 fi
 
 # Activate virtual environment

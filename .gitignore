@@ -5,12 +5,23 @@ __pycache__/
 *.so
 .Python
 
-# Virtual environments
+# Virtual environments (all common patterns and locations)
 .venv/
 venv/
 ENV/
 env/
 .virtualenv/
+**/venv/
+**/.venv/
+**/ENV/
+**/env/
+**/.virtualenv/
+backend/venv/
+backend/.venv/
+frontend/venv/
+frontend/.venv/
+pyenv/
+.pyenv/
 
 # PyCharm
 .idea/

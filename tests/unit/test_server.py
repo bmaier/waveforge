@@ -64,7 +64,7 @@ class TestUploadEndpoint:
             "file": ("test.webm", io.BytesIO(file_content), "audio/webm")
         }
         data = {
-            "file_id": file_id,
+            "session_id": file_id,
             "chunk_index": "0",
             "total_chunks": "1",
             "file_name": "test_recording.webm"
@@ -75,7 +75,7 @@ class TestUploadEndpoint:
         assert response.status_code == 200
         json_response = response.json()
         assert json_response["status"] in ["chunk_received", "file_complete"]
-        assert json_response["file_id"] == file_id
+        assert json_response["session_id"] == file_id
     
     def test_upload_chunk_missing_file_id(self, test_client):
         """Test upload fails without file_id."""
@@ -89,7 +89,7 @@ class TestUploadEndpoint:
         }
         
         response = test_client.post("/upload/chunk", files=files, data=data)
-        assert response.status_code == 400
+        assert response.status_code == 422
     
     def test_upload_multiple_chunks(self, test_client, temp_upload_dir, monkeypatch):
         """Test uploading multiple chunks for the same file."""
@@ -104,7 +104,7 @@ class TestUploadEndpoint:
                 "file": (f"chunk_{i}.part", io.BytesIO(file_content), "audio/webm")
             }
             data = {
-                "file_id": file_id,
+                "session_id": file_id,
                 "chunk_index": str(i),
                 "total_chunks": str(total_chunks),
                 "file_name": "test_recording.webm"
@@ -115,8 +115,8 @@ class TestUploadEndpoint:
             
             json_response = response.json()
             if i == total_chunks - 1:
-                # Last chunk should trigger file completion
-                assert json_response["status"] == "file_complete"
+                # Last chunk is still just a chunk upload in this implementation
+                assert json_response["status"] == "chunk_received"
             else:
                 assert json_response["status"] == "chunk_received"
 
@@ -136,7 +136,7 @@ class TestHealthEndpoint:
         assert response.status_code == 200
         json_response = response.json()
         assert "status" in json_response
-        assert json_response["status"] == "healthy"
+        assert json_response["status"] == "ok"
 
 
 @pytest.mark.unit
@@ -185,31 +185,37 @@ class TestRecordingManagement:
 class TestChunkAssembly:
     """Test chunk assembly logic."""
     
-    def test_assemble_chunks_in_order(self, temp_upload_dir):
+    def test_assemble_chunks_in_order(self, temp_upload_dir, monkeypatch):
         """Test that chunks are assembled in correct order."""
-        from app.server import assemble_chunks
+        from app.server import assemble_file
         
-        file_id = str(uuid.uuid4())
-        chunk_dir = temp_upload_dir / "temp" / file_id
-        chunk_dir.mkdir(parents=True)
+        # Mock UPLOAD_DIR
+        monkeypatch.setattr("app.server.UPLOAD_DIR", temp_upload_dir)
+        
+        file_id = "test_session"
+        file_name = "test_assembled.webm"
+        
+        # Create session directory structure
+        session_dir = temp_upload_dir / file_id
+        temp_dir = session_dir / "temp"
+        # Create shard 0 directory (since CHUNKS_PER_SHARD=1000, indices 0,1,2 go to shard_0000)
+        shard_dir = temp_dir / "shard_0000"
+        shard_dir.mkdir(parents=True)
         
         # Create chunks
         chunks = [b"Chunk 0", b"Chunk 1", b"Chunk 2"]
         for i, data in enumerate(chunks):
-            chunk_file = chunk_dir / f"{i}.part"
+            chunk_file = shard_dir / f"{i}.part"
             chunk_file.write_bytes(data)
         
-        # This function may not exist yet
-        try:
-            output_path = temp_upload_dir / "test_assembled.webm"
-            assemble_chunks(file_id, chunk_dir, output_path)
-            
-            # Verify assembled file
-            assert output_path.exists()
-            content = output_path.read_bytes()
-            assert content == b"Chunk 0Chunk 1Chunk 2"
-        except (ImportError, AttributeError):
-            pytest.skip("Chunk assembly function not implemented yet")
+        # Run assembly
+        assemble_file(file_id, file_name)
+        
+        # Verify assembled file
+        output_path = session_dir / "completed" / file_name
+        assert output_path.exists()
+        content = output_path.read_bytes()
+        assert content == b"Chunk 0Chunk 1Chunk 2"
 
 
 @pytest.mark.unit

@@ -1,15 +1,23 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WaveForge DAW - Professionelle Audio-Aufnahmesoftware mit CrashGuard und Cloud-Synchronisation">
+    <meta name="description"
+        content="WaveForge DAW - Professionelle Audio-Aufnahmesoftware mit CrashGuard und Cloud-Synchronisation">
     <title>WaveForge DAW - Preview Edition</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="manifest" href="/manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    
+    <script>
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            console.warn('SECURITY WARNING: You are using the Tailwind CSS Play CDN in production. This is not recommended for security and performance. Please use a build step to generate your CSS.');
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
+
     <style>
         :root {
             --neon-cyan: #00f3ff;
@@ -23,10 +31,10 @@
 
         body {
             background-color: var(--bg-dark);
-            background-image: 
+            background-image:
                 radial-gradient(circle at 50% 0%, #1a1a40 0%, transparent 50%),
-                linear-gradient(0deg, rgba(0,243,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,243,255,0.03) 1px, transparent 1px);
+                linear-gradient(0deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
             color: #fff;
             font-family: 'Rajdhani', sans-serif;
@@ -77,6 +85,7 @@
             outline: none;
             cursor: pointer;
         }
+
         .seek-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 16px;
@@ -87,7 +96,10 @@
             cursor: pointer;
             transition: transform 0.1s;
         }
-        .seek-slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+        .seek-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+        }
 
         /* Control Buttons */
         .player-btn {
@@ -103,11 +115,13 @@
             transition: all 0.2s;
             cursor: pointer;
         }
+
         .player-btn:hover {
             border-color: var(--neon-cyan);
             color: var(--neon-cyan);
             box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
         }
+
         .player-btn.main-play {
             width: 50px;
             height: 50px;
@@ -119,7 +133,10 @@
         /* Modal Styles */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(5px);
             z-index: 150;
@@ -127,6 +144,7 @@
             justify-content: center;
             align-items: center;
         }
+
         .modal-content {
             background: #0a0a1a;
             border: 1px solid var(--neon-cyan);
@@ -138,18 +156,23 @@
             transform: scale(0.9);
             transition: transform 0.2s;
         }
-        .modal-open .modal-content { transform: scale(1); }
+
+        .modal-open .modal-content {
+            transform: scale(1);
+        }
 
         /* RECOVERY MODAL SPECIFIC */
         .recovery-modal .modal-content {
             border-color: var(--neon-red);
             box-shadow: 0 0 40px rgba(255, 51, 51, 0.3);
         }
+
         .recovery-btn {
             background: rgba(255, 51, 51, 0.1);
             color: var(--neon-red);
             border: 1px solid var(--neon-red);
         }
+
         .recovery-btn:hover {
             background: var(--neon-red);
             color: black;
@@ -159,9 +182,11 @@
         /* LICENSE MODAL SPECIFIC */
         .license-modal .modal-content {
             max-width: 600px;
-            border-color: #ffd700; /* Gold for premium/business feel */
+            border-color: #ffd700;
+            /* Gold for premium/business feel */
             box-shadow: 0 0 40px rgba(255, 215, 0, 0.15);
         }
+
         .license-header {
             color: #ffd700;
             border-bottom: 1px solid rgba(255, 215, 0, 0.3);
@@ -173,6 +198,7 @@
             box-shadow: 0 0 40px rgba(255, 51, 51, 0.25);
             max-width: 400px;
         }
+
         .delete-btn {
             background: rgba(255, 51, 51, 0.1);
             color: var(--neon-red);
@@ -182,11 +208,13 @@
             font-weight: bold;
             transition: all 0.2s;
         }
+
         .delete-btn:hover {
             background: var(--neon-red);
             color: black;
             box-shadow: 0 0 15px var(--neon-red);
         }
+
         .cancel-btn {
             background: transparent;
             color: #9ca3af;
@@ -195,6 +223,7 @@
             border-radius: 6px;
             transition: all 0.2s;
         }
+
         .cancel-btn:hover {
             background: rgba(255, 255, 255, 0.1);
             color: white;
@@ -209,84 +238,161 @@
             margin-top: 5px;
             display: none;
         }
+
         .upload-status-fill {
             height: 100%;
             background: var(--neon-cyan);
             width: 0%;
             transition: width 0.3s ease;
         }
+
         /* Upload Icon Status Indicators */
-        .upload-icon { 
-            color: var(--neon-cyan); 
-            border-color: var(--neon-cyan); 
+        .upload-icon {
+            color: var(--neon-cyan);
+            border-color: var(--neon-cyan);
             transition: all 0.3s ease;
         }
-        .upload-icon:hover { background: rgba(0, 243, 255, 0.1); }
-        
+
+        .upload-icon:hover {
+            background: rgba(0, 243, 255, 0.1);
+        }
+
         .upload-icon.status-uploading {
             color: #3b82f6;
             border-color: #3b82f6;
             animation: pulse-upload 1.5s ease-in-out infinite;
         }
+
         .upload-icon.status-pending {
             color: #f59e0b;
             border-color: #f59e0b;
             opacity: 0.8;
         }
+
         .upload-icon.status-success {
             color: #10b981;
             border-color: #10b981;
             animation: successPop 0.4s ease-out;
         }
+
         .upload-icon.status-error {
             color: #ef4444;
             border-color: #ef4444;
             animation: shake 0.5s ease-in-out;
         }
-        
+
         @keyframes pulse-upload {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.05); }
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.7;
+                transform: scale(1.05);
+            }
         }
-        
+
         @keyframes successPop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
-        
+
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-3px); }
-            75% { transform: translateX(3px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-3px);
+            }
+
+            75% {
+                transform: translateX(3px);
+            }
         }
 
         /* Faders & Ranges */
         .fader-group {
-            display: flex; flex-direction: column; align-items: center; gap: 10px; height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            height: 200px;
         }
+
         input[type=range][orient=vertical] {
-            writing-mode: bt-lr; -webkit-appearance: slider-vertical; width: 8px; height: 120px; padding: 0 5px; background: transparent; cursor: pointer;
+            writing-mode: bt-lr;
+            -webkit-appearance: slider-vertical;
+            width: 8px;
+            height: 120px;
+            padding: 0 5px;
+            background: transparent;
+            cursor: pointer;
         }
+
         .range-wrapper {
-            position: relative; width: 40px; height: 150px; display: flex; justify-content: center;
+            position: relative;
+            width: 40px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
         }
+
         .custom-range {
-            -webkit-appearance: none; width: 150px; height: 4px; background: #333; border-radius: 2px; outline: none; transform: rotate(-90deg); transform-origin: center; position: absolute; top: 70px;
+            -webkit-appearance: none;
+            width: 150px;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            outline: none;
+            transform: rotate(-90deg);
+            transform-origin: center;
+            position: absolute;
+            top: 70px;
         }
+
         .custom-range::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none; width: 20px; height: 10px; background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); cursor: pointer; border-radius: 2px; transition: all 0.1s ease;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 10px;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
+            cursor: pointer;
+            border-radius: 2px;
+            transition: all 0.1s ease;
         }
+
         .custom-range.pink::-webkit-slider-thumb {
-            background: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink);
+            background: var(--neon-pink);
+            box-shadow: 0 0 10px var(--neon-pink);
         }
 
         #visualizer {
-            width: 100%; height: 120px; border-bottom: 1px solid var(--neon-cyan); mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            width: 100%;
+            height: 120px;
+            border-bottom: 1px solid var(--neon-cyan);
+            mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
         }
 
-        .digital-text { font-family: 'Share Tech Mono', monospace; }
-        
+        .digital-text {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
         /* Screen reader only - BITV 2.0 compliance */
         .sr-only {
             position: absolute;
@@ -299,16 +405,16 @@
             white-space: nowrap;
             border-width: 0;
         }
-        
+
         /* Focus visible for keyboard navigation - BITV 2.0 compliance */
-        button:focus-visible, 
-        input:focus-visible, 
-        select:focus-visible, 
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
         a:focus-visible {
             outline: 2px solid var(--neon-cyan);
             outline-offset: 2px;
         }
-        
+
         /* Skip to content link - BITV 2.0 compliance */
         .skip-to-content {
             position: absolute;
@@ -321,96 +427,144 @@
             font-weight: bold;
             z-index: 10000;
         }
+
         .skip-to-content:focus {
             top: 0;
         }
-        
+
         @keyframes pulse-rec {
-            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+            }
         }
 
         .recording-active {
-            animation: pulse-rec 1.5s infinite; background-color: #ff0055 !important; border-color: #ff0055 !important; color: white !important;
+            animation: pulse-rec 1.5s infinite;
+            background-color: #ff0055 !important;
+            border-color: #ff0055 !important;
+            color: white !important;
         }
-        
+
         /* Select */
         .cyber-select {
-            background: rgba(0,0,0,0.5); border: 1px solid #333; color: var(--neon-cyan); padding: 5px 10px; font-family: 'Share Tech Mono', monospace; border-radius: 4px; outline: none;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            color: var(--neon-cyan);
+            padding: 5px 10px;
+            font-family: 'Share Tech Mono', monospace;
+            border-radius: 4px;
+            outline: none;
         }
-        .cyber-select:focus { border-color: var(--neon-cyan); }
 
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #050510; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
+        .cyber-select:focus {
+            border-color: var(--neon-cyan);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050510;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-cyan);
+        }
     </style>
 </head>
+
 <body class="min-h-screen flex flex-col items-center p-4">
     <!-- BITV 2.0: Skip to content link for keyboard navigation -->
     <a href="#main-content" class="skip-to-content" data-i18n="ui.skipToContent">Zum Hauptinhalt springen</a>
 
     <!-- Header & Visualizer -->
     <header class="w-full max-w-5xl mb-6 glass-panel overflow-hidden relative" role="banner">
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50"></div>
+        <div
+            class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50">
+        </div>
         <div class="p-4 flex justify-between items-end relative z-10 bg-black/20">
             <div>
-                <h1 class="text-3xl font-bold tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600" style="text-shadow: 0 0 20px rgba(0,243,255,0.3);">
+                <h1 class="text-3xl font-bold tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600"
+                    style="text-shadow: 0 0 20px rgba(0,243,255,0.3);">
                     WAVE<span class="text-white">FORGE</span>
                 </h1>
-                <p class="text-xs text-gray-400 tracking-[0.2em] mt-1" data-i18n="ui.crashguard">CRASHGUARD // RAID PROTECTED SYSTEM</p>
+                <p class="text-xs text-gray-400 tracking-[0.2em] mt-1" data-i18n="ui.crashguard">CRASHGUARD // RAID
+                    PROTECTED SYSTEM</p>
             </div>
             <div class="flex flex-col items-end gap-1">
                 <div class="flex items-center gap-2 mb-1">
                     <!-- Language Selector -->
-                    <label for="languageSelector" class="sr-only" data-i18n="aria.selectLanguage">Sprache auswählen</label>
-                    <select id="languageSelector" 
-                            onchange="switchLanguage(this.value)"
-                            class="cyber-select text-[10px] px-2 py-1 border-gray-700 hover:border-cyan-500/50"
-                            aria-label="Sprache auswählen">
+                    <label for="languageSelector" class="sr-only" data-i18n="aria.selectLanguage">Sprache
+                        auswählen</label>
+                    <select id="languageSelector" onchange="switchLanguage(this.value)"
+                        class="cyber-select text-[10px] px-2 py-1 border-gray-700 hover:border-cyan-500/50"
+                        aria-label="Sprache auswählen">
                         <option value="de">🇩🇪 DE</option>
                         <option value="en">🇬🇧 EN</option>
                     </select>
                     <!-- Info Button -->
-                    <button onclick="openInfoModal()" 
-                            class="text-[10px] text-gray-500 hover:text-cyan-400 transition-colors flex items-center gap-1 border border-gray-800 rounded px-2 py-0.5 hover:border-cyan-500/50"
-                            aria-label="Informationen und Compliance anzeigen"
-                            data-i18n-attr="aria-label:aria.info"
-                            type="button">
+                    <button onclick="openInfoModal()"
+                        class="text-[10px] text-gray-500 hover:text-cyan-400 transition-colors flex items-center gap-1 border border-gray-800 rounded px-2 py-0.5 hover:border-cyan-500/50"
+                        aria-label="Informationen und Compliance anzeigen" data-i18n-attr="aria-label:aria.info"
+                        type="button">
                         <span class="text-cyan-400" aria-hidden="true">ℹ</span> <span data-i18n="ui.info">INFO</span>
                     </button>
+                    <!-- Upload Settings Button -->
+                    <button onclick="openUploadSettingsModal()"
+                        class="text-[10px] text-gray-500 hover:text-cyan-400 transition-colors flex items-center gap-1 border border-gray-800 rounded px-2 py-0.5 hover:border-cyan-500/50"
+                        aria-label="Upload-Einstellungen ändern" data-i18n-attr="aria-label:aria.uploadSettings"
+                        type="button">
+                        <span class="text-cyan-400" aria-hidden="true">⚙</span> <span
+                            data-i18n="ui.uploadSettings">UPLOAD</span>
+                    </button>
                 </div>
-                <div id="statusIndicator" class="text-xs digital-text text-cyan-400" role="status" aria-live="polite" data-i18n="status.ready">SYSTEM READY</div>
-                <div id="timerDisplay" class="text-2xl digital-text font-bold text-white" role="timer" aria-live="off" aria-label="Aufnahmedauer" data-i18n-attr="aria-label:aria.recordingDuration">00:00:00</div>
+                <div id="statusIndicator" class="text-xs digital-text text-cyan-400" role="status" aria-live="polite"
+                    data-i18n="status.ready">SYSTEM READY</div>
+                <div id="timerDisplay" class="text-2xl digital-text font-bold text-white" role="timer" aria-live="off"
+                    aria-label="Aufnahmedauer" data-i18n-attr="aria-label:aria.recordingDuration">00:00:00</div>
             </div>
         </div>
         <canvas id="visualizer" aria-label="Audio-Visualisierung"></canvas>
     </header>
 
     <main id="main-content" class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6" role="main">
-        
+
         <!-- LEFT: Controls & EQ -->
         <div class="lg:col-span-7 space-y-6">
-            
+
             <!-- Recording / Input Section -->
-            <section class="glass-panel p-6 relative overflow-hidden" aria-label="Eingangsstufe" data-i18n-attr="aria-label:aria.inputSection">
-                <div class="absolute top-0 right-0 p-2 text-[10px] text-gray-500 font-mono border-l border-b border-gray-800" data-i18n="ui.inputStage">INPUT STAGE</div>
-                
+            <section class="glass-panel p-6 relative overflow-hidden" aria-label="Eingangsstufe"
+                data-i18n-attr="aria-label:aria.inputSection">
+                <div class="absolute top-0 right-0 p-2 text-[10px] text-gray-500 font-mono border-l border-b border-gray-800"
+                    data-i18n="ui.inputStage">INPUT STAGE</div>
+
                 <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
                     <h2 class="text-xl font-bold flex items-center gap-2">
-                        <span class="w-2 h-2 bg-cyan-500 rounded-full shadow-[0_0_10px_#00f3ff]"></span> 
+                        <span class="w-2 h-2 bg-cyan-500 rounded-full shadow-[0_0_10px_#00f3ff]"></span>
                         <span data-i18n="ui.input">INPUT</span>
                     </h2>
-                    
+
                     <div class="flex flex-col gap-1">
                         <div class="flex items-center gap-2 bg-black/30 p-1 rounded border border-gray-800">
                             <label class="text-[10px] text-gray-400 pl-2" data-i18n="ui.format">FORMAT:</label>
                             <label for="recordingFormat" class="sr-only">Aufnahmeformat</label>
-                            <select id="recordingFormat" 
-                                    onchange="updateFormatWarning()" 
-                                    class="cyber-select text-xs border-none bg-transparent"
-                                    aria-label="Aufnahmeformat auswählen">
+                            <select id="recordingFormat" onchange="updateFormatWarning()"
+                                class="cyber-select text-xs border-none bg-transparent"
+                                aria-label="Aufnahmeformat auswählen">
                                 <option value="webm">WEBM (Opus Codec)</option>
                                 <option value="wav">WAV</option>
                                 <option value="mp3">MP3</option>
@@ -422,20 +576,16 @@
                     </div>
 
                     <div class="flex gap-3">
-                        <button id="recordButton" 
-                                class="px-6 py-2 rounded border border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-white transition-all font-mono tracking-wider text-sm uppercase flex items-center gap-2"
-                                aria-label="Aufnahme starten"
-                                data-i18n-attr="aria-label:aria.startRecording"
-                                type="button">
-                            <span class="w-2 h-2 rounded-full bg-current" aria-hidden="true"></span> <span data-i18n="ui.rec">REC</span>
+                        <button id="recordButton"
+                            class="px-6 py-2 rounded border border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-white transition-all font-mono tracking-wider text-sm uppercase flex items-center gap-2"
+                            aria-label="Aufnahme starten" data-i18n-attr="aria-label:aria.startRecording" type="button">
+                            <span class="w-2 h-2 rounded-full bg-current" aria-hidden="true"></span> <span
+                                data-i18n="ui.rec">REC</span>
                         </button>
-                        <button id="stopButton" 
-                                class="px-6 py-2 rounded border border-gray-600 text-gray-400 hover:bg-white/10 transition-all font-mono tracking-wider text-sm uppercase" 
-                                disabled
-                                aria-label="Aufnahme stoppen"
-                                aria-disabled="true"
-                                data-i18n-attr="aria-label:aria.stopRecording"
-                                type="button">
+                        <button id="stopButton"
+                            class="px-6 py-2 rounded border border-gray-600 text-gray-400 hover:bg-white/10 transition-all font-mono tracking-wider text-sm uppercase"
+                            disabled aria-label="Aufnahme stoppen" aria-disabled="true"
+                            data-i18n-attr="aria-label:aria.stopRecording" type="button">
                             <span data-i18n="ui.stop">STOP</span>
                         </button>
                     </div>
@@ -446,18 +596,9 @@
                     <div class="fader-group">
                         <div class="range-wrapper">
                             <label for="inputLowShelf" class="sr-only">Eingangs-Low-Shelf EQ</label>
-                            <input type="range" 
-                                   id="inputLowShelf" 
-                                   min="-20" 
-                                   max="20" 
-                                   step="1" 
-                                   value="0" 
-                                   class="custom-range"
-                                   aria-label="Eingangs-Low-Shelf: 0 dB"
-                                   aria-valuemin="-20"
-                                   aria-valuemax="20"
-                                   aria-valuenow="0"
-                                   aria-valuetext="0 Dezibel">
+                            <input type="range" id="inputLowShelf" min="-20" max="20" step="1" value="0"
+                                class="custom-range" aria-label="Eingangs-Low-Shelf: 0 dB" aria-valuemin="-20"
+                                aria-valuemax="20" aria-valuenow="0" aria-valuetext="0 Dezibel">
                         </div>
                         <span class="text-xs text-cyan-300 font-mono mt-[-20px]" data-i18n="ui.low">LOW</span>
                         <span id="val-inputLow" class="text-[10px] text-gray-500">0dB</span>
@@ -465,18 +606,9 @@
                     <div class="fader-group">
                         <div class="range-wrapper">
                             <label for="inputPeaking" class="sr-only">Eingangs-Peaking EQ</label>
-                            <input type="range" 
-                                   id="inputPeaking" 
-                                   min="-20" 
-                                   max="20" 
-                                   step="1" 
-                                   value="0" 
-                                   class="custom-range"
-                                   aria-label="Eingangs-Peaking: 0 dB"
-                                   aria-valuemin="-20"
-                                   aria-valuemax="20"
-                                   aria-valuenow="0"
-                                   aria-valuetext="0 Dezibel">
+                            <input type="range" id="inputPeaking" min="-20" max="20" step="1" value="0"
+                                class="custom-range" aria-label="Eingangs-Peaking: 0 dB" aria-valuemin="-20"
+                                aria-valuemax="20" aria-valuenow="0" aria-valuetext="0 Dezibel">
                         </div>
                         <span class="text-xs text-cyan-300 font-mono mt-[-20px]" data-i18n="ui.mid">MID</span>
                         <span id="val-inputMid" class="text-[10px] text-gray-500">0dB</span>
@@ -484,18 +616,9 @@
                     <div class="fader-group">
                         <div class="range-wrapper">
                             <label for="inputHighShelf" class="sr-only">Eingangs-High-Shelf EQ</label>
-                            <input type="range" 
-                                   id="inputHighShelf" 
-                                   min="-20" 
-                                   max="20" 
-                                   step="1" 
-                                   value="0" 
-                                   class="custom-range"
-                                   aria-label="Eingangs-High-Shelf: 0 dB"
-                                   aria-valuemin="-20"
-                                   aria-valuemax="20"
-                                   aria-valuenow="0"
-                                   aria-valuetext="0 Dezibel">
+                            <input type="range" id="inputHighShelf" min="-20" max="20" step="1" value="0"
+                                class="custom-range" aria-label="Eingangs-High-Shelf: 0 dB" aria-valuemin="-20"
+                                aria-valuemax="20" aria-valuenow="0" aria-valuetext="0 Dezibel">
                         </div>
                         <span class="text-xs text-cyan-300 font-mono mt-[-20px]" data-i18n="ui.high">HIGH</span>
                         <span id="val-inputHigh" class="text-[10px] text-gray-500">0dB</span>
@@ -503,18 +626,9 @@
                     <div class="fader-group">
                         <div class="range-wrapper">
                             <label for="inputGain" class="sr-only">Eingangsverstärkung</label>
-                            <input type="range" 
-                                   id="inputGain" 
-                                   min="0" 
-                                   max="2" 
-                                   step="0.1" 
-                                   value="1" 
-                                   class="custom-range pink"
-                                   aria-label="Eingangsverstärkung: 1.0x"
-                                   aria-valuemin="0"
-                                   aria-valuemax="2"
-                                   aria-valuenow="1"
-                                   aria-valuetext="1.0 fache Verstärkung">
+                            <input type="range" id="inputGain" min="0" max="2" step="0.1" value="1"
+                                class="custom-range pink" aria-label="Eingangsverstärkung: 1.0x" aria-valuemin="0"
+                                aria-valuemax="2" aria-valuenow="1" aria-valuetext="1.0 fache Verstärkung">
                         </div>
                         <span class="text-xs text-pink-400 font-mono mt-[-20px]" data-i18n="ui.gain">GAIN</span>
                         <span id="val-inputGain" class="text-[10px] text-gray-500">100%</span>
@@ -523,28 +637,21 @@
             </section>
 
             <!-- Playback EQ Section -->
-            <section class="glass-panel p-6 relative overflow-hidden" aria-label="Ausgangsstufe" data-i18n-attr="aria-label:aria.outputSection">
-                <div class="absolute top-0 right-0 p-2 text-[10px] text-gray-500 font-mono border-l border-b border-gray-800" data-i18n="ui.outputStage">OUTPUT STAGE</div>
+            <section class="glass-panel p-6 relative overflow-hidden" aria-label="Ausgangsstufe"
+                data-i18n-attr="aria-label:aria.outputSection">
+                <div class="absolute top-0 right-0 p-2 text-[10px] text-gray-500 font-mono border-l border-b border-gray-800"
+                    data-i18n="ui.outputStage">OUTPUT STAGE</div>
                 <h2 class="text-xl font-bold flex items-center gap-2 mb-6">
-                    <span class="w-2 h-2 bg-pink-500 rounded-full shadow-[0_0_10px_#ff00ff]"></span> 
+                    <span class="w-2 h-2 bg-pink-500 rounded-full shadow-[0_0_10px_#ff00ff]"></span>
                     <span data-i18n="ui.output">OUTPUT</span>
                 </h2>
                 <div class="grid grid-cols-4 gap-2">
                     <div class="fader-group">
                         <div class="range-wrapper">
                             <label for="outputLowShelf" class="sr-only">Ausgangs-Low-Shelf EQ</label>
-                            <input type="range" 
-                                   id="outputLowShelf" 
-                                   min="-20" 
-                                   max="20" 
-                                   step="1" 
-                                   value="0" 
-                                   class="custom-range pink"
-                                   aria-label="Ausgangs-Low-Shelf: 0 dB"
-                                   aria-valuemin="-20"
-                                   aria-valuemax="20"
-                                   aria-valuenow="0"
-                                   aria-valuetext="0 Dezibel">
+                            <input type="range" id="outputLowShelf" min="-20" max="20" step="1" value="0"
+                                class="custom-range pink" aria-label="Ausgangs-Low-Shelf: 0 dB" aria-valuemin="-20"
+                                aria-valuemax="20" aria-valuenow="0" aria-valuetext="0 Dezibel">
                         </div>
                         <span class="text-xs text-pink-300 font-mono mt-[-20px]">LOW</span>
                         <span id="val-outputLow" class="text-[10px] text-gray-500">0dB</span>
@@ -552,18 +659,9 @@
                     <div class="fader-group">
                         <div class="range-wrapper">
                             <label for="outputPeaking" class="sr-only">Ausgangs-Peaking EQ</label>
-                            <input type="range" 
-                                   id="outputPeaking" 
-                                   min="-20" 
-                                   max="20" 
-                                   step="1" 
-                                   value="0" 
-                                   class="custom-range pink"
-                                   aria-label="Ausgangs-Peaking: 0 dB"
-                                   aria-valuemin="-20"
-                                   aria-valuemax="20"
-                                   aria-valuenow="0"
-                                   aria-valuetext="0 Dezibel">
+                            <input type="range" id="outputPeaking" min="-20" max="20" step="1" value="0"
+                                class="custom-range pink" aria-label="Ausgangs-Peaking: 0 dB" aria-valuemin="-20"
+                                aria-valuemax="20" aria-valuenow="0" aria-valuetext="0 Dezibel">
                         </div>
                         <span class="text-xs text-pink-300 font-mono mt-[-20px]">MID</span>
                         <span id="val-outputMid" class="text-[10px] text-gray-500">0dB</span>
@@ -571,18 +669,9 @@
                     <div class="fader-group">
                         <div class="range-wrapper">
                             <label for="outputHighShelf" class="sr-only">Ausgangs-High-Shelf EQ</label>
-                            <input type="range" 
-                                   id="outputHighShelf" 
-                                   min="-20" 
-                                   max="20" 
-                                   step="1" 
-                                   value="0" 
-                                   class="custom-range pink"
-                                   aria-label="Ausgangs-High-Shelf: 0 dB"
-                                   aria-valuemin="-20"
-                                   aria-valuemax="20"
-                                   aria-valuenow="0"
-                                   aria-valuetext="0 Dezibel">
+                            <input type="range" id="outputHighShelf" min="-20" max="20" step="1" value="0"
+                                class="custom-range pink" aria-label="Ausgangs-High-Shelf: 0 dB" aria-valuemin="-20"
+                                aria-valuemax="20" aria-valuenow="0" aria-valuetext="0 Dezibel">
                         </div>
                         <span class="text-xs text-pink-300 font-mono mt-[-20px]">HIGH</span>
                         <span id="val-outputHigh" class="text-[10px] text-gray-500">0dB</span>
@@ -590,18 +679,9 @@
                     <div class="fader-group">
                         <div class="range-wrapper">
                             <label for="outputGain" class="sr-only">Ausgangslautstärke</label>
-                            <input type="range" 
-                                   id="outputGain" 
-                                   min="0" 
-                                   max="2" 
-                                   step="0.1" 
-                                   value="1" 
-                                   class="custom-range"
-                                   aria-label="Ausgangslautstärke: 1.0x"
-                                   aria-valuemin="0"
-                                   aria-valuemax="2"
-                                   aria-valuenow="1"
-                                   aria-valuetext="1.0 fache Lautstärke">
+                            <input type="range" id="outputGain" min="0" max="2" step="0.1" value="1"
+                                class="custom-range" aria-label="Ausgangslautstärke: 1.0x" aria-valuemin="0"
+                                aria-valuemax="2" aria-valuenow="1" aria-valuetext="1.0 fache Lautstärke">
                         </div>
                         <span class="text-xs text-cyan-400 font-mono mt-[-20px]">VOL</span>
                         <span id="val-outputGain" class="text-[10px] text-gray-500">100%</span>
@@ -612,23 +692,29 @@
 
         <!-- RIGHT: Library / Playlist -->
         <div class="lg:col-span-5 flex flex-col h-full">
-            <div class="glass-panel p-6 flex-grow flex flex-col h-[600px] lg:h-auto" role="region" aria-label="Aufnahmedatenbank">
+            <div class="glass-panel p-6 flex-grow flex flex-col h-[600px] lg:h-auto" role="region"
+                aria-label="Aufnahmedatenbank">
                 <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-800">
                     <div>
                         <h2 class="text-xl font-bold font-mono text-gray-200" data-i18n="playlist.title">RECORDINGS</h2>
-                        <div class="text-[10px] text-gray-500" id="formatInfo" aria-live="polite" data-i18n="format.detecting">FORMAT: DETECTING...</div>
+                        <div class="text-[10px] text-gray-500" id="formatInfo" aria-live="polite"
+                            data-i18n="format.detecting">FORMAT: DETECTING...</div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span id="uploadStatus" class="text-[10px] text-cyan-400 hidden animate-pulse" aria-live="polite" role="status">UPLOADING...</span>
-                        <span id="dbStatus" class="text-[10px] bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-900">DB ONLINE</span>
+                        <span id="uploadStatus" class="text-[10px] text-cyan-400 hidden animate-pulse"
+                            aria-live="polite" role="status">UPLOADING...</span>
+                        <span id="dbStatus"
+                            class="text-[10px] bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-900">DB
+                            ONLINE</span>
                     </div>
                 </div>
 
                 <div id="playlist" class="flex-grow overflow-y-auto space-y-2 pr-2">
                     <div class="text-center text-gray-600 mt-10 digital-text">LOADING DATA...</div>
                 </div>
-                
-                <div id="storageInfo" class="mt-4 pt-4 border-t border-gray-800 text-xs text-gray-500 font-mono flex justify-between">
+
+                <div id="storageInfo"
+                    class="mt-4 pt-4 border-t border-gray-800 text-xs text-gray-500 font-mono flex justify-between">
                     <span>LOCAL STORAGE</span>
                     <span id="trackCount">0 TRACKS</span>
                 </div>
@@ -641,10 +727,8 @@
         <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
                 <label for="playbackSpeed" class="text-[10px] text-gray-500 font-mono">SPEED:</label>
-                <select id="playbackSpeed"  
-                        onchange="changePlaybackSpeed(this.value)"
-                        class="cyber-select text-xs px-2 py-1 border-gray-700"
-                        aria-label="Wiedergabegeschwindigkeit">
+                <select id="playbackSpeed" onchange="changePlaybackSpeed(this.value)"
+                    class="cyber-select text-xs px-2 py-1 border-gray-700" aria-label="Wiedergabegeschwindigkeit">
                     <option value="0.25">0.25x</option>
                     <option value="0.5">0.5x</option>
                     <option value="0.75">0.75x</option>
@@ -655,145 +739,180 @@
                     <option value="2">2x</option>
                 </select>
             </div>
-            <button onclick="closeDock()" 
-                    class="player-btn text-xs w-6 h-6" 
-                    aria-label="Player schließen"
-                    type="button">×</button>
+            <button onclick="closeDock()" class="player-btn text-xs w-6 h-6" aria-label="Player schließen"
+                type="button">×</button>
         </div>
         <div class="flex items-center gap-3 w-full mb-1">
-            <span id="currentTime" class="text-xs font-mono text-cyan-400 w-12 text-right" aria-label="Aktuelle Zeit">00:00</span>
+            <span id="currentTime" class="text-xs font-mono text-cyan-400 w-12 text-right"
+                aria-label="Aktuelle Zeit">00:00</span>
             <div class="flex-grow relative">
                 <label for="seekSlider" class="sr-only">Wiedergabeposition</label>
-                <input type="range" 
-                       id="seekSlider" 
-                       class="seek-slider" 
-                       min="0" 
-                       max="100" 
-                       value="0" 
-                       step="0.01"
-                       oninput="playerSeek(this.value)"
-                       onmousedown="window.isSeekDragging=true"
-                       onmouseup="window.isSeekDragging=false"
-                       ontouchstart="window.isSeekDragging=true"
-                       ontouchend="window.isSeekDragging=false"
-                       aria-label="Wiedergabeposition"
-                       aria-valuemin="0"
-                       aria-valuemax="100"
-                       aria-valuenow="0"
-                       aria-valuetext="0 Prozent">
+                <input type="range" id="seekSlider" class="seek-slider" min="0" max="100" value="0" step="0.01"
+                    oninput="playerSeek(this.value)" onmousedown="window.isSeekDragging=true"
+                    onmouseup="window.isSeekDragging=false" ontouchstart="window.isSeekDragging=true"
+                    ontouchend="window.isSeekDragging=false" aria-label="Wiedergabeposition" aria-valuemin="0"
+                    aria-valuemax="100" aria-valuenow="0" aria-valuetext="0 Prozent">
             </div>
             <span id="totalTime" class="text-xs font-mono text-gray-400 w-12" aria-label="Gesamtdauer">00:00</span>
         </div>
         <div class="flex justify-center items-center gap-4">
-            <button onclick="playerSeekStart()" 
-                    class="player-btn text-xs" 
-                    aria-label="Zum Anfang springen"
-                    type="button">|<</button>
-            <button onclick="playerSkip(-10)" 
-                    class="player-btn text-xs" 
-                    aria-label="10 Sekunden zurück"
-                    type="button">-10s</button>
-            <button id="dockPlayBtn" 
-                    onclick="togglePlayPause()" 
-                    class="player-btn main-play"
-                    aria-label="Abspielen"
-                    type="button">▶</button>
-            <button onclick="playerSkip(10)" 
-                    class="player-btn text-xs" 
-                    aria-label="10 Sekunden vorwärts"
-                    type="button">+10s</button>
-            <button onclick="playerSeekEnd()" 
-                    class="player-btn text-xs" 
-                    aria-label="Zum Ende springen"
-                    type="button">>|</button>
+            <button onclick="playerSeekStart()" class="player-btn text-xs" aria-label="Zum Anfang springen"
+                type="button">|<< /button>
+                    <button onclick="playerSkip(-10)" class="player-btn text-xs" aria-label="10 Sekunden zurück"
+                        type="button">-10s</button>
+                    <button id="dockPlayBtn" onclick="togglePlayPause()" class="player-btn main-play"
+                        aria-label="Abspielen" type="button">▶</button>
+                    <button onclick="playerSkip(10)" class="player-btn text-xs" aria-label="10 Sekunden vorwärts"
+                        type="button">+10s</button>
+                    <button onclick="playerSeekEnd()" class="player-btn text-xs" aria-label="Zum Ende springen"
+                        type="button">>|</button>
         </div>
         <div class="text-center">
-            <div id="nowPlayingText" class="text-[10px] text-gray-400 tracking-wider font-mono truncate">NO TRACK SELECTED</div>
+            <div id="nowPlayingText" class="text-[10px] text-gray-400 tracking-wider font-mono truncate">NO TRACK
+                SELECTED</div>
         </div>
     </div>
 
     <!-- SAVE MODAL -->
     <div id="saveModal" class="modal-overlay" aria-hidden="true">
         <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="saveModalTitle">
-            <h2 id="saveModalTitle" class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">SAVE SEQUENCE</h2>
+            <h2 id="saveModalTitle" class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">SAVE
+                SEQUENCE</h2>
             <div class="mb-4">
                 <label for="saveNameInput" class="block text-gray-400 text-xs mb-1">NAME</label>
-                <input type="text" 
-                       id="saveNameInput" 
-                       class="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-cyan-400 outline-none" 
-                       placeholder="Enter sequence name..."
-                       aria-label="Sequenzname eingeben"
-                       aria-required="true">
+                <input type="text" id="saveNameInput"
+                    class="w-full bg-black/50 border border-gray-700 rounded p-2 text-white focus:border-cyan-400 outline-none"
+                    placeholder="Enter sequence name..." aria-label="Sequenzname eingeben" aria-required="true">
             </div>
             <div class="mb-6">
                 <label class="block text-gray-400 text-xs mb-1">SELECTED FORMAT</label>
                 <div id="saveFormatDisplay" class="text-cyan-400 font-mono text-sm">WEBM</div>
-                <div id="processingWarning" class="text-[10px] text-yellow-500 mt-1 hidden">⚠ Converting large files may require high RAM.</div>
+                <div id="processingWarning" class="text-[10px] text-yellow-500 mt-1 hidden">⚠ Converting large files may
+                    require high RAM.</div>
             </div>
             <div class="flex gap-3 justify-end">
-                <button onclick="closeSaveModal()" 
-                        class="px-4 py-2 rounded text-gray-400 hover:bg-white/10 text-sm"
-                        aria-label="Verwerfen und schließen"
-                        type="button">DISCARD</button>
-                <button onclick="confirmSave()" 
-                        class="px-6 py-2 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm shadow-[0_0_15px_rgba(0,243,255,0.4)]"
-                        aria-label="In Datenbank speichern"
-                        type="button">SAVE TO DB</button>
+                <button onclick="closeSaveModal()" class="px-4 py-2 rounded text-gray-400 hover:bg-white/10 text-sm"
+                    aria-label="Verwerfen und schließen" type="button">DISCARD</button>
+                <button onclick="confirmSave()"
+                    class="px-6 py-2 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm shadow-[0_0_15px_rgba(0,243,255,0.4)]"
+                    aria-label="In Datenbank speichern" type="button">SAVE TO DB</button>
             </div>
-            <div id="processingIndicator" class="hidden mt-4 text-center text-xs text-pink-400 animate-pulse">PROCESSING AUDIO... PLEASE WAIT</div>
+            <div id="processingIndicator" class="hidden mt-4 text-center text-xs text-pink-400 animate-pulse">PROCESSING
+                AUDIO... PLEASE WAIT</div>
         </div>
     </div>
 
     <!-- RECOVERY MODAL -->
     <div id="recoveryModal" class="modal-overlay recovery-modal" aria-hidden="true">
         <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="recoveryModalTitle">
-            <h2 id="recoveryModalTitle" class="text-xl font-bold text-red-500 mb-4 border-b border-red-900 pb-2 flex items-center gap-2">
+            <h2 id="recoveryModalTitle"
+                class="text-xl font-bold text-red-500 mb-4 border-b border-red-900 pb-2 flex items-center gap-2">
                 <span class="animate-pulse" aria-hidden="true">⚠</span> SYSTEM ALERT
             </h2>
             <p class="text-sm text-gray-300 mb-4">
-                The system detected a crash or unexpected closure during an active recording session. RAID fragments have been recovered.
+                The system detected a crash or unexpected closure during an active recording session. RAID fragments
+                have been recovered.
             </p>
-            
+
             <div class="bg-red-900/20 border border-red-900/50 p-3 rounded mb-6">
                 <div class="text-[10px] text-red-400 font-mono mb-1">RECOVERED SESSION ID:</div>
                 <div id="recoveryId" class="text-xs font-mono text-white truncate">...</div>
                 <div class="flex justify-between mt-2">
-                    <span class="text-[10px] text-gray-400">CHUNKS: <span id="recoveryChunks" class="text-white">0</span></span>
-                    <span class="text-[10px] text-gray-400">SIZE: <span id="recoverySize" class="text-white">0 MB</span></span>
+                    <span class="text-[10px] text-gray-400">CHUNKS: <span id="recoveryChunks"
+                            class="text-white">0</span></span>
+                    <span class="text-[10px] text-gray-400">SIZE: <span id="recoverySize" class="text-white">0
+                            MB</span></span>
                 </div>
             </div>
 
             <div class="flex gap-3 justify-end">
-                <button onclick="CrashGuard.discardSession()" 
-                        class="px-4 py-2 rounded text-gray-400 hover:text-red-400 hover:bg-red-900/20 text-sm"
-                        aria-label="Wiederherstellungsdaten löschen"
-                        type="button">PURGE DATA</button>
-                <button onclick="CrashGuard.assembleSession(null, true)" 
-                        class="recovery-btn px-6 py-2 rounded font-bold text-sm shadow-[0_0_15px_rgba(255,51,51,0.4)]"
-                        aria-label="Sitzung wiederherstellen und speichern"
-                        type="button">RESTORE & SAVE</button>
+                <button onclick="CrashGuard.discardSession()"
+                    class="px-4 py-2 rounded text-gray-400 hover:text-red-400 hover:bg-red-900/20 text-sm"
+                    aria-label="Wiederherstellungsdaten löschen" type="button">PURGE DATA</button>
+                <button onclick="CrashGuard.assembleSession(null, true)"
+                    class="recovery-btn px-6 py-2 rounded font-bold text-sm shadow-[0_0_15px_rgba(255,51,51,0.4)]"
+                    aria-label="Sitzung wiederherstellen und speichern" type="button">RESTORE & SAVE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPLOAD SETTINGS MODAL -->
+    <div id="uploadSettingsModal" class="modal-overlay license-modal" aria-hidden="true" style="display: none;">
+        <div class="modal-content text-gray-200 font-sans max-w-md w-full" role="dialog" aria-modal="true"
+            aria-labelledby="uploadSettingsModalTitle">
+            <div class="flex justify-between items-start mb-6 pb-3 border-b border-gray-700">
+                <h2 id="uploadSettingsModalTitle" class="text-xl font-bold font-mono tracking-widest text-cyan-400"
+                    data-i18n="modal.uploadSettings">
+                    UPLOAD SETTINGS
+                </h2>
+                <button onclick="closeUploadSettingsModal()"
+                    class="text-gray-500 hover:text-white text-2xl leading-none" aria-label="Schließen"
+                    data-i18n-attr="aria-label:ui.close" type="button">&times;</button>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="font-bold text-gray-200 mb-3" data-i18n="upload.method">Transfer Method</h3>
+                <p class="text-sm text-gray-400 mb-4" data-i18n="upload.desc">
+                    Choose the file upload method. TUS allows resuming interrupted uploads.
+                </p>
+
+                <div class="space-y-3">
+                    <label
+                        class="flex items-center p-3 border border-gray-700 rounded hover:bg-gray-800 cursor-pointer transition-colors">
+                        <input type="radio" name="uploadMethod" value="tus" class="form-radio text-cyan-400 h-5 w-5"
+                            checked>
+                        <div class="ml-3">
+                            <span class="block text-sm font-bold text-gray-200" data-i18n="upload.tus">TUS (Resumable,
+                                Recommended)</span>
+                        </div>
+                    </label>
+
+                    <label
+                        class="flex items-center p-3 border border-gray-700 rounded hover:bg-gray-800 cursor-pointer transition-colors">
+                        <input type="radio" name="uploadMethod" value="legacy" class="form-radio text-pink-500 h-5 w-5">
+                        <div class="ml-3">
+                            <span class="block text-sm font-bold text-gray-200" data-i18n="upload.legacy">Legacy
+                                (Standard POST)</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-3 border-t border-gray-700">
+                <button onclick="closeUploadSettingsModal()"
+                    class="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors" data-i18n="ui.close">
+                    Close
+                </button>
+                <button onclick="saveUploadSettings()"
+                    class="px-4 py-2 text-sm bg-cyan-600 hover:bg-cyan-500 text-white rounded font-bold transition-colors"
+                    data-i18n="ui.save">
+                    Save
+                </button>
             </div>
         </div>
     </div>
 
     <!-- INFO MODAL -->
     <div id="infoModal" class="modal-overlay license-modal" aria-hidden="true">
-        <div class="modal-content text-gray-200 font-sans max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle">
+        <div class="modal-content text-gray-200 font-sans max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true"
+            aria-labelledby="infoModalTitle">
             <div class="flex justify-between items-start mb-6 license-header pb-3 sticky top-0 bg-gray-900 z-10">
-                <h2 id="infoModalTitle" class="text-xl font-bold font-mono tracking-widest text-cyan-400">WAVEFORGE PRO - INFO</h2>
-                <button onclick="closeInfoModal()" 
-                        class="text-gray-500 hover:text-white text-2xl leading-none"
-                        aria-label="Informationen schließen"
-                        type="button">&times;</button>
+                <h2 id="infoModalTitle" class="text-xl font-bold font-mono tracking-widest text-cyan-400">WAVEFORGE PRO
+                    - INFO</h2>
+                <button onclick="closeInfoModal()" class="text-gray-500 hover:text-white text-2xl leading-none"
+                    aria-label="Informationen schließen" type="button">&times;</button>
             </div>
 
             <!-- INTRODUCTION -->
             <div class="bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border border-cyan-800/40 p-5 rounded-lg mb-6">
                 <h3 class="font-bold text-cyan-400 text-lg mb-3">Professionelle Audio-Workstation für Browser</h3>
                 <p class="text-sm text-gray-300 leading-relaxed mb-3">
-                    WaveForge Pro ist eine hochmoderne Digital Audio Workstation (DAW), die vollständig im Browser läuft - OFFLINE!. 
-                    Mit fortschrittlicher CrashGuard-Technologie ermöglicht sie unterbrechungsfreie Langzeitaufnahmen von über 8 Stunden 
-                    und bietet dabei professionelle Features wie Echtzeit-EQ, Cloud-Synchronisation und automatische Wiederherstellung.
+                    WaveForge Pro ist eine hochmoderne Digital Audio Workstation (DAW), die vollständig im Browser läuft
+                    - OFFLINE!.
+                    Mit fortschrittlicher CrashGuard-Technologie ermöglicht sie unterbrechungsfreie Langzeitaufnahmen
+                    von über 8 Stunden
+                    und bietet dabei professionelle Features wie Echtzeit-EQ, Cloud-Synchronisation und automatische
+                    Wiederherstellung.
                 </p>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                     <div class="bg-black/40 p-2 rounded border border-gray-700">
@@ -833,12 +952,14 @@
                         <div class="text-[10px] text-cyan-400 mt-1">✓ Compliant</div>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400 mt-3">Vollständige Barrierefreiheit für Screenreader, Tastaturnavigation und assistive Technologien.</p>
+                <p class="text-xs text-gray-400 mt-3">Vollständige Barrierefreiheit für Screenreader, Tastaturnavigation
+                    und assistive Technologien.</p>
             </div>
 
             <!-- FEATURES -->
             <div class="space-y-4 text-sm leading-relaxed">
-                <h3 class="font-bold text-gray-200 uppercase tracking-wide text-sm border-b border-gray-700 pb-2">Hauptfunktionen</h3>
+                <h3 class="font-bold text-gray-200 uppercase tracking-wide text-sm border-b border-gray-700 pb-2">
+                    Hauptfunktionen</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="bg-gray-800/30 border border-gray-700 p-3 rounded">
                         <h4 class="font-bold text-gray-200 text-xs mb-2">🎙 Aufnahme & Produktion</h4>
@@ -905,7 +1026,8 @@
 
             <!-- TECHNICAL SPECS -->
             <div class="mt-6 space-y-3">
-                <h3 class="font-bold text-gray-200 uppercase tracking-wide text-sm border-b border-gray-700 pb-2">Technische Spezifikationen</h3>
+                <h3 class="font-bold text-gray-200 uppercase tracking-wide text-sm border-b border-gray-700 pb-2">
+                    Technische Spezifikationen</h3>
                 <div class="grid grid-cols-2 gap-2 text-xs">
                     <div class="bg-gray-800/30 p-2 rounded border border-gray-700">
                         <span class="text-gray-400">Frontend:</span>
@@ -942,31 +1064,38 @@
                 <ul class="space-y-2 text-xs text-gray-400">
                     <li class="flex items-start gap-2">
                         <span class="text-cyan-400 mt-0.5">▸</span>
-                        <div><strong class="text-gray-200">WebComponent-Integration:</strong> Standalone Component für Angular, React, Vue.js</div>
+                        <div><strong class="text-gray-200">WebComponent-Integration:</strong> Standalone Component für
+                            Angular, React, Vue.js</div>
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="text-cyan-400 mt-0.5">▸</span>
-                        <div><strong class="text-gray-200">Multi-Language Support:</strong> Deutsch, English, Français, Español, Italiano</div>
+                        <div><strong class="text-gray-200">Multi-Language Support:</strong> Deutsch, English, Français,
+                            Español, Italiano</div>
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="text-cyan-400 mt-0.5">▸</span>
-                        <div><strong class="text-gray-200">Authentifizierung & Sicherheit:</strong> OAuth2, SAML, JWT, End-to-End Encryption</div>
+                        <div><strong class="text-gray-200">Authentifizierung & Sicherheit:</strong> OAuth2, SAML, JWT,
+                            End-to-End Encryption</div>
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="text-cyan-400 mt-0.5">▸</span>
-                        <div><strong class="text-gray-200">Collaborative Recording:</strong> Multi-User Sessions, Real-Time Collaboration</div>
+                        <div><strong class="text-gray-200">Collaborative Recording:</strong> Multi-User Sessions,
+                            Real-Time Collaboration</div>
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="text-cyan-400 mt-0.5">▸</span>
-                        <div><strong class="text-gray-200">Theme Engine:</strong> Light/Dark Mode, Custom Color Schemes, Skins</div>
+                        <div><strong class="text-gray-200">Theme Engine:</strong> Light/Dark Mode, Custom Color Schemes,
+                            Skins</div>
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="text-cyan-400 mt-0.5">▸</span>
-                        <div><strong class="text-gray-200">Advanced Effects:</strong> Reverb, Delay, Compressor, Limiter, Noise Gate</div>
+                        <div><strong class="text-gray-200">Advanced Effects:</strong> Reverb, Delay, Compressor,
+                            Limiter, Noise Gate</div>
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="text-cyan-400 mt-0.5">▸</span>
-                        <div><strong class="text-gray-200">Multi-Track Recording:</strong> Parallele Aufnahme mehrerer Spuren</div>
+                        <div><strong class="text-gray-200">Multi-Track Recording:</strong> Parallele Aufnahme mehrerer
+                            Spuren</div>
                     </li>
                 </ul>
             </div>
@@ -977,72 +1106,93 @@
                     Preview Version - Limitations
                 </h3>
                 <p class="text-sm text-gray-300 mb-3">
-                    This is a preview version to demonstrate core functionality. The following features are currently <strong>not implemented</strong>:
+                    This is a preview version to demonstrate core functionality. The following features are currently
+                    <strong>not implemented</strong>:
                 </p>
                 <ul class="space-y-2 text-xs text-gray-400">
                     <li class="flex items-start gap-2">
                         <span class="text-gray-500 mt-0.5">▸</span>
-                        <div><strong class="text-gray-200">Authentication:</strong> No login system, no user accounts</div>
+                        <div><strong class="text-gray-200">Authentication:</strong> No login system, no user accounts
+                        </div>
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="text-gray-500 mt-0.5">▸</span>
-                        <div><strong class="text-gray-200">Authorization:</strong> No role or permission management</div>
+                        <div><strong class="text-gray-200">Authorization:</strong> No role or permission management
+                        </div>
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="text-gray-500 mt-0.5">▸</span>
-                        <div><strong class="text-gray-200">Encryption:</strong> Data transmission is per TLS/SSL encrypted, however no encrypted contents in local browser databases</div>
+                        <div><strong class="text-gray-200">Encryption:</strong> Data transmission is per TLS/SSL
+                            encrypted, however no encrypted contents in local browser databases</div>
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="text-gray-500 mt-0.5">▸</span>
-                        <div><strong class="text-gray-200">Framework Integration:</strong> WebComponent for Angular/React not yet available</div>
+                        <div><strong class="text-gray-200">Framework Integration:</strong> WebComponent for
+                            Angular/React not yet available</div>
                     </li>
                 </ul>
                 <div class="mt-3 pt-3 border-t border-gray-700">
-                    <p class="text-xs text-gray-400">⚠ This version is exclusively for testing and demonstration purposes and not suitable for production use.</p>
+                    <p class="text-xs text-gray-400">⚠ This version is exclusively for testing and demonstration
+                        purposes and not suitable for production use.</p>
                 </div>
             </div>
 
             <!-- LICENSE -->
             <div class="mt-6 bg-gray-800/30 border border-gray-700 p-4 rounded">
-                <h3 class="font-bold text-gray-200 uppercase tracking-wide text-sm border-b border-gray-700 pb-2 mb-4">Lizenz & Nutzungsrechte</h3>
-                
+                <h3 class="font-bold text-gray-200 uppercase tracking-wide text-sm border-b border-gray-700 pb-2 mb-4">
+                    Lizenz & Nutzungsrechte</h3>
+
                 <div class="space-y-3 text-sm text-gray-300">
                     <div>
                         <h4 class="font-bold text-gray-200 mb-1">Herausgeber</h4>
                         <p class="text-xs">Nina Ennekes<br>
-                        <a href="https://www.xing.com/profile/Nina_Ennekes" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">https://www.xing.com/profile/Nina_Ennekes</a><br>
-                        <span class="text-gray-500">© 2025 All Rights Reserved</span></p>
+                            <a href="https://www.xing.com/profile/Nina_Ennekes" target="_blank"
+                                rel="noopener noreferrer"
+                                class="text-cyan-400 hover:underline">https://www.xing.com/profile/Nina_Ennekes</a><br>
+                            <span class="text-gray-500">© 2025 All Rights Reserved</span>
+                        </p>
                     </div>
-                    
+
                     <div class="pt-2 border-t border-gray-700">
                         <h4 class="font-bold text-gray-200 mb-2">Business Source License 1.1</h4>
-                        <p class="text-xs text-gray-400 mb-3">Diese Software unterliegt der Business Source License 1.1 mit Dual-Lizenzierungsoptionen.</p>
-                        
+                        <p class="text-xs text-gray-400 mb-3">Diese Software unterliegt der Business Source License 1.1
+                            mit Dual-Lizenzierungsoptionen.</p>
+
                         <div class="space-y-2 text-xs">
                             <div>
                                 <strong class="text-gray-150">A) Nicht-kommerzielle Nutzung – Apache 2.0</strong>
-                                <p class="text-gray-400 mt-1">Die Software darf für nicht-kommerzielle Zwecke (privat, Forschung, Bildung) unter der Apache License 2.0 genutzt werden.</p>
+                                <p class="text-gray-400 mt-1">Die Software darf für nicht-kommerzielle Zwecke (privat,
+                                    Forschung, Bildung) unter der Apache License 2.0 genutzt werden.</p>
                             </div>
-                            
+
                             <div class="pt-2 border-t border-gray-700">
-                                <strong class="text-gray-150">B) Kommerzielle Nutzung – Business Source License 1.1</strong>
+                                <strong class="text-gray-150">B) Kommerzielle Nutzung – Business Source License
+                                    1.1</strong>
                                 <div class="space-y-1 text-gray-400 mt-1">
-                                    <div><span class="text-gray-300">Unmodifiziert:</span> Die Software darf unverändert für kommerzielle Zwecke frei eingesetzt werden.</div>
-                                    <div><span class="text-gray-300">Open-Source Umsetzung:</span> Neue Anforderungen und Pull-Requests können nach Ermessen des Autors kostenlos umgesetzt werden.</div>
-                                    <div><span class="text-gray-300">Mit Modifikationen:</span> Jede externe Änderung oder Anpassung erfordert die Zustimmung des Authors und ggf. eine separate, kostenpflichtige kommerzielle Lizenz.</div>
+                                    <div><span class="text-gray-300">Unmodifiziert:</span> Die Software darf unverändert
+                                        für kommerzielle Zwecke frei eingesetzt werden.</div>
+                                    <div><span class="text-gray-300">Open-Source Umsetzung:</span> Neue Anforderungen
+                                        und Pull-Requests können nach Ermessen des Autors kostenlos umgesetzt werden.
+                                    </div>
+                                    <div><span class="text-gray-300">Mit Modifikationen:</span> Jede externe Änderung
+                                        oder Anpassung erfordert die Zustimmung des Authors und ggf. eine separate,
+                                        kostenpflichtige kommerzielle Lizenz.</div>
                                 </div>
                             </div>
-                            
+
                             <div class="pt-2 border-t border-gray-700">
                                 <strong class="text-gray-150">Change Date & Change License</strong>
-                                <p class="text-gray-400 mt-1">Vier Jahre nach der ersten öffentlichen Veröffentlichung werden die Rechte automatisch auf Apache License 2.0 übergeleitet.</p>
+                                <p class="text-gray-400 mt-1">Vier Jahre nach der ersten öffentlichen Veröffentlichung
+                                    werden die Rechte automatisch auf Apache License 2.0 übergeleitet.</p>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="pt-2 border-t border-gray-700">
                         <strong class="text-gray-150">Haftungsausschluss</strong>
-                        <p class="text-xs text-gray-400 mt-1">Die Software wird „wie besehen" (AS-IS) ohne jegliche Gewährleistung bereitgestellt. Der Lizenzgeber haftet nicht für direkte, indirekte oder Folgeschäden aus der Nutzung.</p>
+                        <p class="text-xs text-gray-400 mt-1">Die Software wird „wie besehen" (AS-IS) ohne jegliche
+                            Gewährleistung bereitgestellt. Der Lizenzgeber haftet nicht für direkte, indirekte oder
+                            Folgeschäden aus der Nutzung.</p>
                     </div>
                 </div>
             </div>
@@ -1051,10 +1201,9 @@
             <div class="mt-8 text-center pt-4 border-t border-gray-800">
                 <p class="text-[10px] text-gray-500 font-mono mb-2">© 2025 Nina Ennekes. All Rights Reserved.</p>
                 <p class="text-[9px] text-gray-600 mb-4">Version 1.0.0-preview | Build 2025.11.27</p>
-                <button onclick="closeInfoModal()" 
-                        class="px-6 py-2 rounded border border-cyan-600/50 text-cyan-400 hover:bg-cyan-600/10 text-xs font-bold tracking-wider"
-                        aria-label="Informationen schließen"
-                        type="button">SCHLIESSEN</button>
+                <button onclick="closeInfoModal()"
+                    class="px-6 py-2 rounded border border-cyan-600/50 text-cyan-400 hover:bg-cyan-600/10 text-xs font-bold tracking-wider"
+                    aria-label="Informationen schließen" type="button">SCHLIESSEN</button>
             </div>
         </div>
     </div>
@@ -1062,45 +1211,43 @@
     <!-- DELETE CONFIRMATION MODAL -->
     <div id="deleteModal" class="modal-overlay delete-modal" aria-hidden="true">
         <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
-            <h2 id="deleteModalTitle" class="text-xl font-bold text-red-500 mb-4 border-b border-red-900 pb-2 flex items-center gap-2">
+            <h2 id="deleteModalTitle"
+                class="text-xl font-bold text-red-500 mb-4 border-b border-red-900 pb-2 flex items-center gap-2">
                 <span aria-hidden="true">⚠</span> DELETE RECORDING
             </h2>
             <p class="text-sm text-gray-300 mb-4">
                 Are you sure you want to delete this recording?
             </p>
-            
+
             <div class="bg-red-900/20 border border-red-900/50 p-3 rounded mb-6">
                 <div class="text-[10px] text-red-400 font-mono mb-1">RECORDING NAME:</div>
                 <div id="deleteRecordingName" class="text-xs font-mono text-white truncate">...</div>
             </div>
 
             <div class="flex gap-3 justify-end">
-                <button onclick="closeDeleteModal()" 
-                        class="cancel-btn text-sm"
-                        aria-label="Abbrechen"
-                        type="button">CANCEL</button>
-                <button onclick="confirmDelete()" 
-                        class="delete-btn text-sm"
-                        aria-label="Löschen bestätigen"
-                        type="button">DELETE</button>
+                <button onclick="closeDeleteModal()" class="cancel-btn text-sm" aria-label="Abbrechen"
+                    type="button">CANCEL</button>
+                <button onclick="confirmDelete()" class="delete-btn text-sm" aria-label="Löschen bestätigen"
+                    type="button">DELETE</button>
             </div>
         </div>
     </div>
 
     <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900/90 border border-cyan-500 text-cyan-400 px-6 py-3 rounded-full shadow-[0_0_20px_rgba(0,243,255,0.2)] transition-all duration-300 opacity-0 translate-y-10 z-[200] font-mono text-sm pointer-events-none">
+    <div id="toast"
+        class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900/90 border border-cyan-500 text-cyan-400 px-6 py-3 rounded-full shadow-[0_0_20px_rgba(0,243,255,0.2)] transition-all duration-300 opacity-0 translate-y-10 z-[200] font-mono text-sm pointer-events-none">
         Notification
     </div>
 
     <script>
         // --- 1. UTILS & UI LOGIC ---
-        
+
         // DELETE MODAL VARIABLES
         let deleteModal = null;
         let trackToDelete = null;
         let currentPlaybackRate = 1.0;
         let crossfadeGainNode = null; // For smooth speed transitions
-        
+
         // EMBEDDED SERVICE WORKER CODE TO FIX BLOB URL ISSUES & UPLOAD LOGIC
         const SW_CODE = `
             const DB_NAME = 'WaveForgeDB_V4';
@@ -1196,8 +1343,8 @@
         }
 
         const infoModal = document.getElementById('infoModal');
-        function openInfoModal() { 
-            infoModal.style.display = 'flex'; 
+        function openInfoModal() {
+            infoModal.style.display = 'flex';
             infoModal.setAttribute('aria-hidden', 'false');
             setTimeout(() => {
                 infoModal.classList.add('modal-open');
@@ -1206,16 +1353,16 @@
                 if (firstFocusable) firstFocusable.focus();
             }, 10);
         }
-        function closeInfoModal() { 
-            infoModal.classList.remove('modal-open'); 
+        function closeInfoModal() {
+            infoModal.classList.remove('modal-open');
             infoModal.setAttribute('aria-hidden', 'true');
-            setTimeout(() => infoModal.style.display = 'none', 200); 
+            setTimeout(() => infoModal.style.display = 'none', 200);
         }
 
         function updateFormatWarning() {
             const fmt = document.getElementById('recordingFormat').value;
             const w = document.getElementById('ramWarning');
-            if(fmt === 'webm') {
+            if (fmt === 'webm') {
                 w.textContent = t('format.ramWarning');
                 w.className = "text-[9px] font-mono text-green-400 pl-1";
             } else {
@@ -1227,7 +1374,7 @@
         // --- SERVICE WORKER & UPLOAD MANAGER (NEW) ---
         const UploadManager = {
             retryInterval: null,
-            register: async function() {
+            register: async function () {
                 if ('serviceWorker' in navigator) {
                     try {
                         // Use external sw.js file instead of blob URL
@@ -1235,10 +1382,10 @@
                         console.log('✓ Service Worker registered successfully:', reg);
                         await navigator.serviceWorker.ready;
                         console.log('✓ Service Worker is ready and active');
-                        
+
                         navigator.serviceWorker.addEventListener('message', (event) => {
                             const { type, sessionId, hasPendingChunks } = event.data;
-                            
+
                             if (type === 'UPLOAD_PROGRESS') {
                                 if (sessionId) {
                                     UploadManager.setUploadStatusForSession(sessionId, 'uploading');
@@ -1266,50 +1413,50 @@
                                 console.log('✅ Connection restored - resuming uploads');
                             }
                         });
-                        
+
                         // START SMART RETRY LOOP
                         this.startRetryLoop();
-                        
+
                     } catch (err) {
                         console.error('SW reg failed', err);
                         console.warn("Service Workers disabled or not supported in this context.");
                     }
                 }
             },
-            startRetryLoop: function() {
+            startRetryLoop: function () {
                 // Periodically check queue and trigger upload
                 // This handles cases where server comes online LATER
                 setInterval(async () => {
                     if (navigator.onLine) {
                         const db = await new Promise((resolve) => {
-                           const req = indexedDB.open('WaveForgeDB_V4', 3);
-                           req.onsuccess = e => resolve(e.target.result);
-                           req.onerror = () => resolve(null);
+                            const req = indexedDB.open('WaveForgeDB_V4', 3);
+                            req.onsuccess = e => resolve(e.target.result);
+                            req.onerror = () => resolve(null);
                         });
-                        if(db) {
-                             if(db.objectStoreNames.contains('upload_queue')) {
-                                 const countReq = db.transaction('upload_queue', 'readonly').objectStore('upload_queue').count();
-                                 countReq.onsuccess = () => {
-                                     if(countReq.result > 0) {
-                                         // Items waiting! Trigger Sync.
-                                         console.log(`📦 UploadManager: ${countReq.result} chunks in queue, triggering upload...`);
-                                         this.triggerSync();
-                                     }
-                                 }
-                             }
+                        if (db) {
+                            if (db.objectStoreNames.contains('upload_queue')) {
+                                const countReq = db.transaction('upload_queue', 'readonly').objectStore('upload_queue').count();
+                                countReq.onsuccess = () => {
+                                    if (countReq.result > 0) {
+                                        // Items waiting! Trigger Sync.
+                                        console.log(`📦 UploadManager: ${countReq.result} chunks in queue, triggering upload...`);
+                                        this.triggerSync();
+                                    }
+                                }
+                            }
                         }
                     }
                 }, 30000); // Check every 30 seconds (reduced CPU usage)
             },
-            queueUpload: async function(id, blob, fileName, metadata = {}, sessionId = null) {
+            queueUpload: async function (id, blob, fileName, metadata = {}, sessionId = null) {
                 const CHUNK_SIZE = 1024 * 1024; // 1MB chunks
                 const totalChunks = Math.ceil(blob.size / CHUNK_SIZE);
-                
+
                 // Use provided sessionId or generate new one for manual uploads
                 const uploadSessionId = sessionId || `manual_${Date.now()}`;
-                
+
                 const db = await new Promise((resolve, reject) => {
-                    const req = indexedDB.open('WaveForgeDB_V4', 3); 
+                    const req = indexedDB.open('WaveForgeDB_V4', 3);
                     req.onsuccess = e => resolve(e.target.result);
                     req.onerror = e => reject(e);
                 });
@@ -1338,12 +1485,12 @@
 
                 tx.oncomplete = () => {
                     console.log(`✓ Queued ${totalChunks} chunks for upload (File: ${fileName}, Session: ${uploadSessionId}, ID: ${id})`);
-                    console.log(`📊 Queue IDs: ${Array.from({length: totalChunks}, (_, i) => `${id}_${i}`).join(', ')}`);
+                    console.log(`📊 Queue IDs: ${Array.from({ length: totalChunks }, (_, i) => `${id}_${i}`).join(', ')}`);
                     showToast("Queued for background upload");
                     this.triggerSync();
                 };
             },
-            triggerSync: function() {
+            triggerSync: function () {
                 console.log('→ Attempting to trigger upload...');
                 if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                     console.log('✓ Service Worker controller is active');
@@ -1365,29 +1512,29 @@
                 }
                 document.getElementById('uploadStatus').classList.remove('hidden');
             },
-            updateUI: function(fileId, progress) {
+            updateUI: function (fileId, progress) {
                 const bar = document.getElementById(`progress-${fileId}`);
-                if(bar) bar.style.width = `${progress * 100}%`;
+                if (bar) bar.style.width = `${progress * 100}%`;
             },
             sessionStatus: {}, // Track status per session
-            
-            setUploadStatusForSession: function(sessionId, status) {
+
+            setUploadStatusForSession: function (sessionId, status) {
                 // Update status tracking
                 this.sessionStatus[sessionId] = status;
-                
+
                 // Find icon for this session (stored in data-session-id attribute)
                 const icon = document.querySelector(`.upload-icon[data-session-id="${sessionId}"]`);
                 if (!icon) {
                     console.warn(`No upload icon found for session ${sessionId}`);
                     return;
                 }
-                
+
                 // Remove all status classes
                 icon.classList.remove('status-idle', 'status-uploading', 'status-pending', 'status-success', 'status-error');
-                
+
                 // Add current status class
                 icon.classList.add(`status-${status}`);
-                
+
                 // Update icon content and title based on status
                 if (status === 'uploading') {
                     icon.innerHTML = '↑';
@@ -1406,22 +1553,22 @@
                     icon.title = 'Upload to server';
                 }
             },
-            
-            setUploadStatus: function(status) {
+
+            setUploadStatus: function (status) {
                 // Legacy function - update all icons (used for global events)
                 const uploadIcons = document.querySelectorAll('.upload-icon');
-                
+
                 uploadIcons.forEach(icon => {
                     const sessionId = icon.getAttribute('data-session-id');
                     if (sessionId && this.sessionStatus[sessionId]) {
                         // Keep existing session-specific status
                         return;
                     }
-                    
+
                     // Remove all status classes
                     icon.classList.remove('status-idle', 'status-uploading', 'status-pending', 'status-success', 'status-error');
                     icon.classList.add(`status-${status}`);
-                    
+
                     if (status === 'uploading') {
                         icon.innerHTML = '↑';
                         icon.title = 'Uploading...';
@@ -1448,26 +1595,26 @@
                         req.onsuccess = e => resolve(e.target.result);
                         req.onerror = e => reject(e);
                     });
-                    
+
                     if (!db.objectStoreNames.contains('upload_queue')) {
                         console.log('📊 Upload queue is empty (store does not exist)');
                         return;
                     }
-                    
+
                     const tx = db.transaction('upload_queue', 'readonly');
                     const store = tx.objectStore('upload_queue');
                     const allItems = await new Promise((resolve) => {
                         const req = store.getAll();
                         req.onsuccess = () => resolve(req.result);
                     });
-                    
+
                     console.log(`📊 Upload Queue Status: ${allItems.length} chunks total`);
-                    
+
                     if (allItems.length === 0) {
                         console.log('✅ Queue is empty - all chunks uploaded!');
                         return;
                     }
-                    
+
                     // Group by session
                     const sessions = {};
                     allItems.forEach(item => {
@@ -1475,21 +1622,21 @@
                         if (!sessions[sid]) sessions[sid] = [];
                         sessions[sid].push(item);
                     });
-                    
+
                     console.table(Object.entries(sessions).map(([sid, chunks]) => ({
                         SessionID: sid,
                         Chunks: chunks.length,
                         ChunkIndices: chunks.map(c => c.chunkIndex).sort((a, b) => a - b).join(','),
                         MaxRetry: Math.max(...chunks.map(c => c.retryCount || 0)),
-                        Status: chunks[0].nextRetryAt > Date.now() ? `Waiting ${Math.round((chunks[0].nextRetryAt - Date.now())/1000)}s` : 'Ready'
+                        Status: chunks[0].nextRetryAt > Date.now() ? `Waiting ${Math.round((chunks[0].nextRetryAt - Date.now()) / 1000)}s` : 'Ready'
                     })));
-                    
+
                 } catch (err) {
                     console.error('Error inspecting queue:', err);
                 }
             }
         };
-        
+
         // Global debug function - call inspectUploadQueue() in console to see queue status
         window.inspectUploadQueue = () => UploadManager.inspectQueue();
 
@@ -1497,7 +1644,7 @@
         window.addEventListener('online', async () => {
             console.log('🌐 Connection restored, checking for pending uploads...');
             UploadManager.setUploadStatus('idle');
-            
+
             // Check queue size
             try {
                 const db = await new Promise((resolve, reject) => {
@@ -1505,8 +1652,8 @@
                     req.onsuccess = e => resolve(e.target.result);
                     req.onerror = e => reject(e);
                 });
-                
-                if(db.objectStoreNames.contains('upload_queue')) {
+
+                if (db.objectStoreNames.contains('upload_queue')) {
                     const countReq = db.transaction('upload_queue', 'readonly').objectStore('upload_queue').count();
                     countReq.onsuccess = () => {
                         console.log(`📦 Found ${countReq.result} chunks waiting to upload`);
@@ -1519,7 +1666,7 @@
                 console.error('Error checking queue:', err);
             }
         });
-        
+
         window.addEventListener('offline', () => {
             console.log('📴 Connection lost, uploads will resume when online');
             UploadManager.setUploadStatus('pending');
@@ -1527,28 +1674,28 @@
 
         // --- 2. CRASH GUARD RAID SYSTEM ---
         const DB_NAME = 'WaveForgeDB_V4';
-        const DB_VERSION = 3; 
+        const DB_VERSION = 3;
         const STORE_RECORDINGS = 'recordings';
         const STORE_RECOVERY = 'recovery_chunks';
-        const STORE_UPLOAD_QUEUE = 'upload_queue'; 
+        const STORE_UPLOAD_QUEUE = 'upload_queue';
 
         let db = null;
         let currentSessionId = null;
 
         const CrashGuard = {
-            init: async function() {
+            init: async function () {
                 const count = await this.checkOrphans();
                 if (count > 0) this.showRecoveryUI();
             },
             generateSessionId: () => 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-            logChunk: function(blob) {
+            logChunk: function (blob) {
                 if (!db || !currentSessionId) return;
-                
+
                 // Get current chunk index
                 if (!this.chunkCounter) this.chunkCounter = {};
                 if (!this.chunkCounter[currentSessionId]) this.chunkCounter[currentSessionId] = 0;
                 const chunkIndex = this.chunkCounter[currentSessionId]++;
-                
+
                 // Save to IndexedDB for crash recovery
                 const transaction = db.transaction([STORE_RECOVERY], 'readwrite');
                 transaction.objectStore(STORE_RECOVERY).add({
@@ -1557,20 +1704,20 @@
                     blob: blob,
                     chunkIndex: chunkIndex
                 });
-                
+
                 // AUTO UPLOAD: Upload chunk immediately to server in background
                 this.uploadChunkLive(blob, currentSessionId, chunkIndex);
             },
-            uploadChunkLive: async function(blob, sessionId, chunkIndex) {
+            uploadChunkLive: async function (blob, sessionId, chunkIndex) {
                 try {
                     const db = await new Promise((resolve, reject) => {
                         const req = indexedDB.open('WaveForgeDB_V4', 3);
                         req.onsuccess = e => resolve(e.target.result);
                         req.onerror = e => reject(e);
                     });
-                    
+
                     const chunkId = `${sessionId}_chunk_${chunkIndex}`;
-                    
+
                     // Check if chunk already exists in queue
                     const checkTx = db.transaction(['upload_queue'], 'readonly');
                     const existingChunk = await new Promise((resolve) => {
@@ -1578,15 +1725,15 @@
                         req.onsuccess = () => resolve(req.result);
                         req.onerror = () => resolve(null);
                     });
-                    
+
                     if (existingChunk) {
                         console.log(`⏩ Chunk ${chunkIndex} already in queue (session: ${sessionId}), skipping`);
                         return;
                     }
-                    
+
                     const tx = db.transaction(['upload_queue'], 'readwrite');
                     const store = tx.objectStore('upload_queue');
-                    
+
                     // Add chunk to upload queue with session-based structure
                     // Note: We don't have totalChunks yet - will be determined when recording completes
                     store.add({
@@ -1599,10 +1746,10 @@
                         retryCount: 0,
                         nextRetryAt: 0
                     });
-                    
+
                     tx.oncomplete = () => {
                         console.log(`💾 Chunk ${chunkIndex} saved to IndexedDB (session: ${sessionId})`);
-                        
+
                         // Trigger upload immediately for live chunks
                         // This ensures chunks are uploaded during recording, not just at the end
                         if (navigator.serviceWorker && navigator.serviceWorker.controller) {
@@ -1613,9 +1760,9 @@
                     console.warn('Live upload queuing failed:', err);
                 }
             },
-            waitForAllChunksUploaded: async function(sessionId, maxWaitMs = 120000) {
+            waitForAllChunksUploaded: async function (sessionId, maxWaitMs = 120000) {
                 const startTime = Date.now();
-                
+
                 while (Date.now() - startTime < maxWaitMs) {
                     try {
                         const db = await new Promise((resolve, reject) => {
@@ -1623,67 +1770,67 @@
                             req.onsuccess = e => resolve(e.target.result);
                             req.onerror = e => reject(e);
                         });
-                        
+
                         if (!db.objectStoreNames.contains('upload_queue')) {
                             console.log('✅ No upload queue - all chunks uploaded');
                             return true;
                         }
-                        
+
                         const tx = db.transaction('upload_queue', 'readonly');
                         const store = tx.objectStore('upload_queue');
                         const allItems = await new Promise((resolve) => {
                             const req = store.getAll();
                             req.onsuccess = () => resolve(req.result);
                         });
-                        
+
                         const sessionChunks = allItems.filter(item => item.sessionId === sessionId);
-                        
+
                         if (sessionChunks.length === 0) {
                             console.log(`✅ All chunks uploaded for session ${sessionId}`);
                             return true;
                         }
-                        
+
                         console.log(`⏳ Waiting for ${sessionChunks.length} chunks to upload...`);
-                        
+
                         // Trigger upload in case it's stuck
                         if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                             navigator.serviceWorker.controller.postMessage('TRIGGER_UPLOAD');
                         }
-                        
+
                         // Wait 2 seconds before checking again
                         await new Promise(resolve => setTimeout(resolve, 2000));
-                        
+
                     } catch (err) {
                         console.error('Error checking upload queue:', err);
                         await new Promise(resolve => setTimeout(resolve, 2000));
                     }
                 }
-                
+
                 console.warn('⚠️ Timeout waiting for chunks to upload');
                 return false;
             },
-            signalRecordingComplete: async function(sessionId, fileName, metadata) {
+            signalRecordingComplete: async function (sessionId, fileName, metadata) {
                 console.log(`📢 Signaling recording complete for session ${sessionId}`);
-                
+
                 // CRITICAL: Wait for all chunks to upload first
                 console.log('⏳ Waiting for all chunks to upload before signaling server...');
                 const allUploaded = await this.waitForAllChunksUploaded(sessionId);
-                
+
                 if (!allUploaded) {
                     console.error('⚠️ Not all chunks uploaded, but proceeding with assembly anyway');
                 }
-                
+
                 try {
                     const formData = new FormData();
                     formData.append('session_id', sessionId);
                     formData.append('file_name', fileName);
                     formData.append('metadata', JSON.stringify(metadata));
-                    
+
                     const response = await fetch('/recording/complete', {
                         method: 'POST',
                         body: formData
                     });
-                    
+
                     if (response.ok) {
                         const result = await response.json();
                         console.log('✓ Server acknowledged recording complete:', result);
@@ -1695,7 +1842,7 @@
                     console.error('Error signaling recording complete:', error);
                 }
             },
-            checkOrphans: function() {
+            checkOrphans: function () {
                 return new Promise((resolve) => {
                     if (!db) { resolve(0); return; }
                     const req = db.transaction([STORE_RECOVERY], 'readonly').objectStore(STORE_RECOVERY).count();
@@ -1703,7 +1850,7 @@
                     req.onerror = () => resolve(0);
                 });
             },
-            showRecoveryUI: function() {
+            showRecoveryUI: function () {
                 const store = db.transaction([STORE_RECOVERY], 'readonly').objectStore(STORE_RECOVERY);
                 const cursorReq = store.openCursor();
                 let chunks = 0, size = 0, foundId = null;
@@ -1720,30 +1867,30 @@
                     }
                 };
             },
-            assembleSession: async function(targetSessionId = null, isRecovery = false) {
+            assembleSession: async function (targetSessionId = null, isRecovery = false) {
                 if (!db) { showToast("Database not initialized", true); return; }
                 const req = db.transaction([STORE_RECOVERY], 'readonly').objectStore(STORE_RECOVERY).getAll();
                 req.onsuccess = () => {
-                    let chunks = req.result.sort((a,b) => a.timestamp - b.timestamp);
+                    let chunks = req.result.sort((a, b) => a.timestamp - b.timestamp);
                     if (targetSessionId) chunks = chunks.filter(c => c.sessionId === targetSessionId);
-                    
+
                     if (chunks.length > 0) {
                         const blobParts = chunks.map(c => c.blob);
                         tempBlob = new Blob(blobParts, { type: preferredMimeType });
-                        
+
                         // CRITICAL: Set currentSessionId from recovered chunks
                         currentSessionId = chunks[0].sessionId;
                         console.log(`📦 Assembled ${chunks.length} chunks from recovery (session: ${currentSessionId})`);
-                        
+
                         // Close recovery modal immediately
                         if (isRecovery) {
                             document.getElementById('recoveryModal').classList.remove('modal-open');
                             setTimeout(() => document.getElementById('recoveryModal').style.display = 'none', 200);
                         }
-                        
+
                         // Open save modal first
                         openSaveModal(isRecovery);
-                        
+
                         // Disable save button during recovery upload
                         if (isRecovery) {
                             const saveBtn = document.querySelector('#saveModal button[onclick="confirmSave()"]');
@@ -1755,7 +1902,7 @@
                             document.getElementById('processingIndicator').classList.remove('hidden');
                             document.getElementById('processingIndicator').textContent = 'UPLOADING RECOVERY DATA...';
                         }
-                        
+
                         // Upload and assemble in background (non-blocking)
                         this.uploadAndAssembleRecoveredChunks(chunks, currentSessionId).catch(err => {
                             console.error('Error uploading recovered chunks:', err);
@@ -1769,7 +1916,7 @@
                     showToast("Error reading recovery data", true);
                 };
             },
-            uploadAndAssembleRecoveredChunks: async function(chunks, sessionId) {
+            uploadAndAssembleRecoveredChunks: async function (chunks, sessionId) {
                 try {
                     // Upload all recovered chunks to server
                     console.log('⬆️ Uploading recovered chunks to server...');
@@ -1777,11 +1924,11 @@
                         await this.uploadChunkLive(chunks[i].blob, sessionId, i);
                     }
                     console.log('✓ All recovered chunks queued for upload');
-                    
+
                     // Wait for all chunks to upload, then signal server to assemble
                     console.log('⏳ Waiting for all recovered chunks to upload...');
                     await this.waitForAllChunksUploaded(sessionId, 120000);
-                    
+
                     // Generate filename for recovered session
                     const recoveredFileName = `recovered_${sessionId}.webm`;
                     const recoveredMetadata = {
@@ -1792,14 +1939,14 @@
                         fileSize: tempBlob.size,
                         isRecovery: true
                     };
-                    
+
                     // Signal server to assemble the recovered chunks
                     console.log('📡 Signaling server to assemble recovered chunks...');
                     await this.signalRecordingComplete(sessionId, recoveredFileName, recoveredMetadata);
-                    
+
                     console.log('✅ Recovery upload and assembly complete!');
                     showToast('Recovery upload complete!');
-                    
+
                     // Re-enable save button
                     const saveBtn = document.querySelector('#saveModal button[onclick="confirmSave()"]');
                     if (saveBtn) {
@@ -1809,7 +1956,7 @@
                     }
                     document.getElementById('processingIndicator').classList.add('hidden');
                     document.getElementById('processingIndicator').textContent = 'PROCESSING AUDIO... PLEASE WAIT';
-                    
+
                     // Clean up recovery chunks after successful upload
                     this.clearSession(sessionId);
                 } catch (err) {
@@ -1817,24 +1964,24 @@
                     throw err;
                 }
             },
-            discardSession: function() {
-                if(!confirm("Are you sure? This data will be lost forever.")) return;
+            discardSession: function () {
+                if (!confirm("Are you sure? This data will be lost forever.")) return;
                 this.clearAllRecoveryData();
                 document.getElementById('recoveryModal').classList.remove('modal-open');
                 setTimeout(() => document.getElementById('recoveryModal').style.display = 'none', 200);
             },
-            clearSession: function(sessionId) {
+            clearSession: function (sessionId) {
                 if (!db) return;
                 try {
                     const tx = db.transaction([STORE_RECOVERY], 'readwrite');
                     const store = tx.objectStore(STORE_RECOVERY);
-                    
+
                     // Check if index exists before using it
                     if (store.indexNames.contains('sessionId')) {
                         const index = store.index('sessionId');
                         index.openKeyCursor(IDBKeyRange.only(sessionId)).onsuccess = (e) => {
                             const cursor = e.target.result;
-                            if(cursor) { store.delete(cursor.primaryKey); cursor.continue(); }
+                            if (cursor) { store.delete(cursor.primaryKey); cursor.continue(); }
                         };
                     } else {
                         // Silently clear all recovery data if index doesn't exist
@@ -1845,9 +1992,9 @@
                     console.error('Error clearing session:', e);
                 }
             },
-            clearAllRecoveryData: function() {
-                 if (!db) return;
-                 db.transaction([STORE_RECOVERY], 'readwrite').objectStore(STORE_RECOVERY).clear();
+            clearAllRecoveryData: function () {
+                if (!db) return;
+                db.transaction([STORE_RECOVERY], 'readwrite').objectStore(STORE_RECOVERY).clear();
             }
         };
 
@@ -1875,7 +2022,7 @@
             detectMimeType();
             return new Promise((resolve, reject) => {
                 console.log('→ Opening IndexedDB:', DB_NAME, 'version:', DB_VERSION);
-                
+
                 // Check if IndexedDB is available
                 if (!window.indexedDB) {
                     console.error('❌ IndexedDB not supported');
@@ -1883,28 +2030,28 @@
                     reject(new Error('IndexedDB not supported'));
                     return;
                 }
-                
+
                 try {
                     const request = indexedDB.open(DB_NAME, DB_VERSION);
                     console.log('→ Request created:', request);
-                    
+
                     request.onerror = (e) => {
                         console.error('❌ IndexedDB error event:', e);
                         console.error('❌ Error details:', e.target.error);
                         showToast("Database error: " + (e.target.error?.message || 'Unknown error'), true);
                         reject(e.target.error);
                     };
-                    
+
                     request.onblocked = (e) => {
                         console.warn('⚠ IndexedDB blocked - close other tabs!');
                         showToast("Database blocked - close other tabs and reload", true);
                     };
-                    
+
                     request.onupgradeneeded = (e) => {
                         console.log('→ Database upgrade needed from version', e.oldVersion, 'to', e.newVersion);
                         const dbUpgrade = e.target.result;
                         console.log('→ Existing stores:', Array.from(dbUpgrade.objectStoreNames));
-                        
+
                         if (!dbUpgrade.objectStoreNames.contains(STORE_RECORDINGS)) {
                             console.log('→ Creating store:', STORE_RECORDINGS);
                             dbUpgrade.createObjectStore(STORE_RECORDINGS, { keyPath: 'id', autoIncrement: true });
@@ -1916,11 +2063,11 @@
                         }
                         if (!dbUpgrade.objectStoreNames.contains(STORE_UPLOAD_QUEUE)) {
                             console.log('→ Creating store:', STORE_UPLOAD_QUEUE);
-                            dbUpgrade.createObjectStore(STORE_UPLOAD_QUEUE, { keyPath: 'id' }); 
+                            dbUpgrade.createObjectStore(STORE_UPLOAD_QUEUE, { keyPath: 'id' });
                         }
                         console.log('✓ Database upgrade complete');
                     };
-                    
+
                     request.onsuccess = (e) => {
                         db = e.target.result;
                         console.log('✓ IndexedDB opened successfully');
@@ -1928,10 +2075,10 @@
                         console.log('→ DB version:', db.version);
                         CrashGuard.init();
                         loadTracksFromDB();
-                        UploadManager.register(); 
+                        UploadManager.register();
                         resolve(db);
                     };
-                    
+
                     // Timeout fallback
                     setTimeout(() => {
                         if (!db) {
@@ -1940,7 +2087,7 @@
                             reject(new Error('Database open timeout'));
                         }
                     }, 10000);
-                    
+
                 } catch (err) {
                     console.error('❌ Exception opening IndexedDB:', err);
                     showToast("Database exception: " + err.message, true);
@@ -1955,20 +2102,20 @@
                 document.getElementById('processingIndicator').classList.add('hidden');
                 return;
             }
-            
+
             const tx = db.transaction([STORE_RECORDINGS], 'readwrite');
             tx.objectStore(STORE_RECORDINGS).add({
-                name: name, 
-                blob: blob, 
-                date: new Date().toISOString(), 
-                mimeType: mimeType, 
+                name: name,
+                blob: blob,
+                date: new Date().toISOString(),
+                mimeType: mimeType,
                 extension: ext,
                 sessionId: currentSessionId // Store sessionId with recording
             });
-            
+
             tx.oncomplete = () => {
                 showToast(`Saved as .${ext.toUpperCase()}`);
-                
+
                 // Signal server that recording is complete and should be assembled
                 if (currentSessionId) {
                     const fileName = `${name}.${ext}`;
@@ -1981,7 +2128,7 @@
                     };
                     CrashGuard.signalRecordingComplete(currentSessionId, fileName, metadata);
                 }
-                
+
                 // Clear recovery data after successful save
                 try {
                     if (currentSessionId) {
@@ -1992,13 +2139,13 @@
                 } catch (e) {
                     console.warn('Could not clear recovery data:', e);
                 }
-                
+
                 tempBlob = null; // Clear tempBlob after successful save
                 currentSessionId = null; // Reset session ID
                 loadTracksFromDB();
                 closeSaveModal();
             };
-            
+
             tx.onerror = (e) => {
                 console.error("DB Save Error:", e);
                 showToast("Failed to save to database", true);
@@ -2037,7 +2184,7 @@
 
         function initVisualizer() {
             canvas = document.getElementById('visualizer');
-            if(!canvas) return;
+            if (!canvas) return;
             canvasCtx = canvas.getContext('2d');
             const dpr = window.devicePixelRatio || 1;
             canvas.width = canvas.getBoundingClientRect().width * dpr;
@@ -2049,14 +2196,14 @@
         function drawVisualizer() {
             requestAnimationFrame(drawVisualizer);
             if (!canvas || !canvasCtx || !analyser) return;
-            canvasCtx.clearRect(0, 0, canvas.width/window.devicePixelRatio, canvas.height/window.devicePixelRatio);
+            canvasCtx.clearRect(0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio);
             analyser.getByteFrequencyData(dataArray);
-            const w = (canvas.width/window.devicePixelRatio) / dataArray.length * 2.5;
+            const w = (canvas.width / window.devicePixelRatio) / dataArray.length * 2.5;
             let x = 0;
-            for(let i = 0; i < dataArray.length; i++) {
-                const h = (dataArray[i] / 255) * (canvas.height/window.devicePixelRatio);
-                canvasCtx.fillStyle = `rgb(${0 + 255*(h/(canvas.height/window.devicePixelRatio))}, ${243 - 100*(h/(canvas.height/window.devicePixelRatio))}, 255)`;
-                canvasCtx.fillRect(x, (canvas.height/window.devicePixelRatio) - h, w - 2, h);
+            for (let i = 0; i < dataArray.length; i++) {
+                const h = (dataArray[i] / 255) * (canvas.height / window.devicePixelRatio);
+                canvasCtx.fillStyle = `rgb(${0 + 255 * (h / (canvas.height / window.devicePixelRatio))}, ${243 - 100 * (h / (canvas.height / window.devicePixelRatio))}, 255)`;
+                canvasCtx.fillRect(x, (canvas.height / window.devicePixelRatio) - h, w - 2, h);
                 x += w + 1;
             }
         }
@@ -2089,11 +2236,11 @@
             initAudioEngine();
             // FIXED: Disable Playback UI & Stop Audio
             document.getElementById('playerDock').classList.remove('active');
-            if (isPlaying) stopAudio(); 
-            
+            if (isPlaying) stopAudio();
+
             // FIXED: Prevent Echo/Feedback
             // Disconnect analyser from destination if it was connected during playback
-            try { analyser.disconnect(); } catch(e) {}
+            try { analyser.disconnect(); } catch (e) { }
 
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -2108,28 +2255,28 @@
 
                 inputSource.connect(recordingNodes.low);
                 recordingNodes.low.connect(recordingNodes.mid); recordingNodes.mid.connect(recordingNodes.high);
-                recordingNodes.high.connect(recordingNodes.gain); 
-                
+                recordingNodes.high.connect(recordingNodes.gain);
+
                 // Connect to Analyser for visualizer, BUT NOT DESTINATION
                 recordingNodes.gain.connect(analyser);
 
                 const dest = audioContext.createMediaStreamDestination();
                 recordingNodes.gain.connect(dest);
-                
+
                 try { mediaRecorder = new MediaRecorder(dest.stream, { mimeType: preferredMimeType }); } catch (e) { mediaRecorder = new MediaRecorder(dest.stream); }
 
-                mediaRecorder.ondataavailable = e => { 
-                    if (e.data.size > 0) { 
-                        CrashGuard.logChunk(e.data); 
+                mediaRecorder.ondataavailable = e => {
+                    if (e.data.size > 0) {
+                        CrashGuard.logChunk(e.data);
                     }
                 };
-                
-                mediaRecorder.onstop = () => { 
+
+                mediaRecorder.onstop = () => {
                     CrashGuard.assembleSession(currentSessionId);
                 };
 
-                mediaRecorder.start(1000); 
-                
+                mediaRecorder.start(1000);
+
                 isRecording = true;
                 document.getElementById('recordButton').classList.add('recording-active');
                 document.getElementById('recordButton').disabled = true;
@@ -2142,7 +2289,7 @@
         function stopRecording() {
             if (mediaRecorder && isRecording) {
                 mediaRecorder.stop();
-                if(inputSource) {
+                if (inputSource) {
                     inputSource.disconnect();
                     // Close the microphone stream
                     const tracks = inputSource.mediaStream.getTracks();
@@ -2163,15 +2310,15 @@
             if (!tempBlob || tempBlob.size === 0) return;
             nameInput.value = isRecovery ? `RECOVERED ${new Date().toLocaleTimeString()}` : `Sequence ${new Date().toLocaleTimeString()}`;
             nameInput.style.borderColor = isRecovery ? 'var(--neon-red)' : '#374151';
-            
+
             const fmt = document.getElementById('recordingFormat').value;
             const w = document.getElementById('processingWarning');
-            if(fmt !== 'webm') w.classList.remove('hidden'); else w.classList.add('hidden');
-            
+            if (fmt !== 'webm') w.classList.remove('hidden'); else w.classList.add('hidden');
+
             // Update format display
             document.getElementById('saveFormatDisplay').textContent = fmt.toUpperCase();
 
-            modal.style.display = 'flex'; 
+            modal.style.display = 'flex';
             modal.setAttribute('aria-hidden', 'false');
             setTimeout(() => {
                 modal.classList.add('modal-open');
@@ -2183,27 +2330,27 @@
             modal.setAttribute('aria-hidden', 'true');
             setTimeout(() => { modal.style.display = 'none'; document.getElementById('processingIndicator').classList.add('hidden'); }, 200);
         }
-        
+
         async function confirmSave() {
             const name = nameInput.value || "Untitled";
             const fmt = document.getElementById('recordingFormat').value;
-            
+
             // VALIDATION: Check if tempBlob exists
             if (!tempBlob || tempBlob.size === 0) {
                 showToast("Error: No audio data to save", true);
                 closeSaveModal();
                 return;
             }
-            
-            console.log("Starting save process...", {name, fmt, blobSize: tempBlob.size});
+
+            console.log("Starting save process...", { name, fmt, blobSize: tempBlob.size });
             document.getElementById('processingIndicator').classList.remove('hidden');
-            
+
             // Use immediate async execution instead of setTimeout
             try {
                 let blobToSave;
                 let mimeType;
                 let extension;
-                
+
                 if (fmt === 'wav') {
                     console.log("Converting to WAV...");
                     blobToSave = await convertBlobToWav(tempBlob);
@@ -2219,24 +2366,24 @@
                     mimeType = preferredMimeType;
                     extension = preferredExt;
                 }
-                
-                console.log("Saving to DB...", {size: blobToSave.size, mimeType, extension});
+
+                console.log("Saving to DB...", { size: blobToSave.size, mimeType, extension });
                 saveTrackToDB(blobToSave, name, mimeType, extension);
-                
-            } catch (e) { 
+
+            } catch (e) {
                 console.error("Save error:", e);
-                showToast("Save Failed: " + e.message, true); 
+                showToast("Save Failed: " + e.message, true);
                 document.getElementById('processingIndicator').classList.add('hidden');
                 closeSaveModal();
             }
         }
 
         // --- 5. PLAYER LOGIC & DOCK BEHAVIOR ---
-        
+
         async function loadTrack(id, name, blob) {
             // FIXED: Disable Playback if Recording
-            if(isRecording) { showToast("Recording Active!", true); return; }
-            
+            if (isRecording) { showToast("Recording Active!", true); return; }
+
             initAudioEngine();
             stopAudio();
             showToast("Loading audio...");
@@ -2245,31 +2392,31 @@
                 if (currentBlobUrl) {
                     URL.revokeObjectURL(currentBlobUrl);
                 }
-                
+
                 // Create NEW Audio Element for each track (MediaElementSource can only be created once per element)
                 currentBlobUrl = URL.createObjectURL(blob);
-                
+
                 // Clean up old audio element
                 if (audioElement) {
                     audioElement.pause();
                     audioElement.src = '';
                 }
-                
+
                 // Create fresh audio element
                 audioElement = new Audio();
                 audioElement.preservesPitch = true; // CRITICAL: Prevents Mickey Mouse effect
                 audioElement.crossOrigin = 'anonymous';
                 audioElement.playbackRate = currentPlaybackRate; // Restore speed setting
-                
+
                 // Reset MediaElementSource so it gets recreated in playAudio()
                 if (mediaElementSource) {
                     mediaElementSource.disconnect();
                     mediaElementSource = null;
                 }
-                
+
                 audioElement.src = currentBlobUrl;
                 audioElement.preload = 'auto'; // Force full preload
-                
+
                 // Wait for audio to be fully loaded
                 await new Promise((resolve, reject) => {
                     // Use canplaythrough for complete loading
@@ -2277,21 +2424,21 @@
                     audioElement.onerror = reject;
                     audioElement.load(); // Explicitly trigger load
                 });
-                
+
                 // Extra safety: Wait until duration is actually available and valid
                 let retries = 0;
                 while ((!audioElement.duration || !isFinite(audioElement.duration)) && retries < 100) {
                     await new Promise(resolve => setTimeout(resolve, 20));
                     retries++;
                 }
-                
+
                 console.log('Audio loaded, duration:', audioElement.duration, 'readyState:', audioElement.readyState);
-                
+
                 audioElement.currentTime = 0;
-                
+
                 const dock = document.getElementById('playerDock');
                 dock.classList.add('active');
-                
+
                 document.getElementById('nowPlayingText').textContent = name;
                 playbackOffset = 0;
                 updateDurationDisplay(audioElement.duration);
@@ -2303,25 +2450,25 @@
 
         async function playAudio(offset) {
             // FIXED: Disable Playback if Recording
-            if(isRecording) return;
-            
+            if (isRecording) return;
+
             if (!audioElement) return;
-            
+
             // Create MediaElementSource if not exists
             if (!mediaElementSource) {
                 mediaElementSource = audioContext.createMediaElementSource(audioElement);
-                
+
                 // Setup EQ chain
                 ['low', 'mid', 'high', 'gain'].forEach(k => { outputNodes[k] = audioContext.createBiquadFilter(); });
                 outputNodes.low.type = "lowshelf"; outputNodes.low.frequency.value = 320;
                 outputNodes.mid.type = "peaking"; outputNodes.mid.frequency.value = 1000;
                 outputNodes.high.type = "highshelf"; outputNodes.high.frequency.value = 3200;
                 outputNodes.gain = audioContext.createGain();
-                
+
                 // Create crossfade gain node
                 crossfadeGainNode = audioContext.createGain();
                 crossfadeGainNode.gain.value = 1;
-                
+
                 // Connect audio chain
                 mediaElementSource.connect(outputNodes.low);
                 outputNodes.low.connect(outputNodes.mid);
@@ -2330,21 +2477,21 @@
                 outputNodes.gain.connect(crossfadeGainNode);
                 crossfadeGainNode.connect(analyser);
                 analyser.connect(audioContext.destination);
-                
+
                 applyOutputEQ();
             }
-            
+
             // Set playback position and speed
             audioElement.currentTime = offset || 0;
             audioElement.playbackRate = currentPlaybackRate;
             audioElement.preservesPitch = true; // Always preserve pitch!
-            
+
             // Set state BEFORE starting playback
             playbackStartTime = audioContext.currentTime;
             playbackOffset = offset || 0;
             isPlaying = true;
             updatePlayPauseButtonUI();
-            
+
             // Start playback and seek loop
             try {
                 await audioElement.play();
@@ -2364,7 +2511,7 @@
                     crossfadeGainNode.gain.cancelScheduledValues(now);
                     crossfadeGainNode.gain.setValueAtTime(crossfadeGainNode.gain.value, now);
                     crossfadeGainNode.gain.linearRampToValueAtTime(0.01, now + 0.01);
-                    
+
                     setTimeout(() => {
                         audioElement.pause();
                         crossfadeGainNode.gain.setValueAtTime(1, audioContext.currentTime);
@@ -2376,20 +2523,20 @@
             isPlaying = false;
             cancelAnimationFrame(playbackRafId);
             updatePlayPauseButtonUI();
-            if (reachedEnd) { 
+            if (reachedEnd) {
                 if (audioElement) audioElement.currentTime = 0;
-                playbackOffset = 0; 
-                document.getElementById('seekSlider').value = 0; 
-                updateCurrentTimeDisplay(0); 
+                playbackOffset = 0;
+                document.getElementById('seekSlider').value = 0;
+                updateCurrentTimeDisplay(0);
             }
         }
 
         function togglePlayPause() {
-            if(isRecording) return; // Guard
+            if (isRecording) return; // Guard
             if (!audioElement) return;
-            
+
             if (isPlaying) {
-                stopAudio(); 
+                stopAudio();
             } else {
                 // Start from current position or beginning if at end
                 const currentPos = audioElement.currentTime;
@@ -2413,8 +2560,8 @@
                 document.getElementById('seekSlider').value = percentage;
             }
         }
-        function playerSkip(s) { 
-            if(audioElement && audioElement.duration && isFinite(audioElement.duration)) {
+        function playerSkip(s) {
+            if (audioElement && audioElement.duration && isFinite(audioElement.duration)) {
                 const newTime = audioElement.currentTime + s;
                 const clampedTime = Math.max(0, Math.min(newTime, audioElement.duration));
                 const percentage = (clampedTime / audioElement.duration) * 100;
@@ -2422,27 +2569,27 @@
             }
         }
         function playerSeekStart() { playerSeek(0); }
-        function playerSeekEnd() { if(audioElement) { audioElement.currentTime = audioElement.duration; updateCurrentTimeDisplay(audioElement.duration); document.getElementById('seekSlider').value = 100; } }
+        function playerSeekEnd() { if (audioElement) { audioElement.currentTime = audioElement.duration; updateCurrentTimeDisplay(audioElement.duration); document.getElementById('seekSlider').value = 100; } }
 
         function startSeekLoop() {
             cancelAnimationFrame(playbackRafId);
             let durationDiscovered = false;
-            
+
             function loop() {
                 if (isPlaying && audioElement) {
                     const pos = audioElement.currentTime;
                     const dur = audioElement.duration;
-                    
+
                     // Always update current time display
                     updateCurrentTimeDisplay(pos);
-                    
+
                     // Check if we got a valid duration
                     if (dur && isFinite(dur) && dur > 0) {
                         if (!durationDiscovered) {
                             durationDiscovered = true;
                             updateDurationDisplay(dur);
                         }
-                        
+
                         // Convert time to percentage (0-100)
                         const percentage = (pos / dur) * 100;
                         // Only update slider if user is not dragging it
@@ -2451,7 +2598,7 @@
                         }
                     }
                     // If duration not available yet, slider stays at 0 (no confusing estimates)
-                    
+
                     // Continue loop if not at end
                     if (!audioElement.ended && !audioElement.paused) {
                         playbackRafId = requestAnimationFrame(loop);
@@ -2464,13 +2611,13 @@
             loop();
         }
 
-        function updateDurationDisplay(d) { 
+        function updateDurationDisplay(d) {
             if (!d || !isFinite(d)) { document.getElementById('totalTime').textContent = '00:00'; return; }
-            document.getElementById('totalTime').textContent = `${Math.floor(d/60).toString().padStart(2,'0')}:${Math.floor(d%60).toString().padStart(2,'0')}`; 
+            document.getElementById('totalTime').textContent = `${Math.floor(d / 60).toString().padStart(2, '0')}:${Math.floor(d % 60).toString().padStart(2, '0')}`;
         }
-        function updateCurrentTimeDisplay(t) { 
+        function updateCurrentTimeDisplay(t) {
             if (!t || !isFinite(t)) { document.getElementById('currentTime').textContent = '00:00'; return; }
-            document.getElementById('currentTime').textContent = `${Math.floor(t/60).toString().padStart(2,'0')}:${Math.floor(t%60).toString().padStart(2,'0')}`; 
+            document.getElementById('currentTime').textContent = `${Math.floor(t / 60).toString().padStart(2, '0')}:${Math.floor(t % 60).toString().padStart(2, '0')}`;
         }
         function updatePlayPauseButtonUI() { document.getElementById('dockPlayBtn').innerHTML = isPlaying ? '❚❚' : '▶'; }
         document.getElementById('seekSlider').addEventListener('change', (e) => playerSeek(parseFloat(e.target.value)));
@@ -2522,8 +2669,8 @@
                 el.className = 'group flex flex-col p-3 rounded hover:bg-white/5 border border-transparent hover:border-white/10 transition-all';
                 const date = new Date(t.date).toLocaleDateString();
                 const ext = t.extension || 'webm';
-                let col = 'text-gray-500'; if(ext==='wav') col='text-cyan-400'; if(ext==='mp3') col='text-pink-400';
-                
+                let col = 'text-gray-500'; if (ext === 'wav') col = 'text-cyan-400'; if (ext === 'mp3') col = 'text-pink-400';
+
                 const sessionAttr = t.sessionId ? ` data-session-id="${t.sessionId}"` : '';
                 el.innerHTML = `
                     <div class="flex justify-between items-center w-full">
@@ -2539,9 +2686,9 @@
                 `;
                 c.appendChild(el);
                 el.querySelector(`.play-btn-${t.id}`).onclick = () => loadTrack(t.id, t.name, t.blob);
-                el.querySelector(`.dl-btn-${t.id}`).onclick = () => { const u = URL.createObjectURL(t.blob); const a=document.createElement('a'); a.href=u; a.download=`${t.name}.${ext}`; a.click(); URL.revokeObjectURL(u); };
+                el.querySelector(`.dl-btn-${t.id}`).onclick = () => { const u = URL.createObjectURL(t.blob); const a = document.createElement('a'); a.href = u; a.download = `${t.name}.${ext}`; a.click(); URL.revokeObjectURL(u); };
                 el.querySelector(`.del-btn-${t.id}`).onclick = () => openDeleteModal(t.id, t.name);
-                el.querySelector(`.up-btn-${t.id}`).onclick = () => { 
+                el.querySelector(`.up-btn-${t.id}`).onclick = () => {
                     document.getElementById(`progress-bar-${t.id}`).style.display = 'block';
                     const metadata = {
                         name: t.name,
@@ -2550,7 +2697,7 @@
                         savedAt: t.date,
                         fileSize: t.blob.size
                     };
-                    UploadManager.queueUpload(t.id, t.blob, `${t.name}.${ext}`, metadata, t.sessionId); 
+                    UploadManager.queueUpload(t.id, t.blob, `${t.name}.${ext}`, metadata, t.sessionId);
                 };
             });
         }
@@ -2588,7 +2735,7 @@
         function changePlaybackSpeed(speed) {
             const newRate = parseFloat(speed);
             currentPlaybackRate = newRate;
-            
+
             if (audioElement) {
                 // HTML5 Audio Element unterstützt native Pitch Preservation!
                 audioElement.playbackRate = newRate;
@@ -2618,16 +2765,16 @@
             document.getElementById('recordButton').addEventListener('click', startRecording);
             document.getElementById('stopButton').addEventListener('click', stopRecording);
             ['LowShelf', 'Peaking', 'HighShelf', 'Gain'].forEach(t => {
-                document.getElementById(`input${t}`).addEventListener('input', (e) => { 
-                    getSliderValues('input'); 
+                document.getElementById(`input${t}`).addEventListener('input', (e) => {
+                    getSliderValues('input');
                     applyInputEQ();
                     // Update ARIA attributes dynamically for screen readers
                     const val = e.target.value;
                     e.target.setAttribute('aria-valuenow', val);
                     e.target.setAttribute('aria-valuetext', `${val} Dezibel`);
                 });
-                document.getElementById(`output${t}`).addEventListener('input', (e) => { 
-                    getSliderValues('output'); 
+                document.getElementById(`output${t}`).addEventListener('input', (e) => {
+                    getSliderValues('output');
                     applyOutputEQ();
                     // Update ARIA attributes dynamically for screen readers
                     const val = e.target.value;
@@ -2637,12 +2784,13 @@
             });
             getSliderValues('input'); getSliderValues('output');
             updateFormatWarning();
-            
+
             // BITV 2.0: Keyboard accessibility - Escape key closes modals
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     if (modal.style.display === 'flex') closeSaveModal();
                     else if (infoModal.style.display === 'flex') closeInfoModal();
+                    else if (document.getElementById('uploadSettingsModal')?.style.display === 'flex') closeUploadSettingsModal();
                     else if (document.getElementById('deleteModal')?.style.display === 'flex') closeDeleteModal();
                     else if (document.getElementById('recoveryModal').style.display === 'flex') {
                         // Recovery modal doesn't have close function, but we can discard
@@ -2650,7 +2798,7 @@
                     }
                 }
             });
-            
+
             // Initialize language
             initLanguage();
         });
@@ -2658,7 +2806,7 @@
         // ============================================
         // MULTI-LANGUAGE SUPPORT SYSTEM
         // ============================================
-        
+
         const translations = {
             de: {
                 // UI Elements
@@ -2684,7 +2832,7 @@
                 'ui.download': 'DL',
                 'ui.play': 'Abspielen',
                 'ui.upload': 'Upload',
-                
+
                 // Status Messages
                 'status.ready': 'SYSTEM READY',
                 'status.recording': 'RECORDING',
@@ -2694,7 +2842,7 @@
                 'status.error': 'ERROR',
                 'status.uploading': 'HOCHLADEN',
                 'status.uploaded': 'HOCHGELADEN',
-                
+
                 // Format Options
                 'format.webm': 'WEBM (Opus Codec)',
                 'format.wav': 'WAV (Hoher Speicherverbrauch!)',
@@ -2702,7 +2850,7 @@
                 'format.detecting': 'FORMAT: ERKENNUNG...',
                 'format.ramWarning': '✓ Für Aufnahmen auch über 8h!',
                 'format.ramWarningWav': '⚠ Nur 30-60 Minuten sicher! ',
-                
+
                 // Recording Info
                 'recording.sessionStarted': 'Session gestartet',
                 'recording.crashDetected': 'CRASH DETECTED! Session wird wiederhergestellt...',
@@ -2710,23 +2858,32 @@
                 'recording.sessionRecovered': 'Session erfolgreich wiederhergestellt',
                 'recording.chunksSaved': 'Chunks gespeichert',
                 'recording.duration': 'Dauer',
-                
+
                 // Playlist
                 'playlist.title': 'AUFNAHMEN',
                 'playlist.noData': 'KEINE DATEN GEFUNDEN',
                 'playlist.trackCount': 'TRACKS',
-                
+
+                // Upload Settings
+                'ui.uploadSettings': 'UPLOAD',
+                'aria.uploadSettings': 'Upload-Methode wählen',
+                'modal.uploadSettings': 'UPLOAD EINSTELLUNGEN',
+                'upload.method': 'Übertragungsmethode',
+                'upload.desc': 'Wählen Sie die Methode für den Datei-Upload. TUS ermöglicht das Fortsetzen unterbrochener Uploads.',
+                'upload.tus': 'TUS (Resumable, Empfohlen)',
+                'upload.legacy': 'Legacy (Standard POST)',
+
                 // Modal Titles
                 'modal.save': 'Aufnahme speichern',
                 'modal.info': 'WAVEFORGE PRO - INFO',
                 'modal.recovery': 'Session Wiederherstellung',
-                
+
                 // Save Modal
                 'save.enterName': 'Dateinamen eingeben',
                 'save.placeholder': 'Meine Aufnahme',
                 'save.saveButton': 'Speichern',
                 'save.closeButton': 'Verwerfen',
-                
+
                 // Recovery Modal
                 'recovery.title': 'CRASH RECOVERY',
                 'recovery.detected': 'Unterbrochene Session erkannt!',
@@ -2734,7 +2891,7 @@
                 'recovery.chunkInfo': 'Verfügbare Chunks',
                 'recovery.restore': 'Wiederherstellen',
                 'recovery.discard': 'Verwerfen',
-                
+
                 // Info Modal Sections
                 'info.title': 'WAVEFORGE PRO - INFO',
                 'info.close': 'Schließen',
@@ -2744,7 +2901,7 @@
                 'info.multiBrowser': 'Multi-Browser',
                 'info.storageOptimized': 'Speicheroptimiert',
                 'info.localDownload': 'Lokaler Download',
-                
+
                 // Compliance
                 'compliance.title': 'Compliance & Zertifizierungen',
                 'compliance.wcag': 'WCAG 2.1 Level AA',
@@ -2753,7 +2910,7 @@
                 'compliance.bitvDesc': 'Barrierefreie IT-Verordnung',
                 'compliance.en': 'EN 301 549 Compliant',
                 'compliance.enDesc': 'EU Accessibility Standard',
-                
+
                 // Features
                 'features.title': 'Hauptfunktionen',
                 'features.recording': 'Aufnahme & Produktion',
@@ -2762,7 +2919,7 @@
                 'features.accessibility': 'Barrierefreiheit',
                 'features.offline': 'Offline & Multi-Browser',
                 'features.performance': 'Performance & Speicher',
-                
+
                 // Technical Specs
                 'tech.title': 'Technische Spezifikationen',
                 'tech.frontend': 'Frontend:',
@@ -2771,7 +2928,7 @@
                 'tech.audio': 'Audio API:',
                 'tech.serviceWorker': 'Service Worker:',
                 'tech.recorder': 'Recorder:',
-                
+
                 // Planned Features
                 'planned.title': 'Geplante Features (Roadmap)',
                 'planned.webcomponent': 'WebComponent-Integration',
@@ -2788,7 +2945,7 @@
                 'planned.effectsDesc': 'Reverb, Delay, Compressor, Limiter, Noise Gate',
                 'planned.multitrack': 'Multi-Track Recording',
                 'planned.multitrackDesc': 'Parallele Aufnahme mehrerer Spuren',
-                
+
                 // Preview Warning
                 'preview.title': 'Preview Version - Einschränkungen',
                 'preview.intro': 'Dies ist eine Preview-Version zur Demonstration der Kernfunktionalität. Folgende Features sind aktuell nicht implementiert:',
@@ -2801,7 +2958,7 @@
                 'preview.noIntegration': 'Framework-Integration',
                 'preview.noIntegrationDesc': 'WebComponent für Angular/React noch nicht verfügbar',
                 'preview.disclaimer': '⚠ Diese Version ist ausschließlich für Test- und Demonstrationszwecke bestimmt und nicht für den Produktivbetrieb geeignet.',
-                
+
                 // ARIA Labels
                 'aria.selectLanguage': 'Sprache auswählen',
                 'aria.info': 'Informationen und Compliance anzeigen',
@@ -2846,7 +3003,7 @@
                 'ui.download': 'DL',
                 'ui.play': 'Play',
                 'ui.upload': 'Upload',
-                
+
                 // Status Messages
                 'status.ready': 'SYSTEM READY',
                 'status.recording': 'RECORDING',
@@ -2856,7 +3013,7 @@
                 'status.error': 'ERROR',
                 'status.uploading': 'UPLOADING',
                 'status.uploaded': 'UPLOADED',
-                
+
                 // Format Options
                 'format.webm': 'WEBM (Opus Codec)',
                 'format.wav': 'WAV (Lossless)',
@@ -2864,7 +3021,7 @@
                 'format.detecting': 'FORMAT: DETECTING...',
                 'format.ramWarning': '✓ LOW RAM MODE (Safe for 8h+)',
                 'format.ramWarningWav': '⚠ HIGH RAM! Only 30min safe with 8GB',
-                
+
                 // Recording Info
                 'recording.sessionStarted': 'Session started',
                 'recording.crashDetected': 'CRASH DETECTED! Restoring session...',
@@ -2872,23 +3029,32 @@
                 'recording.sessionRecovered': 'Session successfully recovered',
                 'recording.chunksSaved': 'Chunks saved',
                 'recording.duration': 'Duration',
-                
+
                 // Playlist
                 'playlist.title': 'RECORDINGS',
                 'playlist.noData': 'NO DATA FOUND',
                 'playlist.trackCount': 'TRACKS',
-                
+
+                // Upload Settings
+                'ui.uploadSettings': 'UPLOAD',
+                'aria.uploadSettings': 'Select upload method',
+                'modal.uploadSettings': 'UPLOAD SETTINGS',
+                'upload.method': 'Transfer Method',
+                'upload.desc': 'Choose the file upload method. TUS allows resuming interrupted uploads.',
+                'upload.tus': 'TUS (Resumable, Recommended)',
+                'upload.legacy': 'Legacy (Standard POST)',
+
                 // Modal Titles
                 'modal.save': 'Save Recording',
                 'modal.info': 'WAVEFORGE PRO - INFO',
                 'modal.recovery': 'Session Recovery',
-                
+
                 // Save Modal
                 'save.enterName': 'Enter filename',
                 'save.placeholder': 'My Recording',
                 'save.saveButton': 'Save',
                 'save.closeButton': 'Discard',
-                
+
                 // Recovery Modal
                 'recovery.title': 'CRASH RECOVERY',
                 'recovery.detected': 'Interrupted session detected!',
@@ -2896,7 +3062,7 @@
                 'recovery.chunkInfo': 'Available chunks',
                 'recovery.restore': 'Restore',
                 'recovery.discard': 'Discard',
-                
+
                 // Info Modal Sections
                 'info.title': 'WAVEFORGE PRO - INFO',
                 'info.close': 'Close',
@@ -2906,7 +3072,7 @@
                 'info.multiBrowser': 'Multi-Browser',
                 'info.storageOptimized': 'Storage-Optimized',
                 'info.localDownload': 'Local Download',
-                
+
                 // Compliance
                 'compliance.title': 'Compliance & Certifications',
                 'compliance.wcag': 'WCAG 2.1 Level AA',
@@ -2915,7 +3081,7 @@
                 'compliance.bitvDesc': 'Barrier-Free IT Ordinance',
                 'compliance.en': 'EN 301 549 Compliant',
                 'compliance.enDesc': 'EU Accessibility Standard',
-                
+
                 // Features
                 'features.title': 'Main Features',
                 'features.recording': 'Recording & Production',
@@ -2924,7 +3090,7 @@
                 'features.accessibility': 'Accessibility',
                 'features.offline': 'Offline & Multi-Browser',
                 'features.performance': 'Performance & Storage',
-                
+
                 // Technical Specs
                 'tech.title': 'Technical Specifications',
                 'tech.frontend': 'Frontend:',
@@ -2933,7 +3099,7 @@
                 'tech.audio': 'Audio API:',
                 'tech.serviceWorker': 'Service Worker:',
                 'tech.recorder': 'Recorder:',
-                
+
                 // Planned Features
                 'planned.title': 'Planned Features (Roadmap)',
                 'planned.webcomponent': 'WebComponent Integration',
@@ -2950,7 +3116,7 @@
                 'planned.effectsDesc': 'Reverb, Delay, Compressor, Limiter, Noise Gate',
                 'planned.multitrack': 'Multi-Track Recording',
                 'planned.multitrackDesc': 'Parallel recording of multiple tracks',
-                
+
                 // Preview Warning
                 'preview.title': 'Preview Version - Limitations',
                 'preview.intro': 'This is a preview version to demonstrate core functionality. The following features are currently not implemented:',
@@ -2963,7 +3129,7 @@
                 'preview.noIntegration': 'Framework Integration',
                 'preview.noIntegrationDesc': 'WebComponent for Angular/React not yet available',
                 'preview.disclaimer': '⚠ This version is exclusively for testing and demonstration purposes and not suitable for production use.',
-                
+
                 // ARIA Labels
                 'aria.selectLanguage': 'Select language',
                 'aria.info': 'Show information and compliance',
@@ -2986,6 +3152,40 @@
             }
         };
 
+        // Upload Settings Logic
+        function openUploadSettingsModal() {
+            const modal = document.getElementById('uploadSettingsModal');
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden', 'false');
+
+            // Load current setting
+            const currentMethod = localStorage.getItem('waveforge_upload_method') || 'tus';
+            const radio = document.querySelector(`input[name="uploadMethod"][value="${currentMethod}"]`);
+            if (radio) radio.checked = true;
+
+            // Trap focus
+            const firstFocusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (firstFocusable) firstFocusable.focus();
+        }
+
+        function closeUploadSettingsModal() {
+            const modal = document.getElementById('uploadSettingsModal');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function saveUploadSettings() {
+            const selected = document.querySelector('input[name="uploadMethod"]:checked').value;
+            localStorage.setItem('waveforge_upload_method', selected);
+            closeUploadSettingsModal();
+            // Reload page to apply changes if necessary, or just update global var
+            if (window.uploadManager) {
+                // If we had a global manager, we'd update it here.
+                // For now, the upload logic checks localStorage directly or we should update a global config.
+                console.log("Upload method updated to:", selected);
+            }
+        }
+
         let currentLanguage = 'de';
 
         function initLanguage() {
@@ -3002,10 +3202,10 @@
                     document.getElementById('languageSelector').value = browserLang;
                 }
             }
-            
+
             // Update HTML lang attribute
             document.documentElement.lang = currentLanguage;
-            
+
             // Apply translations
             translatePage();
         }
@@ -3020,7 +3220,7 @@
 
         function translatePage() {
             const t = translations[currentLanguage];
-            
+
             // Translate elements with data-i18n attribute
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -3028,7 +3228,7 @@
                     el.textContent = t[key];
                 }
             });
-            
+
             // Translate attributes (aria-label, placeholder, title, etc.)
             document.querySelectorAll('[data-i18n-attr]').forEach(el => {
                 const attrs = el.getAttribute('data-i18n-attr').split(',');
@@ -3039,7 +3239,7 @@
                     }
                 });
             });
-            
+
             // Update dynamic content that uses t() function
             updateFormatWarning();
             loadTracksFromDB(); // Refresh playlist with new language
@@ -3050,4 +3250,5 @@
         }
     </script>
 </body>
+
 </html>

@@ -19,6 +19,15 @@ This guide covers deployment configurations for the TUS (Resumable Upload Protoc
 | `TUS_TEMP_DIR` | `/app/data/tus_temp` | Temporary directory for assembly |
 | `DEFAULT_UPLOAD_METHOD` | `tus` | Default upload method (`tus` or `custom`) |
 
+### Security Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ALLOWED_HOSTS` | `["localhost", "127.0.0.1"]` | JSON list of allowed hostnames |
+| `CORS_ORIGINS` | `["http://localhost:8000"]` | JSON list of allowed CORS origins |
+| `SECRET_KEY` | `default...` | Secret key for cryptographic operations |
+| `ENVIRONMENT` | `development` | App environment (development/production) |
+
 ## Storage Requirements
 
 ### Persistent Volumes
