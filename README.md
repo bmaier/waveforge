@@ -13,6 +13,7 @@
 - **🎤 Professional Audio Recording** - High-quality browser-based audio recording with Web Audio API
 - **🛡️ CrashGuard System** - Advanced crash recovery with automatic state restoration
 - **☁️ Cloud Synchronization** - Seamless upload of recordings with chunked transfer for large files
+- **🔄 TUS Resumable Uploads** - Industry-standard resumable uploads (tus.io) with automatic retry
 - **🌐 Multi-Language Support** - Full German (DE) and English (EN) localization
 - **♿ BITV 2.0 Accessibility** - Complete keyboard navigation and screen reader support
 - **📱 Progressive Web App** - Offline capability with Service Worker
@@ -23,6 +24,10 @@
 - **🔒 HTTPS by Default** - Automatic TLS/SSL with Let's Encrypt
 - **🛡️ Security Headers** - HSTS, CSP, X-Frame-Options, and more
 - **📦 Chunked Uploads** - Reliable file transfers for large recordings
+- **🔄 Resumable Uploads** - TUS protocol with automatic offset detection and resume capability
+- **📡 Offline Support** - Background sync when connection is restored
+- **⚡ Parallel Uploads** - Up to 3 concurrent chunk uploads
+- **🔀 Hybrid Upload System** - TUS primary with custom chunking fallback
 - **📊 Real-time Waveform** - Live audio visualization
 - **✂️ Audio Editing** - Trim and modify recordings
 - **📋 Playlist Management** - Organize your recordings
@@ -132,7 +137,41 @@ WaveForge Pro follows a clean separation of concerns with a modern architecture:
 - **Backend**: FastAPI-based REST API for audio processing and storage
 - **Frontend**: Vanilla JavaScript with Web Audio API for audio manipulation
 - **Storage**: Dual-layer storage (IndexedDB + Server-side)
+- **Upload System**: Hybrid TUS + Custom chunking with Service Worker
 - **Deployment**: Kubernetes-ready with Docker support
+
+### 🔄 Upload Architecture
+
+WaveForge Pro uses a sophisticated dual-upload system:
+
+#### **TUS Protocol (Primary)**
+- **Industry Standard**: Implements [tus.io](https://tus.io/) v1.0.0 resumable upload protocol
+- **Chunk-by-Chunk**: Uploads during recording (not whole file at end)
+- **Resumability**: HEAD endpoint checks offset, PATCH resumes from exact position
+- **512KB Sub-chunks**: Efficient TUS chunk size for optimal resumability
+- **Automatic Assembly**: Server assembles chunks when upload completes
+- **Checksum Support**: SHA-1/SHA-256 verification (optional)
+- **Metadata**: Recording name, format, chunk info in base64-encoded headers
+
+#### **Custom Chunking (Fallback)**
+- **Reliability**: Falls back automatically if TUS fails
+- **1MB Chunks**: Proven reliable for large file transfers
+- **Sequential Upload**: Ordered chunk upload with retry logic
+- **IndexedDB Queue**: Persistent queue survives page reloads
+
+#### **Service Worker Integration**
+- **Background Sync**: Uploads continue when app is closed
+- **Offline Support**: Queues chunks when offline, uploads when online
+- **Connection Detection**: Automatic retry when connection restored
+- **Concurrent Uploads**: Max 3 simultaneous uploads to avoid overwhelming network
+- **Exponential Backoff**: Smart retry delays (2s → 60s max)
+
+#### **Configuration**
+Users can choose upload method via UI selector (bottom-right corner):
+- **TUS (Default)**: Resumable uploads with automatic retry
+- **Custom**: Legacy chunking system as fallback
+
+Configuration persists in LocalStorage across sessions.
 
 For detailed architecture documentation, see [docs/architecture/](docs/architecture/).
 
@@ -330,14 +369,73 @@ If you encounter any issues:
 2. Review [Known Issues](docs/BUGFIXES.md)
 3. Open an issue on GitHub
 
+## 🔄 Upload System Features
+
+### TUS Resumable Uploads
+
+WaveForge Pro implements the [TUS protocol](https://tus.io/) for reliable, resumable uploads:
+
+#### **How It Works**
+1. **During Recording**: Chunks are uploaded in real-time as audio is recorded
+2. **Connection Loss**: If connection drops, uploads pause automatically
+3. **Reconnection**: When online, Service Worker resumes from exact byte offset
+4. **No Data Loss**: Already-uploaded chunks are never re-sent
+5. **Automatic Assembly**: Server assembles chunks into final file when complete
+
+#### **TUS Endpoints**
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| POST | `/files/{session_id}/chunks/` | Create new chunk upload |
+| PATCH | `/files/{session_id}/chunks/{chunk_id}` | Upload chunk data at offset |
+| HEAD | `/files/{session_id}/chunks/{chunk_id}` | Check current upload offset (resume) |
+| GET | `/files/{session_id}/status` | Get upload session status |
+| POST | `/files/{session_id}/assemble` | Manually trigger assembly |
+| DELETE | `/files/{session_id}` | Cancel upload and cleanup |
+
+#### **TUS Headers**
+- `Tus-Resumable: 1.0.0` - Protocol version
+- `Upload-Offset: <bytes>` - Current upload position
+- `Upload-Length: <bytes>` - Total file size
+- `Upload-Metadata: <base64>` - Recording metadata
+- `Location: <url>` - Chunk upload URL
+
+#### **Configuration**
+
+Upload method is configurable via UI (bottom-right corner):
+
+```javascript
+// Programmatic configuration
+localStorage.setItem('uploadMethod', 'tus');    // Use TUS (default)
+localStorage.setItem('uploadMethod', 'custom'); // Use custom chunking
+```
+
+#### **Monitoring Uploads**
+
+Check pending uploads:
+- UI shows badge with count in upload method selector
+- Service Worker tracks all pending chunks
+- Console logs show upload progress and retry attempts
+
+#### **Benefits**
+- ✅ **Reliable**: Survives network interruptions, browser crashes, page reloads
+- ✅ **Efficient**: Only uploads missing data, never duplicates
+- ✅ **Real-time**: Chunks uploaded during recording (memory efficient)
+- ✅ **Standard**: Uses industry-standard TUS protocol (tus.io)
+- ✅ **Automatic**: No user intervention needed for resume/retry
+- ✅ **Fallback**: Automatically switches to custom chunking if TUS fails
+
 ## 🗺️ Roadmap
 
+- [x] TUS resumable upload protocol implementation
+- [x] Service Worker background upload with offline support
+- [x] Hybrid upload system (TUS + Custom fallback)
 - [ ] WebSocket support for real-time collaboration
 - [ ] Multi-track editing
 - [ ] Audio effects and filters
 - [ ] VST plugin support
 - [ ] Mobile app versions
-- [ ] Cloud storage integrations
+- [ ] Cloud storage integrations (S3, Google Drive, Dropbox)
 
 ---
 
