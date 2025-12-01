@@ -2238,26 +2238,17 @@
                             setTimeout(() => document.getElementById('recoveryModal').style.display = 'none', 200);
                         }
 
-                        // Open save modal first
+                        // Open save modal and wait for user to enter name
+                        // Recovery upload will happen in confirmSave() with the real name
                         openSaveModal(isRecovery);
-
-                        // Disable save button during recovery upload
+                        
+                        // Store recovery info for later upload in confirmSave()
                         if (isRecovery) {
-                            const saveBtn = document.querySelector('#saveModal button[onclick="confirmSave()"]');
-                            if (saveBtn) {
-                                saveBtn.disabled = true;
-                                saveBtn.style.opacity = '0.5';
-                                saveBtn.style.cursor = 'not-allowed';
-                            }
-                            document.getElementById('processingIndicator').classList.remove('hidden');
-                            document.getElementById('processingIndicator').textContent = 'UPLOADING RECOVERY DATA...';
+                            window.pendingRecoveryUpload = {
+                                chunks: chunks,
+                                sessionId: currentSessionId
+                            };
                         }
-
-                        // Upload and assemble in background (non-blocking)
-                        this.uploadAndAssembleRecoveredChunks(chunks, currentSessionId).catch(err => {
-                            console.error('Error uploading recovered chunks:', err);
-                            showToast('Upload error: ' + err.message, true);
-                        });
                     } else {
                         showToast("Error: No data found to assemble", true);
                     }
@@ -2266,10 +2257,10 @@
                     showToast("Error reading recovery data", true);
                 };
             },
-            uploadAndAssembleRecoveredChunks: async function (chunks, sessionId) {
+            uploadAndAssembleRecoveredChunks: async function (chunks, sessionId, userName, userFormat) {
                 try {
                     // Upload all recovered chunks to server
-                    console.log('⬆️ Uploading recovered chunks to server...');
+                    console.log('⬆️ Uploading recovered chunks to server with name:', userName);
                     for (let i = 0; i < chunks.length; i++) {
                         await this.uploadChunkLive(chunks[i].blob, sessionId, i);
                     }
@@ -2281,28 +2272,32 @@
 
                     // Detect mime type from first chunk or use global defaults
                     let mimeType = 'audio/webm;codecs=opus';
-                    let extension = 'webm';
+                    let extension = userFormat || 'webm';
                     
                     if (chunks.length > 0 && chunks[0].blob && chunks[0].blob.type) {
                         mimeType = chunks[0].blob.type;
-                        // Extract extension from mime type
-                        if (mimeType.includes('webm')) extension = 'webm';
-                        else if (mimeType.includes('mp4')) extension = 'mp4';
-                        else if (mimeType.includes('ogg')) extension = 'ogg';
+                        // Extract extension from mime type (only if user didn't specify format)
+                        if (!userFormat) {
+                            if (mimeType.includes('webm')) extension = 'webm';
+                            else if (mimeType.includes('mp4')) extension = 'mp4';
+                            else if (mimeType.includes('ogg')) extension = 'ogg';
+                        }
                     } else if (typeof preferredMimeType !== 'undefined') {
                         // Fallback to global variables if they exist
                         mimeType = preferredMimeType;
-                        extension = preferredExt || 'webm';
+                        if (!userFormat) {
+                            extension = preferredExt || 'webm';
+                        }
                     }
 
-                    // Generate filename for recovered session
-                    const recoveredFileName = `recovered_${sessionId}.${extension}`;
+                    // Use real filename from user input
+                    const recoveredFileName = `${userName}.${extension}`;
                     
                     // Calculate total size from chunks
                     const totalSize = chunks.reduce((sum, chunk) => sum + (chunk.blob?.size || 0), 0);
                     
                     const recoveredMetadata = {
-                        name: `recovered_${sessionId}`,
+                        name: userName,
                         mimeType: mimeType,
                         extension: extension,
                         recordingCompletedAt: new Date().toISOString(),
@@ -2315,18 +2310,7 @@
                     console.log('📡 Signaling server to assemble recovered chunks...');
                     await this.signalRecordingComplete(sessionId, recoveredFileName, recoveredMetadata);
 
-                    console.log('✅ Recovery upload and assembly complete!');
-                    showToast('Recovery upload complete!');
-
-                    // Re-enable save button
-                    const saveBtn = document.querySelector('#saveModal button[onclick="confirmSave()"]');
-                    if (saveBtn) {
-                        saveBtn.disabled = false;
-                        saveBtn.style.opacity = '1';
-                        saveBtn.style.cursor = 'pointer';
-                    }
-                    document.getElementById('processingIndicator').classList.add('hidden');
-                    document.getElementById('processingIndicator').textContent = 'PROCESSING AUDIO... PLEASE WAIT';
+                    console.log('✅ Recovery upload and assembly complete with name:', userName);
 
                     // Clean up recovery chunks after successful upload
                     this.clearSession(sessionId);
@@ -2715,6 +2699,26 @@
 
             console.log("Starting save process...", { name, fmt, blobSize: tempBlob.size });
             document.getElementById('processingIndicator').classList.remove('hidden');
+            
+            // If this is a recovery, upload chunks first with the real name
+            if (window.pendingRecoveryUpload) {
+                console.log('🔄 Processing recovery upload with name:', name);
+                document.getElementById('processingIndicator').textContent = 'UPLOADING RECOVERY DATA...';
+                
+                try {
+                    const { chunks, sessionId } = window.pendingRecoveryUpload;
+                    await CrashGuard.uploadAndAssembleRecoveredChunks(chunks, sessionId, name, fmt);
+                    window.pendingRecoveryUpload = null;
+                    console.log('✅ Recovery upload complete');
+                } catch (err) {
+                    console.error('Recovery upload failed:', err);
+                    showToast('Recovery upload failed: ' + err.message, true);
+                    document.getElementById('processingIndicator').classList.add('hidden');
+                    return;
+                }
+                
+                document.getElementById('processingIndicator').textContent = 'PROCESSING AUDIO... PLEASE WAIT';
+            }
 
             // Use immediate async execution instead of setTimeout
             try {
