@@ -1,0 +1,50 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.3, pytest-9.0.1, pluggy-1.6.0 -- /Users/A3694852/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/A3694852/Documents/dev/AI/Google/waveforge-pro
+configfile: pyproject.toml
+plugins: anyio-4.11.0
+collecting ... collected 14 items
+
+tests/integration/test_hybrid_upload.py::TestOnlineRecordingFlow::test_complete_online_flow PASSED [  7%]
+tests/integration/test_hybrid_upload.py::TestOnlineRecordingFlow::test_online_flow_with_metadata_save PASSED [ 14%]
+tests/integration/test_hybrid_upload.py::TestOnlineRecordingFlow::test_online_flow_fast_performance PASSED [ 21%]
+tests/integration/test_hybrid_upload.py::TestOfflineRecordingFlow::test_offline_to_online_transition PASSED [ 28%]
+tests/integration/test_hybrid_upload.py::TestOfflineRecordingFlow::test_client_side_assembly_fallback PASSED [ 35%]
+tests/integration/test_hybrid_upload.py::TestConnectionLossDuringRecording::test_partial_upload_then_completion FAILED [ 42%]
+tests/integration/test_hybrid_upload.py::TestConnectionLossDuringRecording::test_resume_after_complete_failure FAILED [ 50%]
+tests/integration/test_hybrid_upload.py::TestRecoveryUpload::test_recovery_chunks_upload_after_crash PASSED [ 57%]
+tests/integration/test_hybrid_upload.py::TestHybridAssemblyLogic::test_server_assembly_when_all_uploaded PASSED [ 64%]
+tests/integration/test_hybrid_upload.py::TestHybridAssemblyLogic::test_client_assembly_when_incomplete PASSED [ 71%]
+tests/integration/test_hybrid_upload.py::TestLargeFileHandling::test_large_recording_assembly PASSED [ 78%]
+tests/integration/test_hybrid_upload.py::TestLargeFileHandling::test_very_long_recording PASSED [ 85%]
+tests/integration/test_hybrid_upload.py::TestErrorHandling::test_assembly_with_corrupted_chunk PASSED [ 92%]
+tests/integration/test_hybrid_upload.py::TestErrorHandling::test_session_cleanup_after_assembly PASSED [100%]
+
+=================================== FAILURES ===================================
+E   AssertionError: assert 'assembling' == 'pending'
+      
+      - pending
+      + assembling
+----------------------------- Captured stdout call -----------------------------
+→ Assembling 0 chunks for recording...
+✓ Assembled partial.webm (0 bytes)
+✓ Metadata saved to backend/uploaded_data/f5a0b0c4-e27a-4cb8-ada4-8da82ff88f03/chunks/recording_metadata.json
+✓ Session f5a0b0c4-e27a-4cb8-ada4-8da82ff88f03 removed from tracking
+✅ Assembly complete: backend/uploaded_data/f5a0b0c4-e27a-4cb8-ada4-8da82ff88f03/chunks/partial.webm
+/Users/A3694852/Documents/dev/AI/Google/waveforge-pro/tests/integration/test_hybrid_upload.py:227: AssertionError: assert 'assembling' == 'pending'
+E   AssertionError: assert 'assembling' == 'pending'
+      
+      - pending
+      + assembling
+----------------------------- Captured stdout call -----------------------------
+→ Assembling 0 chunks for recording...
+✓ Assembled test.webm (0 bytes)
+✓ Metadata saved to backend/uploaded_data/940e23cc-2113-4a3f-a3e5-1b8856266001/chunks/recording_metadata.json
+✓ Session 940e23cc-2113-4a3f-a3e5-1b8856266001 removed from tracking
+✅ Assembly complete: backend/uploaded_data/940e23cc-2113-4a3f-a3e5-1b8856266001/chunks/test.webm
+/Users/A3694852/Documents/dev/AI/Google/waveforge-pro/tests/integration/test_hybrid_upload.py:276: AssertionError: assert 'assembling' == 'pending'
+=========================== short test summary info ============================
+FAILED tests/integration/test_hybrid_upload.py::TestConnectionLossDuringRecording::test_partial_upload_then_completion
+FAILED tests/integration/test_hybrid_upload.py::TestConnectionLossDuringRecording::test_resume_after_complete_failure
+========================= 2 failed, 12 passed in 1.73s =========================

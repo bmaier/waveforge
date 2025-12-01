@@ -12,14 +12,12 @@ const CONNECTION_CHECK_INTERVAL = 5000; // Check connection every 5 seconds when
 let isOffline = false; // Track offline state
 let connectionCheckInterval = null; // Connection check timer
 let isProcessingUploads = false; // Prevent concurrent upload processing
+let uploadStartTime = null; // Track upload start time for timeout
+const UPLOAD_TIMEOUT = 60000; // 60 seconds maximum upload duration
 
-// TUS Configuration
-const TUS_ENDPOINT = '/files';
-const MAX_CONCURRENT_UPLOADS = 3;
-let activeUploads = 0;
-
-// Import tus-js-client
-importScripts('https://cdn.jsdelivr.net/npm/tus-js-client@3/dist/tus.min.js');
+// NOTE: TUS Upload runs in main thread via tus-upload-manager.js
+// Service Worker uses custom upload method (FormData POST to /upload/chunk)
+// This avoids "window is not defined" error in Service Worker context
 
 // Open DB Helper
 function openDB() {
@@ -239,57 +237,8 @@ async function handleCheckPendingUploads() {
     });
 }
 
-// Upload Chunk with TUS
-async function uploadChunkWithTUS(item) {
-    return new Promise((resolve, reject) => {
-        if (activeUploads >= MAX_CONCURRENT_UPLOADS) {
-            reject(new Error('Max concurrent uploads reached'));
-            return;
-        }
-        
-        activeUploads++;
-        
-        const upload = new self.tus.Upload(item.blob, {
-            endpoint: `${self.location.origin}${TUS_ENDPOINT}/${item.sessionId}/chunks/`,
-            metadata: {
-                chunkIndex: item.chunkIndex.toString(),
-                totalChunks: item.totalChunks.toString(),
-                sessionId: item.sessionId,
-                recordingName: item.recordingName,
-                format: item.format
-            },
-            chunkSize: 512 * 1024, // 512KB sub-chunks
-            retryDelays: [0, 1000, 3000, 5000, 10000],
-            onProgress: (bytesUploaded, bytesTotal) => {
-                const progress = bytesUploaded / bytesTotal;
-                broadcastStatus({
-                    type: 'UPLOAD_PROGRESS',
-                    sessionId: item.sessionId,
-                    fileId: item.fileId,
-                    chunkIndex: item.chunkIndex,
-                    progress: (item.chunkIndex + progress) / item.totalChunks
-                });
-            },
-            onError: (error) => {
-                activeUploads--;
-                console.error('[SW TUS] Upload error:', error);
-                reject(error);
-            },
-            onSuccess: () => {
-                activeUploads--;
-                console.log(`[SW TUS] Chunk ${item.chunkIndex} uploaded successfully`);
-                broadcastStatus({
-                    type: 'CHUNK_UPLOADED',
-                    sessionId: item.sessionId,
-                    chunkIndex: item.chunkIndex
-                });
-                resolve();
-            }
-        });
-        
-        upload.start();
-    });
-}
+// NOTE: TUS Upload is handled in main thread via tus-upload-manager.js
+// Service Worker only uses custom upload method to avoid 'window is not defined' error
 
 // Upload Chunk with Custom Method
 async function uploadChunkCustom(item) {
@@ -320,10 +269,17 @@ async function uploadChunkCustom(item) {
 async function processUploads() {
     console.log('[SW] processUploads() called');
     
-    // Prevent concurrent execution
+    // Check if processing is stuck (timeout)
     if (isProcessingUploads) {
-        console.log('[SW] ⏸ Already processing uploads - skipping');
-        return;
+        const now = Date.now();
+        if (uploadStartTime && (now - uploadStartTime) > UPLOAD_TIMEOUT) {
+            console.warn('[SW] ⚠️ Upload processing timeout - forcing unlock');
+            isProcessingUploads = false;
+            uploadStartTime = null;
+        } else {
+            console.log('[SW] ⏸ Already processing uploads - skipping');
+            return;
+        }
     }
     
     // Skip if we're in offline mode
@@ -333,6 +289,7 @@ async function processUploads() {
     }
     
     isProcessingUploads = true;
+    uploadStartTime = Date.now();
     console.log('[SW] 🔒 Upload processing locked');
     
     const db = await openDB();
@@ -389,19 +346,10 @@ async function processUploads() {
                 progress: (item.chunkIndex + 1) / item.totalChunks 
             });
 
-            // Perform Upload based on method
-            console.log(`[SW] 📤 Sending chunk ${item.chunkIndex} to server...`);
-            
-            if (uploadMethod === 'tus') {
-                try {
-                    await uploadChunkWithTUS(item);
-                } catch (tusError) {
-                    console.warn(`[SW] TUS upload failed, falling back to custom:`, tusError);
-                    await uploadChunkCustom(item);
-                }
-            } else {
-                await uploadChunkCustom(item);
-            }
+            // Service Worker always uses custom upload
+            // TUS upload runs in main thread via tus-upload-manager.js
+            console.log(`[SW] 📤 Sending chunk ${item.chunkIndex} to server (custom upload)...`);
+            await uploadChunkCustom(item);
 
             // Success: Remove chunk from DB
             console.log(`[SW] ✓ Chunk ${item.chunkIndex} uploaded successfully (session: ${item.sessionId})`);
@@ -506,9 +454,24 @@ async function processUploads() {
         console.error('[SW] Error closing DB:', err);
     } finally {
         isProcessingUploads = false;
+        uploadStartTime = null;
         console.log('[SW] 🔓 Upload processing unlocked');
     }
 }
+
+// Message handler for force-unlock
+self.addEventListener('message', async (event) => {
+    console.log('[SW] Received message:', event.data);
+    
+    if (event.data.type === 'PROCESS_UPLOADS') {
+        if (event.data.force) {
+            console.log('[SW] 🔓 Force unlocking upload processing');
+            isProcessingUploads = false;
+            uploadStartTime = null;
+        }
+        await processUploads();
+    }
+});
 
 // Service Worker Lifecycle Events
 self.addEventListener('install', (event) => {

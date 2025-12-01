@@ -20,8 +20,11 @@ router = APIRouter()
 upload_sessions: Dict[str, dict] = {}
 
 # Storage configuration
-UPLOAD_DIR = Path("backend/uploaded_data")
+# Use environment variable if set, otherwise use relative path
+import os
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", str(Path(__file__).parent.parent.parent.parent / "backend" / "uploaded_data")))
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+print(f"📂 UPLOAD_DIR configured: {UPLOAD_DIR.absolute()}")
 
 
 def parse_tus_metadata(metadata_header: Optional[str]) -> dict:
@@ -57,9 +60,32 @@ def get_session_dir(session_id: str) -> Path:
 
 
 def get_chunk_path(session_id: str, chunk_id: str) -> Path:
-    """Get path for specific chunk file"""
-    session_dir = get_session_dir(session_id)
-    return session_dir / f"chunk_{chunk_id}.bin"
+    """
+    Get path for specific chunk file.
+    Supports both TUS chunks (chunk_{id}.bin) and sharded chunks (temp/shard_*/index.part)
+    """
+    # Base session directory (without /chunks/ subdirectory)
+    base_session_dir = UPLOAD_DIR / session_id
+    
+    # Try sharded format FIRST (Service Worker uploads)
+    temp_dir = base_session_dir / "temp"
+    if temp_dir.exists():
+        try:
+            chunk_index = int(chunk_id)
+            shard_num = chunk_index // 1000
+            shard_dir = temp_dir / f"shard_{shard_num:04d}"
+            sharded_chunk = shard_dir / f"{chunk_index}.part"
+            if sharded_chunk.exists():
+                return sharded_chunk
+        except (ValueError, TypeError):
+            pass  # Not a valid chunk index, try TUS format
+    
+    # Try TUS format (chunks/chunk_{id}.bin)
+    session_dir = get_session_dir(session_id)  # This adds /chunks/
+    tus_chunk = session_dir / f"chunk_{chunk_id}.bin"
+    
+    # Return TUS path (will be checked for existence by caller)
+    return tus_chunk
 
 
 def assemble_chunks(session_id: str, recording_name: str, format: str):

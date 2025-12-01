@@ -4,7 +4,7 @@ import json
 import re
 from datetime import datetime
 from typing import List
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks, Request
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -34,7 +34,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self';"
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; media-src 'self' blob: data:; connect-src 'self';"
         return response
 
 app.add_middleware(SecurityHeadersMiddleware)
@@ -126,10 +126,21 @@ def assemble_file(session_id: str, file_name: str, metadata: dict = None):
     # Check if temp directory exists
     if not temp_dir.exists():
         print(f"⚠ No temp directory found for session {session_id}")
+        print(f"   Session directory: {session_dir}")
+        print(f"   Expected temp directory: {temp_dir}")
         print(f"   This usually means chunks haven't been uploaded yet or wrong session ID")
+        return
+    
+    # Check if any shard directories exist (chunks are stored in shards)
+    shard_dirs = list(temp_dir.glob("shard_*"))
+    if not shard_dirs:
+        print(f"⚠ No shard directories found in {temp_dir}")
+        print(f"   This means no chunks have been uploaded yet")
+        print(f"   Directory contents: {list(temp_dir.iterdir())}")
         return
 
     print(f"🔧 Assembling {file_name} for session {session_id}...")
+    print(f"   Found {len(shard_dirs)} shard directories")
     
     # Create completed directory
     completed_dir.mkdir(parents=True, exist_ok=True)
@@ -139,16 +150,45 @@ def assemble_file(session_id: str, file_name: str, metadata: dict = None):
     metadata_path = completed_dir / f"{file_name}.meta.json"
     
     try:
-        # Assemble file by reading chunks in order
+        # CRITICAL: Only assemble COMPLETE chunks (.part files)
+        # Ignore any .tmp files that may still be in progress
         file_size = 0
         chunk_info = []
         chunk_index = 0
         missing_chunks = []
+        incomplete_chunks = []  # Track .tmp files found
+        
+        print(f"🔧 Starting assembly in strict mode (only complete .part files)")
         
         with open(final_path, "wb") as outfile:
             while True:
                 chunk_path = get_chunk_path(session_id, chunk_index)
+                chunk_tmp_path = get_chunk_path(session_id, chunk_index, temp_suffix=".tmp")
                 
+                # Check if chunk is still being written (.tmp exists)
+                if chunk_tmp_path.exists() and not chunk_path.exists():
+                    print(f"⚠️  Chunk {chunk_index} incomplete (.tmp exists, .part missing)")
+                    incomplete_chunks.append(chunk_index)
+                    
+                    # Look ahead to see if there are more complete chunks
+                    found_more = False
+                    for look_ahead in range(1, 11):
+                        future_chunk = get_chunk_path(session_id, chunk_index + look_ahead)
+                        if future_chunk.exists():
+                            found_more = True
+                            break
+                    
+                    if found_more:
+                        # Skip this incomplete chunk, continue with next
+                        missing_chunks.append(chunk_index)
+                        chunk_index += 1
+                        continue
+                    else:
+                        # No more complete chunks ahead, stop assembly
+                        print(f"⚠️  Stopping assembly - last chunk ({chunk_index}) is incomplete")
+                        break
+                
+                # Check if complete chunk exists
                 if not chunk_path.exists():
                     # Check if this is truly the end or a gap
                     # Look ahead 10 chunks to see if there are more
@@ -164,11 +204,19 @@ def assemble_file(session_id: str, file_name: str, metadata: dict = None):
                         break
                     else:
                         # Gap detected, skip this chunk and continue
-                        print(f"⚠ Chunk {chunk_index} missing (gap detected)")
+                        print(f"⚠️  Chunk {chunk_index} missing (gap detected)")
                         chunk_index += 1
                         continue
                 
-                # Read and append chunk
+                # Verify chunk file size (must be > 0 bytes)
+                chunk_size = chunk_path.stat().st_size
+                if chunk_size == 0:
+                    print(f"⚠️  Chunk {chunk_index} is empty (0 bytes), skipping")
+                    missing_chunks.append(chunk_index)
+                    chunk_index += 1
+                    continue
+                
+                # Read and append chunk (only complete, non-empty chunks)
                 with open(chunk_path, "rb") as infile:
                     data = infile.read()
                     outfile.write(data)
@@ -181,10 +229,15 @@ def assemble_file(session_id: str, file_name: str, metadata: dict = None):
                 
                 chunk_index += 1
         
+        # Report assembly status
+        if incomplete_chunks:
+            print(f"⚠️  Assembly completed with {len(incomplete_chunks)} incomplete chunks: {incomplete_chunks}")
         if missing_chunks:
-            print(f"⚠ Assembly completed with {len(missing_chunks)} missing chunks: {missing_chunks}")
+            print(f"⚠️  Assembly completed with {len(missing_chunks)} missing chunks: {missing_chunks}")
+        if not missing_chunks and not incomplete_chunks:
+            print(f"✅ Assembly completed successfully with {len(chunk_info)} chunks (no gaps)")
         else:
-            print(f"✓ Assembly completed successfully with {len(chunk_info)} chunks")
+            print(f"✓ Assembly completed with {len(chunk_info)} chunks ({len(missing_chunks)} gaps, {len(incomplete_chunks)} incomplete)")
         
         # Create metadata file
         meta_info = {
@@ -193,6 +246,7 @@ def assemble_file(session_id: str, file_name: str, metadata: dict = None):
             "file_size_bytes": file_size,
             "total_chunks": len(chunk_info),
             "missing_chunks": missing_chunks if missing_chunks else [],
+            "incomplete_chunks": incomplete_chunks if incomplete_chunks else [],
             "recording_completed_at": metadata.get("recordingCompletedAt") if metadata else None,
             "upload_completed_at": datetime.now().isoformat(),
             "mime_type": metadata.get("mimeType") if metadata else "audio/webm",
@@ -200,7 +254,9 @@ def assemble_file(session_id: str, file_name: str, metadata: dict = None):
             "duration_seconds": metadata.get("duration") if metadata else None,
             "sample_rate": metadata.get("sampleRate") if metadata else None,
             "chunk_details": chunk_info,
-            "client_metadata": metadata or {}
+            "client_metadata": metadata or {},
+            "assembly_mode": "strict",
+            "assembly_notes": "Only complete .part files assembled; .tmp files skipped"
         }
         
         with open(metadata_path, "w") as meta_file:
@@ -300,34 +356,9 @@ async def debug_session(session_id: str):
         "chunk_details": chunk_info
     }
 
-@app.post("/recording/complete")
-async def recording_complete(
-    background_tasks: BackgroundTasks,
-    session_id: str = Form(...),
-    file_name: str = Form(...),
-    metadata: str = Form(None)
-):
-    """
-    Called when recording is complete on the client.
-    Triggers assembly of all chunks for this session.
-    """
-    validate_session_id(session_id) # Validate input
-    validate_file_name(file_name) # Validate input
-
-    print(f"📢 Recording complete signal received for session {session_id}")
-    
-    # Parse metadata if provided
-    meta_dict = None
-    if metadata:
-        try:
-            meta_dict = json.loads(metadata)
-        except Exception as e:
-            print(f"⚠ Could not parse metadata: {e}")
-    
-    # Trigger assembly in background
-    background_tasks.add_task(assemble_file, session_id, file_name, meta_dict)
-    
-    return {"status": "assembly_queued", "session_id": session_id, "file_name": file_name}
+# NOTE: /recording/complete endpoint is now handled by routes/recording_complete.py
+# This avoids duplication and uses the router-based implementation which supports
+# both sharded storage (Service Worker uploads) and TUS uploads
 
 # 6. Frontend Serving
 # Mount static assets (favicon, etc.)
@@ -353,6 +384,21 @@ async def serve_manifest():
 @app.get("/favicon.svg")
 async def serve_favicon():
     return FileResponse(STATIC_DIR / "favicon.svg", media_type="image/svg+xml")
+
+@app.get("/tus.min.js")
+async def serve_tus_client():
+    return FileResponse(FRONTEND_SRC / "tus.min.js", media_type="application/javascript")
+
+@app.get("/tailwind.min.js")
+async def serve_tailwind():
+    return FileResponse(FRONTEND_SRC / "tailwind.min.js", media_type="application/javascript")
+
+@app.get("/fonts.css")
+async def serve_fonts_css():
+    return FileResponse(FRONTEND_SRC / "fonts.css", media_type="text/css")
+
+# Serve font files
+app.mount("/fonts", StaticFiles(directory=str(FRONTEND_SRC / "fonts")), name="fonts")
 
 if __name__ == "__main__":
     import uvicorn

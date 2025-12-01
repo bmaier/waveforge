@@ -9,14 +9,8 @@
     <title>WaveForge DAW - Preview Edition</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="manifest" href="/manifest.json">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            console.warn('SECURITY WARNING: You are using the Tailwind CSS Play CDN in production. This is not recommended for security and performance. Please use a build step to generate your CSS.');
-        }
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap"
-        rel="stylesheet">
+    <script src="/tailwind.min.js"></script>
+    <link href="/fonts.css" rel="stylesheet">
 
     <style>
         :root {
@@ -1762,6 +1756,8 @@
             },
             waitForAllChunksUploaded: async function (sessionId, maxWaitMs = 120000) {
                 const startTime = Date.now();
+                let lastChunkCount = -1;
+                let noProgressCount = 0;
 
                 while (Date.now() - startTime < maxWaitMs) {
                     try {
@@ -1789,6 +1785,25 @@
                             console.log(`✅ All chunks uploaded for session ${sessionId}`);
                             return true;
                         }
+
+                        // Check for progress
+                        if (sessionChunks.length === lastChunkCount) {
+                            noProgressCount++;
+                            if (noProgressCount >= 5) { // 10 seconds no progress (5 * 2s)
+                                console.warn(`⚠️ No upload progress for 10 seconds - forcing unlock`);
+                                // Force trigger Service Worker upload with unlock
+                                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                                    navigator.serviceWorker.controller.postMessage({
+                                        type: 'PROCESS_UPLOADS',
+                                        force: true
+                                    });
+                                }
+                                noProgressCount = 0; // Reset counter
+                            }
+                        } else {
+                            noProgressCount = 0; // Reset on progress
+                        }
+                        lastChunkCount = sessionChunks.length;
 
                         console.log(`⏳ Waiting for ${sessionChunks.length} chunks to upload...`);
 
@@ -1820,6 +1835,10 @@
                     console.error('⚠️ Not all chunks uploaded, but proceeding with assembly anyway');
                 }
 
+                // IMPORTANT: Add small delay to ensure server has finished writing chunks to disk
+                console.log('⏳ Waiting for server to finish writing chunks to disk...');
+                await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+
                 try {
                     const formData = new FormData();
                     formData.append('session_id', sessionId);
@@ -1836,10 +1855,13 @@
                         console.log('✓ Server acknowledged recording complete:', result);
                         showToast(`Upload complete: ${fileName}`);
                     } else {
-                        console.error('Server error:', response.status);
+                        const errorText = await response.text();
+                        console.error('Server error:', response.status, errorText);
+                        showToast(`Server error: ${response.status}`, true);
                     }
                 } catch (error) {
                     console.error('Error signaling recording complete:', error);
+                    showToast('Error signaling server', true);
                 }
             },
             checkOrphans: function () {
@@ -1929,14 +1951,35 @@
                     console.log('⏳ Waiting for all recovered chunks to upload...');
                     await this.waitForAllChunksUploaded(sessionId, 120000);
 
+                    // Detect mime type from first chunk or use global defaults
+                    let mimeType = 'audio/webm;codecs=opus';
+                    let extension = 'webm';
+                    
+                    if (chunks.length > 0 && chunks[0].blob && chunks[0].blob.type) {
+                        mimeType = chunks[0].blob.type;
+                        // Extract extension from mime type
+                        if (mimeType.includes('webm')) extension = 'webm';
+                        else if (mimeType.includes('mp4')) extension = 'mp4';
+                        else if (mimeType.includes('ogg')) extension = 'ogg';
+                    } else if (typeof preferredMimeType !== 'undefined') {
+                        // Fallback to global variables if they exist
+                        mimeType = preferredMimeType;
+                        extension = preferredExt || 'webm';
+                    }
+
                     // Generate filename for recovered session
-                    const recoveredFileName = `recovered_${sessionId}.webm`;
+                    const recoveredFileName = `recovered_${sessionId}.${extension}`;
+                    
+                    // Calculate total size from chunks
+                    const totalSize = chunks.reduce((sum, chunk) => sum + (chunk.blob?.size || 0), 0);
+                    
                     const recoveredMetadata = {
                         name: `recovered_${sessionId}`,
-                        mimeType: preferredMimeType,
-                        extension: preferredExt,
+                        mimeType: mimeType,
+                        extension: extension,
                         recordingCompletedAt: new Date().toISOString(),
-                        fileSize: tempBlob.size,
+                        totalChunks: chunks.length,
+                        fileSize: totalSize,
                         isRecovery: true
                     };
 
@@ -3249,6 +3292,10 @@
             return translations[currentLanguage][key] || key;
         }
     </script>
+    
+    <!-- TUS Upload Client (for main thread uploads) -->
+    <script src="/tus.min.js"></script>
+    <script src="/tus-upload-manager.js"></script>
 </body>
 
 </html>

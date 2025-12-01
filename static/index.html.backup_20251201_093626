@@ -7,8 +7,8 @@
     <title>WaveForge DAW - Preview Edition</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="manifest" href="/manifest.json">
-    <script src="/tailwind.min.js"></script>
-    <link href="/fonts.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -1280,10 +1280,6 @@
                             } else if (type === 'UPLOAD_COMPLETE') {
                                 if (sessionId) {
                                     UploadManager.setUploadStatusForSession(sessionId, 'success');
-                                    
-                                    // Markiere Recording als serverSynced in IndexedDB
-                                    UploadManager.markRecordingAsSynced(sessionId);
-                                    
                                     setTimeout(() => {
                                         UploadManager.setUploadStatusForSession(sessionId, 'idle');
                                     }, 2000);
@@ -1442,44 +1438,6 @@
                 } else {
                     icon.innerHTML = '☁';
                     icon.title = 'Upload to server';
-                }
-            },
-            
-            markRecordingAsSynced: async function(sessionId) {
-                // Markiere Recording in IndexedDB als serverSynced
-                if (!db) {
-                    console.warn('Database not ready');
-                    return;
-                }
-                
-                try {
-                    // Finde Recording mit diesem sessionId
-                    const tx = db.transaction([STORE_RECORDINGS], 'readwrite');
-                    const store = tx.objectStore(STORE_RECORDINGS);
-                    const getAllReq = store.getAll();
-                    
-                    getAllReq.onsuccess = () => {
-                        const recordings = getAllReq.result;
-                        const recording = recordings.find(r => r.sessionId === sessionId);
-                        
-                        if (recording) {
-                            // Update serverSynced flag
-                            recording.serverSynced = true;
-                            recording.syncedAt = new Date().toISOString();
-                            
-                            const updateTx = db.transaction([STORE_RECORDINGS], 'readwrite');
-                            updateTx.objectStore(STORE_RECORDINGS).put(recording);
-                            
-                            updateTx.oncomplete = () => {
-                                console.log(`✓ Recording ${recording.name} marked as synced`);
-                                loadTracksFromDB(); // Refresh UI
-                            };
-                        } else {
-                            console.warn(`Recording with sessionId ${sessionId} not found`);
-                        }
-                    };
-                } catch (err) {
-                    console.error('Failed to mark recording as synced:', err);
                 }
             },
             
@@ -1843,10 +1801,6 @@
                     console.error('⚠️ Not all chunks uploaded, but proceeding with assembly anyway');
                 }
                 
-                // IMPORTANT: Add small delay to ensure server has finished writing chunks to disk
-                console.log('⏳ Waiting for server to finish writing chunks to disk...');
-                await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
-                
                 try {
                     const formData = new FormData();
                     formData.append('session_id', sessionId);
@@ -1863,13 +1817,10 @@
                         console.log('✓ Server acknowledged recording complete:', result);
                         showToast(`Upload complete: ${fileName}`);
                     } else {
-                        const errorText = await response.text();
-                        console.error('Server error:', response.status, errorText);
-                        showToast(`Server error: ${response.status}`, true);
+                        console.error('Server error:', response.status);
                     }
                 } catch (error) {
                     console.error('Error signaling recording complete:', error);
-                    showToast('Error signaling server', true);
                 }
             },
             checkOrphans: function() {
@@ -1959,35 +1910,14 @@
                     console.log('⏳ Waiting for all recovered chunks to upload...');
                     await this.waitForAllChunksUploaded(sessionId, 120000);
                     
-                    // Detect mime type from first chunk or use global defaults
-                    let mimeType = 'audio/webm;codecs=opus';
-                    let extension = 'webm';
-                    
-                    if (chunks.length > 0 && chunks[0].blob && chunks[0].blob.type) {
-                        mimeType = chunks[0].blob.type;
-                        // Extract extension from mime type
-                        if (mimeType.includes('webm')) extension = 'webm';
-                        else if (mimeType.includes('mp4')) extension = 'mp4';
-                        else if (mimeType.includes('ogg')) extension = 'ogg';
-                    } else if (typeof preferredMimeType !== 'undefined') {
-                        // Fallback to global variables if they exist
-                        mimeType = preferredMimeType;
-                        extension = preferredExt || 'webm';
-                    }
-                    
                     // Generate filename for recovered session
-                    const recoveredFileName = `recovered_${sessionId}.${extension}`;
-                    
-                    // Calculate total size from chunks
-                    const totalSize = chunks.reduce((sum, chunk) => sum + (chunk.blob?.size || 0), 0);
-                    
+                    const recoveredFileName = `recovered_${sessionId}.webm`;
                     const recoveredMetadata = {
                         name: `recovered_${sessionId}`,
-                        mimeType: mimeType,
-                        extension: extension,
+                        mimeType: preferredMimeType,
+                        extension: preferredExt,
                         recordingCompletedAt: new Date().toISOString(),
-                        totalChunks: chunks.length,
-                        fileSize: totalSize,
+                        fileSize: tempBlob.size,
                         isRecovery: true
                     };
                     
@@ -2190,29 +2120,7 @@
         function loadTracksFromDB() {
             if (!db) return;
             const req = db.transaction([STORE_RECORDINGS], 'readonly').objectStore(STORE_RECORDINGS).getAll();
-            req.onsuccess = () => {
-                const recordings = req.result;
-                
-                // Auto-upload: Recordings die online aufgenommen wurden aber noch nicht synced
-                if (ConnectionMonitor.isOnline) {
-                    recordings.forEach(track => {
-                        if (track.wasOnlineDuringRecording && !track.serverSynced && track.blob && track.sessionId) {
-                            console.log(`🔄 Auto-uploading recording: ${track.name} (session: ${track.sessionId})`);
-                            const ext = track.extension || 'webm';
-                            const metadata = {
-                                name: track.name,
-                                mimeType: track.mimeType || preferredMimeType,
-                                extension: ext,
-                                savedAt: track.date,
-                                fileSize: track.blob.size
-                            };
-                            UploadManager.queueUpload(track.id, track.blob, `${track.name}.${ext}`, metadata, track.sessionId);
-                        }
-                    });
-                }
-                
-                renderPlaylist(recordings);
-            };
+            req.onsuccess = () => renderPlaylist(req.result);
         }
 
         function deleteTrackFromDB(id) {
@@ -2339,72 +2247,7 @@
     - Was Online: ${wasOnline}
     - All Uploaded: ${allUploaded}
     - Current Status: ${ConnectionMonitor.isOnline ? 'ONLINE' : 'OFFLINE'}`);\n                    
-                    
-                    // 🔄 LOCAL-FIRST STRATEGIE: Immer lokal assemblieren und speichern
-                    console.log('📦 Assembling recording locally (local-first strategy)...');
-                    showToast('Saving recording locally...');
-                    
-                    // Assembliere lokal aus IndexedDB
-                    await CrashGuard.assembleSession(currentSessionId, false);
-                    
-                    // Automatisch in IndexedDB speichern (ohne Modal)
-                    if (tempBlob && tempBlob.size > 0) {
-                        const autoName = currentRecordingName || `Recording_${new Date().toLocaleTimeString()}`;
-                        
-                        const tx = db.transaction([STORE_RECORDINGS], 'readwrite');
-                        tx.objectStore(STORE_RECORDINGS).add({
-                            name: autoName, 
-                            blob: tempBlob, // Immer lokaler Blob!
-                            date: new Date().toISOString(), 
-                            mimeType: preferredMimeType, 
-                            extension: preferredExt,
-                            sessionId: currentSessionId,
-                            isServerBacked: false, // Lokal gespeichert
-                            wasOnlineDuringRecording: wasOnline, // Info für später
-                            serverSynced: false // Noch nicht mit Server synchronisiert
-                        });
-                        
-                        tx.oncomplete = () => {
-                            showToast(`✓ Saved locally as .${preferredExt.toUpperCase()}`);
-                            
-                            // Bei Online-Aufnahme: Sende Assembly-Signal an Server (Background)
-                            if (wasOnline && allUploaded && ConnectionMonitor.isOnline) {
-                                console.log('🔄 Triggering server assembly in background...');
-                                const fileName = `${autoName}.${preferredExt}`;
-                                const metadata = {
-                                    name: autoName,
-                                    mimeType: preferredMimeType,
-                                    extension: preferredExt,
-                                    totalChunks: totalChunks,
-                                    recordingCompletedAt: new Date().toISOString()
-                                };
-                                
-                                CrashGuard.signalRecordingComplete(currentSessionId, fileName, metadata)
-                                    .then(() => {
-                                        console.log('✓ Server assembly completed (background)');
-                                    })
-                                    .catch(err => {
-                                        console.warn('⚠ Server assembly failed (not critical):', err);
-                                    });
-                            }
-                            
-                            // Cleanup
-                            CrashGuard.clearSession(currentSessionId);
-                            tempBlob = null;
-                            currentSessionId = null;
-                            loadTracksFromDB();
-                        };
-                        
-                        tx.onerror = (e) => {
-                            console.error("❌ DB Save Error:", e);
-                            showToast("Failed to save locally", true);
-                        };
-                        
-                    } else {
-                        console.error('❌ No audio data assembled');
-                        showToast('Recording failed: No audio data', true);
-                    }
-                };
+                    if (wasOnline && allUploaded && ConnectionMonitor.isOnline) {\n                        // \u2705 ONLINE-MODUS: Server hat alle Chunks - Server Assembly\n                        console.log('\u2705 Online mode: All chunks uploaded - using server assembly');\n                        \n                        showToast('Finalizing on server...');\n                        \n                        // Signal Server: Recording complete, bitte assemblieren\n                        const fileName = `${currentRecordingName || currentSessionId}.${preferredExt}`;\n                        const metadata = {\n                            name: currentRecordingName || `Recording_${new Date().toLocaleTimeString()}`,\n                            mimeType: preferredMimeType,\n                            extension: preferredExt,\n                            totalChunks: totalChunks,\n                            recordingCompletedAt: new Date().toISOString()\n                        };\n                        \n                        try {\n                            await CrashGuard.signalRecordingComplete(currentSessionId, fileName, metadata);\n                            \n                            // Setze tempBlob auf null (kein lokales Assembly nötig!)\n                            tempBlob = null;\n                            \n                            // Speichere Metadata in IndexedDB (ohne Blob!)\n                            await saveMetadataOnly(metadata, currentSessionId);\n                            \n                            showToast('Recording saved on server!');\n                            \n                            // Cleanup local chunks\n                            CrashGuard.clearSession(currentSessionId);\n                            \n                            // Refresh playlist\n                            loadTracksFromDB();\n                            \n                        } catch (serverErr) {\n                            console.error('Server assembly failed:', serverErr);\n                            showToast('Server assembly failed - switching to local assembly', true);\n                            \n                            // Fallback to local assembly\n                            await CrashGuard.assembleSession(currentSessionId, false);\n                            openSaveModal(false);\n                        }\n                        \n                    } else {\n                        // \ud83d\udcf4 OFFLINE-MODUS oder UNVOLLST\u00c4NDIGER UPLOAD: Lokales Assembly erforderlich\n                        console.log('\ud83d\udcf4 Offline mode or incomplete upload - assembling locally');\n                        \n                        showToast('Assembling recording locally...');\n                        \n                        // Assembliere lokal aus IndexedDB\n                        await CrashGuard.assembleSession(currentSessionId, false);\n                        \n                        // tempBlob ist jetzt verf\u00fcgbar\n                        // \u00d6ffne normales Save-Modal\n                        openSaveModal(false);\n                    }\n                };
 
                 mediaRecorder.start(1000); 
                 
@@ -2521,73 +2364,26 @@
             try {
                 let audioBlob;
                 
-                console.log('🔍 Loading track:', { 
-                    id, 
-                    name, 
-                    hasBlob: !!trackData.blob, 
-                    blobSize: trackData.blob?.size,
-                    isServerBacked: trackData.isServerBacked,
-                    serverPath: trackData.serverPath,
-                    sessionId: trackData.sessionId
-                });
-                
-                // 🔄 LOCAL-FIRST STRATEGIE: Immer zuerst lokalen Blob versuchen
-                if (trackData.blob) {
-                    // ✅ Lokaler Blob vorhanden - verwenden (schnellster Weg)
-                    audioBlob = trackData.blob;
-                    console.log('✓ Audio loaded from local IndexedDB, size:', audioBlob.size);
-                    
-                } else if ((trackData.serverPath || trackData.sessionId) && ConnectionMonitor.isOnline) {
-                    // 📥 Kein lokaler Blob - versuche vom Server zu laden (nur wenn online)
-                    // Konstruiere serverPath wenn nicht vorhanden
-                    let serverPath = trackData.serverPath;
-                    if (!serverPath && trackData.sessionId) {
-                        const ext = trackData.extension || 'webm';
-                        serverPath = `/recordings/${trackData.sessionId}/${trackData.name}.${ext}`;
-                        console.log('🔧 Constructed serverPath:', serverPath);
-                    }
-                    
-                    console.log('📡 No local blob, attempting to load from server:', serverPath);
+                // Check if recording is server-backed
+                if (trackData.isServerBacked && trackData.serverPath) {
+                    // Load from server
+                    console.log('Loading from server:', trackData.serverPath);
                     showToast('Loading from server...');
                     
-                    try {
-                        const response = await fetch(serverPath);
-                        if (!response.ok) {
-                            throw new Error(`Server returned ${response.status} for ${serverPath}`);
-                        }
-                        
-                        audioBlob = await response.blob();
-                        console.log('✓ Audio loaded from server, size:', audioBlob.size);
-                        
-                        // Optional: Lokal cachen für zukünftige Verwendung
-                        console.log('💾 Caching server audio locally...');
-                        const updateTx = db.transaction([STORE_RECORDINGS], 'readwrite');
-                        updateTx.objectStore(STORE_RECORDINGS).put({
-                            ...trackData,
-                            id: id,
-                            blob: audioBlob // Blob lokal speichern
-                        });
-                        updateTx.oncomplete = () => {
-                            console.log('✓ Audio cached locally for future use');
-                        };
-                        
-                    } catch (fetchErr) {
-                        throw new Error(`Server unavailable: ${fetchErr.message}`);
+                    const response = await fetch(trackData.serverPath);
+                    if (!response.ok) {
+                        throw new Error(`Server file not found: ${response.status}`);
                     }
                     
-                } else if ((trackData.serverPath || trackData.sessionId) && !ConnectionMonitor.isOnline) {
-                    // ❌ Kein lokaler Blob UND offline
-                    throw new Error('⚠️ Audio not available locally and you are offline. Please connect to the internet to download this recording.');
+                    audioBlob = await response.blob();
+                    console.log('\u2713 Audio loaded from server, size:', audioBlob.size);
                     
                 } else {
-                    // ❌ Keine Audio-Daten verfügbar
-                    console.error('❌ No audio data available:', {
-                        hasBlob: !!trackData.blob,
-                        hasServerPath: !!trackData.serverPath,
-                        hasSessionId: !!trackData.sessionId,
-                        isOnline: ConnectionMonitor.isOnline
-                    });
-                    throw new Error('No audio data found - neither locally nor on server');
+                    // Load from local IndexedDB blob
+                    audioBlob = trackData.blob;
+                    if (!audioBlob) {
+                        throw new Error('No audio data found');
+                    }
                 }
                 
                 // Clean up old blob URL
@@ -2596,14 +2392,7 @@
                 }
                 
                 // Create NEW Audio Element for each track (MediaElementSource can only be created once per element)
-                console.log('📦 Creating blob URL from blob:', {
-                    blobSize: audioBlob.size,
-                    blobType: audioBlob.type,
-                    mimeType: trackData.mimeType
-                });
-                
                 currentBlobUrl = URL.createObjectURL(audioBlob);
-                console.log('✓ Blob URL created:', currentBlobUrl);
                 
                 // Clean up old audio element
                 if (audioElement) {
@@ -2625,26 +2414,12 @@
                 
                 audioElement.src = currentBlobUrl;
                 audioElement.preload = 'auto'; // Force full preload
-                console.log('🔄 Loading audio element...');
                 
                 // Wait for audio to be fully loaded
                 await new Promise((resolve, reject) => {
                     // Use canplaythrough for complete loading
-                    audioElement.oncanplaythrough = () => {
-                        console.log('✓ Audio canplaythrough event fired');
-                        resolve();
-                    };
-                    audioElement.onerror = (e) => {
-                        console.error('❌ Audio element error:', e);
-                        console.error('Audio element error details:', {
-                            error: audioElement.error,
-                            code: audioElement.error?.code,
-                            message: audioElement.error?.message,
-                            src: audioElement.src,
-                            readyState: audioElement.readyState
-                        });
-                        reject(e);
-                    };
+                    audioElement.oncanplaythrough = resolve;
+                    audioElement.onerror = reject;
                     audioElement.load(); // Explicitly trigger load
                 });
                 
@@ -2894,22 +2669,10 @@
                 const ext = track.extension || 'webm';
                 let col = 'text-gray-500'; if(ext==='wav') col='text-cyan-400'; if(ext==='mp3') col='text-pink-400';
                 
-                // Upload-Status Badge mit 3 Zuständen
-                let syncBadge = '';
-                if (track.isServerBacked) {
-                    // Nur auf Server (veraltet - sollte nicht mehr vorkommen)
-                    syncBadge = '<span class="text-[8px] text-yellow-400 ml-1">\u2601 SERVER-ONLY</span>';
-                } else if (track.serverSynced) {
-                    // Lokal + Server synchronisiert
-                    syncBadge = '<span class="text-[8px] text-green-400 ml-1">\u2713 SYNCED</span>';
-                } else if (track.wasOnlineDuringRecording && ConnectionMonitor.isOnline) {
-                    // Lokal gespeichert, Upload läuft im Hintergrund
-                    syncBadge = '<span class="text-[8px] text-cyan-400 ml-1 animate-pulse">\u21ea SYNCING...</span>';
-                } else {
-                    // Nur lokal, noch nicht uploaded
-                    syncBadge = '<span class="text-[8px] text-gray-500 ml-1">\ud83d\udcbe LOCAL</span>';
-                }
-                const serverBadge = syncBadge;
+                // Server-backed indicator
+                const serverBadge = track.isServerBacked 
+                    ? '<span class="text-[8px] text-green-400 ml-1">\u2601 SERVER</span>' 
+                    : '<span class="text-[8px] text-gray-500 ml-1">\ud83d\udcbe LOCAL</span>';
                 
                 const sessionAttr = track.sessionId ? ` data-session-id="${track.sessionId}"` : '';
                 
