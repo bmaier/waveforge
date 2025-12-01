@@ -254,7 +254,8 @@
         .upload-icon.status-uploading {
             color: #3b82f6;
             border-color: #3b82f6;
-            animation: pulse-upload 1.5s ease-in-out infinite;
+            background: rgba(59, 130, 246, 0.15);
+            animation: blink-upload 1s ease-in-out infinite;
         }
 
         .upload-icon.status-pending {
@@ -274,6 +275,103 @@
             border-color: #ef4444;
             animation: shake 0.5s ease-in-out;
         }
+        
+        .upload-icon.status-fatal {
+            color: #dc2626;
+            border-color: #dc2626;
+            background: rgba(220, 38, 38, 0.2);
+        }
+        
+        /* Expanded upload status container */
+        .upload-status-expanded {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0;
+            margin-top: 0;
+        }
+        
+        .upload-status-expanded.active {
+            max-height: 80px;
+            padding: 8px 0;
+            margin-top: 8px;
+        }
+        
+        .upload-progress-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 6px;
+        }
+        
+        .upload-progress-info.paused {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+        
+        .upload-progress-info.fatal {
+            background: rgba(220, 38, 38, 0.08);
+            border-color: rgba(220, 38, 38, 0.2);
+        }
+        
+        .upload-icon-large {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 18px;
+            border: 2px solid;
+        }
+        
+        .upload-icon-large.uploading {
+            color: #3b82f6;
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            animation: blink-upload 1s ease-in-out infinite;
+        }
+        
+        .upload-icon-large.paused {
+            color: #f59e0b;
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .upload-icon-large.fatal {
+            color: #dc2626;
+            border-color: #dc2626;
+            background: rgba(220, 38, 38, 0.15);
+            cursor: pointer;
+        }
+        
+        .upload-icon-large.fatal:hover {
+            background: rgba(220, 38, 38, 0.25);
+            transform: scale(1.05);
+        }
+        
+        .upload-progress-text {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .upload-progress-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .upload-progress-details {
+            font-size: 10px;
+            opacity: 0.7;
+            font-family: 'Share Tech Mono', monospace;
+        }
 
         @keyframes pulse-upload {
 
@@ -286,6 +384,15 @@
             50% {
                 opacity: 0.7;
                 transform: scale(1.05);
+            }
+        }
+        
+        @keyframes blink-upload {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.4;
             }
         }
 
@@ -1772,13 +1879,20 @@
                 }, 5000);
             },
             
-            failUpload: function(sessionId, error) {
+            failUpload: function(sessionId, error, isFatal = false) {
                 const upload = this.activeUploads.get(sessionId);
                 if (!upload) return;
                 
                 upload.status = 'failed';
                 upload.error = error;
-                console.error(`❌ Upload failed: ${sessionId} - ${error}`);
+                upload.isFatal = isFatal;
+                
+                if (isFatal) {
+                    console.error(`💀 Fatal upload error for session ${sessionId}:`, error);
+                } else {
+                    console.warn(`⚠️ Temporary upload error for session ${sessionId}:`, error);
+                }
+                
                 this.updateUI(sessionId);
             },
             
@@ -1822,7 +1936,7 @@
             },
             
             handleServiceWorkerMessage: function(data) {
-                const { type, sessionId, chunkId, totalChunks, error, fileName } = data;
+                const { type, sessionId, chunkId, totalChunks, error, fileName, isFatal } = data;
                 
                 switch (type) {
                     case 'CHUNK_UPLOADED':
@@ -1840,8 +1954,17 @@
                         this.completeUpload(sessionId);
                         break;
                         
+                    case 'UPLOAD_FATAL_ERROR':
+                        this.failUpload(sessionId, error, true);
+                        showToast(`Fatal upload error - manual download required`, true);
+                        break;
+                        
                     case 'UPLOAD_ERROR':
-                        this.failUpload(sessionId, error);
+                        this.failUpload(sessionId, error, isFatal || false);
+                        if (!isFatal) {
+                            // Only show toast for temporary errors after multiple retries
+                            // Fatal errors already handled above
+                        }
                         break;
                         
                     case 'UPLOAD_PROGRESS':
@@ -1917,6 +2040,10 @@
                         existingBadge.remove();
                     }
                     
+                    // Get upload status container
+                    const statusContainer = item.querySelector('.upload-status-expanded');
+                    const uploadIcon = item.querySelector('.upload-icon');
+                    
                     // Add new badge if upload exists
                     if (upload) {
                         const badge = document.createElement('span');
@@ -1955,8 +2082,129 @@
                         if (filenameElement) {
                             filenameElement.insertAdjacentElement('afterend', badge);
                         }
+                        
+                        // Update upload icon status
+                        if (uploadIcon) {
+                            uploadIcon.classList.remove('status-idle', 'status-uploading', 'status-pending', 'status-success', 'status-error', 'status-fatal');
+                            
+                            if (upload.status === 'failed' && upload.isFatal) {
+                                uploadIcon.classList.add('status-fatal');
+                            } else if (upload.status === 'uploading') {
+                                uploadIcon.classList.add('status-uploading');
+                            } else if (upload.status === 'paused') {
+                                uploadIcon.classList.add('status-pending');
+                            } else if (upload.status === 'failed') {
+                                uploadIcon.classList.add('status-error');
+                            } else if (upload.status === 'synced') {
+                                uploadIcon.classList.add('status-success');
+                            }
+                        }
+                        
+                        // Show expanded status for active/paused/failed uploads
+                        if (statusContainer && (upload.status === 'uploading' || upload.status === 'paused' || upload.status === 'failed')) {
+                            statusContainer.classList.add('active');
+                            
+                            let statusClass = '';
+                            let iconClass = '';
+                            let statusLabel = '';
+                            let statusDetails = '';
+                            let iconSymbol = '☁';
+                            
+                            if (upload.status === 'uploading') {
+                                statusClass = '';
+                                iconClass = 'uploading';
+                                statusLabel = 'Uploading';
+                                statusDetails = `${upload.progress}% • ${upload.uploadedChunks}/${upload.totalChunks} chunks`;
+                                iconSymbol = '⇪';
+                            } else if (upload.status === 'paused') {
+                                statusClass = 'paused';
+                                iconClass = 'paused';
+                                statusLabel = 'Upload Paused';
+                                statusDetails = 'Connection lost - will resume automatically';
+                                iconSymbol = '⏸';
+                            } else if (upload.status === 'failed' && upload.isFatal) {
+                                statusClass = 'fatal';
+                                iconClass = 'fatal';
+                                statusLabel = 'Upload Failed (Fatal Error)';
+                                statusDetails = 'Click icon for manual download instructions';
+                                iconSymbol = '⚠';
+                            } else if (upload.status === 'failed') {
+                                statusClass = 'paused';
+                                iconClass = 'paused';
+                                statusLabel = 'Upload Paused (Temporary Error)';
+                                statusDetails = 'Will retry automatically';
+                                iconSymbol = '⏸';
+                            }
+                            
+                            statusContainer.innerHTML = `
+                                <div class="upload-progress-info ${statusClass}">
+                                    <div class="upload-icon-large ${iconClass}" id="fatal-icon-${sessionId}">
+                                        <span aria-hidden="true">${iconSymbol}</span>
+                                    </div>
+                                    <div class="upload-progress-text">
+                                        <div class="upload-progress-label" style="color: ${iconClass === 'uploading' ? '#3b82f6' : iconClass === 'fatal' ? '#dc2626' : '#f59e0b'}">${statusLabel}</div>
+                                        <div class="upload-progress-details">${statusDetails}</div>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Add click handler for fatal error
+                            if (upload.isFatal) {
+                                const fatalIcon = statusContainer.querySelector(`#fatal-icon-${sessionId}`);
+                                if (fatalIcon) {
+                                    fatalIcon.style.cursor = 'pointer';
+                                    fatalIcon.onclick = () => this.showFatalErrorModal(sessionId, upload);
+                                }
+                            }
+                        } else if (statusContainer) {
+                            // Hide expanded status for completed/idle uploads
+                            statusContainer.classList.remove('active');
+                            statusContainer.innerHTML = '';
+                        }
+                    } else {
+                        // No active upload - hide expanded status
+                        if (statusContainer) {
+                            statusContainer.classList.remove('active');
+                            statusContainer.innerHTML = '';
+                        }
+                        
+                        // Reset upload icon to idle state
+                        if (uploadIcon) {
+                            uploadIcon.classList.remove('status-idle', 'status-uploading', 'status-pending', 'status-success', 'status-error', 'status-fatal');
+                        }
                     }
                 });
+            },
+            
+            showFatalErrorModal: function(sessionId, upload) {
+                const modalHtml = `
+                    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000;" id="fatal-error-modal">
+                        <div style="background: linear-gradient(135deg, #1e1e2e 0%, #0a0a14 100%); padding: 30px; border-radius: 12px; max-width: 500px; border: 2px solid #dc2626; box-shadow: 0 0 30px rgba(220, 38, 38, 0.3);">
+                            <h2 style="color: #dc2626; margin: 0 0 16px 0; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 28px;">⚠</span> Fatal Upload Error
+                            </h2>
+                            <div style="color: #d1d5db; margin-bottom: 20px; line-height: 1.6; font-size: 14px;">
+                                <p style="margin: 0 0 12px 0;">The upload has encountered a fatal error and cannot be completed automatically.</p>
+                                <p style="margin: 0 0 12px 0; padding: 12px; background: rgba(220, 38, 38, 0.1); border-left: 3px solid #dc2626; border-radius: 4px; font-family: monospace; font-size: 12px;">
+                                    Error: ${upload.error || 'Unknown fatal error'}
+                                </p>
+                                <p style="margin: 0; font-weight: 600;">To save your recording:</p>
+                                <ol style="margin: 8px 0 0 0; padding-left: 20px;">
+                                    <li style="margin-bottom: 6px;">Click the <strong style="color: #10b981;">DL</strong> button to download the file to your computer</li>
+                                    <li style="margin-bottom: 6px;">Manually upload the downloaded file to your cloud storage</li>
+                                    <li>The file is safely stored in your browser and won't be lost</li>
+                                </ol>
+                            </div>
+                            <button onclick="document.getElementById('fatal-error-modal').remove()" style="width: 100%; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                                OK, Understood
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = modalHtml;
+                document.body.appendChild(tempDiv.firstElementChild);
             }
         };
         
@@ -3096,6 +3344,9 @@
                         </div>
                     </div>
                     <div class="upload-status-bar" id="progress-bar-${t.id}"><div class="upload-status-fill" id="progress-${t.id}"></div></div>
+                    <div class="upload-status-expanded" id="upload-status-${t.id}">
+                        <!-- Dynamically filled by UploadCoordinator -->
+                    </div>
                 `;
                 c.appendChild(el);
                 el.querySelector(`.play-btn-${t.id}`).onclick = () => loadTrack(t.id, t.name, t.blob);

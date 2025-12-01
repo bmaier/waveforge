@@ -467,21 +467,50 @@ async function processUploads() {
             const retryCount = (item.retryCount || 0) + 1;
             console.warn(`[SW] Upload failed for chunk ${item.chunkIndex} (session ${item.sessionId}, attempt ${retryCount}):`, error.message);
             
+            // Check if this is a connection error (server unreachable)
+            const isConnectionError = error.message.includes('Failed to fetch') || 
+                                     error.message.includes('NetworkError') ||
+                                     error.message.includes('Server error: 5') ||
+                                     error.message.includes('fetch');
+            
+            // Check for fatal errors (non-recoverable)
+            const isFatalError = !isConnectionError && (
+                error.message.includes('Server error: 400') || // Bad request
+                error.message.includes('Server error: 413') || // Payload too large
+                error.message.includes('Server error: 422') || // Unprocessable entity
+                error.message.includes('Invalid chunk data') ||
+                error.message.includes('Corrupted') ||
+                retryCount >= 20 // Too many retries = something is broken
+            );
+            
+            if (isFatalError) {
+                console.error(`[SW] 💀 Fatal error detected - stopping retries for chunk ${item.chunkIndex}`);
+                
+                // Remove from queue - no more retries
+                await removeFromQueue(db, item.id);
+                
+                // Notify UI about fatal error
+                broadcastStatus({
+                    type: 'UPLOAD_FATAL_ERROR',
+                    sessionId: item.sessionId,
+                    chunkId: item.chunkIndex,
+                    error: error.message,
+                    isFatal: true
+                });
+                
+                continue; // Skip to next item
+            }
+            
             // Notify UploadCoordinator about error (only after multiple failures)
             if (retryCount >= 3) {
                 broadcastStatus({
                     type: 'UPLOAD_ERROR',
                     sessionId: item.sessionId,
                     chunkId: item.chunkIndex,
-                    error: error.message
+                    error: error.message,
+                    isFatal: false
                 });
             }
-            
-            // Check if this is a connection error (server unreachable)
-            const isConnectionError = error.message.includes('Failed to fetch') || 
-                                     error.message.includes('NetworkError') ||
-                                     error.message.includes('Server error: 5') ||
-                                     error.message.includes('fetch');
             
             if (isConnectionError) {
                 console.log('[SW] 🔴 Connection error detected - entering offline mode');
