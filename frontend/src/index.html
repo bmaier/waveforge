@@ -357,20 +357,28 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 2px;
+            min-width: 0;
         }
         
         .upload-progress-label {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            line-height: 1.2;
+            color: #d1d5db;
         }
         
         .upload-progress-details {
-            font-size: 10px;
-            opacity: 0.7;
+            font-size: 11px;
+            opacity: 0.8;
             font-family: 'Share Tech Mono', monospace;
+            line-height: 1.3;
+            color: #9ca3af;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         @keyframes pulse-upload {
@@ -1895,7 +1903,15 @@
             
             registerUpload: function(sessionId, method = 'custom', totalChunks = 0) {
                 if (this.activeUploads.has(sessionId)) {
-                    console.log(`📝 Upload already registered: ${sessionId}`);
+                    // Update totalChunks if it was previously 0
+                    const upload = this.activeUploads.get(sessionId);
+                    if (upload.totalChunks === 0 && totalChunks > 0) {
+                        console.log(`📝 Updating totalChunks for ${sessionId}: ${totalChunks}`);
+                        upload.totalChunks = totalChunks;
+                        this.updateUI(sessionId);
+                    } else {
+                        console.log(`📝 Upload already registered: ${sessionId}`);
+                    }
                     return;
                 }
                 
@@ -1947,11 +1963,11 @@
                 console.log(`✅ Upload completed: ${sessionId}`);
                 this.updateUI(sessionId);
                 
-                // Remove from active uploads after 5 seconds
+                // Remove from active uploads after 3 seconds (showing completion state briefly)
                 setTimeout(() => {
                     this.activeUploads.delete(sessionId);
                     this.updateUI(sessionId);
-                }, 5000);
+                }, 3000);
             },
             
             failUpload: function(sessionId, error, isFatal = false) {
@@ -2188,8 +2204,8 @@
                             if (upload.status === 'uploading') {
                                 statusClass = '';
                                 iconClass = 'uploading';
-                                statusLabel = 'Uploading';
-                                statusDetails = `${upload.progress}% • ${upload.uploadedChunks}/${upload.totalChunks} chunks`;
+                                statusLabel = `Uploading ${upload.progress}%`;
+                                statusDetails = `${upload.uploadedChunks} / ${upload.totalChunks} chunks uploaded`;
                                 iconSymbol = '⇪';
                             } else if (upload.status === 'paused') {
                                 statusClass = 'paused';
@@ -2837,6 +2853,28 @@
                         recordingCompletedAt: new Date().toISOString(),
                         fileSize: blob.size
                     };
+                    
+                    // IMPORTANT: Count total chunks in queue for this session and register upload
+                    const countTx = db.transaction(['upload_queue'], 'readonly');
+                    const countStore = countTx.objectStore('upload_queue');
+                    const countReq = countStore.getAll();
+                    countReq.onsuccess = () => {
+                        const sessionChunks = countReq.result.filter(item => item.sessionId === currentSessionId);
+                        const totalChunks = sessionChunks.length;
+                        
+                        console.log(`📦 Recording saved: ${totalChunks} chunks queued for upload`);
+                        
+                        // Register upload with total chunks
+                        if (typeof UploadCoordinator !== 'undefined' && totalChunks > 0) {
+                            UploadCoordinator.registerUpload(currentSessionId, 'custom', totalChunks);
+                            
+                            // Immediately update UI to show upload status
+                            setTimeout(() => {
+                                UploadCoordinator.updateUI(currentSessionId);
+                            }, 100);
+                        }
+                    };
+                    
                     CrashGuard.signalRecordingComplete(currentSessionId, fileName, metadata);
                 }
 
