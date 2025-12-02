@@ -136,3 +136,5 @@ coverage.xml
 .so
 .dll
 .dylib
+# Alte Server-Datei ignorieren (richtige Version ist in backend/app/server.py)
+/server.py
