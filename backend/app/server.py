@@ -300,8 +300,37 @@ async def upload_chunk(
     
     # Check if chunk already exists (idempotency - allow retries)
     if chunk_path.exists():
-        print(f"⏩ Chunk {chunk_index} already exists for session {session_id}, skipping")
-        return {"status": "chunk_already_exists", "chunk_index": chunk_index, "session_id": session_id}
+        # CRITICAL: Verify existing chunk is complete by checking size matches
+        # If chunk was partially written before server crash, we need to rewrite it
+        try:
+            existing_size = chunk_path.stat().st_size
+            file.file.seek(0, 2)  # Seek to end to get size
+            incoming_size = file.file.tell()
+            file.file.seek(0)  # Reset to beginning
+            
+            if existing_size == incoming_size and existing_size > 0:
+                print(f"⏩ Chunk {chunk_index} already exists with correct size ({existing_size} bytes), skipping")
+                return {"status": "chunk_already_exists", "chunk_index": chunk_index, "session_id": session_id}
+            else:
+                print(f"⚠️ Chunk {chunk_index} exists but size mismatch: existing={existing_size}, incoming={incoming_size}")
+                print(f"⚠️ Chunk may be corrupted - will overwrite")
+                # Delete corrupted chunk so it can be rewritten
+                chunk_path.unlink()
+        except Exception as check_err:
+            print(f"⚠️ Error checking existing chunk {chunk_index}: {check_err}")
+            print(f"⚠️ Will attempt to overwrite")
+            try:
+                chunk_path.unlink()
+            except:
+                pass
+    
+    # Clean up any orphaned .tmp file from previous failed upload
+    if chunk_path_tmp.exists():
+        print(f"⚠️ Found orphaned .tmp file for chunk {chunk_index}, removing")
+        try:
+            chunk_path_tmp.unlink()
+        except Exception as cleanup_err:
+            print(f"⚠️ Could not remove orphaned .tmp file: {cleanup_err}")
     
     try:
         # Write to temporary file first
@@ -315,6 +344,15 @@ async def upload_chunk(
         # If server crashes before this, client will retry
         chunk_path_tmp.rename(chunk_path)
         
+        # CRITICAL: Sync the parent directory to ensure the rename is persisted
+        # Without this, the directory entry might not survive a sudden server kill
+        parent_dir = chunk_path.parent
+        dir_fd = os.open(str(parent_dir), os.O_RDONLY)
+        try:
+            os.fsync(dir_fd)
+        finally:
+            os.close(dir_fd)
+        
         print(f"✓ Chunk {chunk_index} received and saved for session {session_id}")
     except Exception as e:
         print(f"❌ Error saving chunk: {e}")
@@ -324,6 +362,69 @@ async def upload_chunk(
         raise HTTPException(status_code=500, detail="Could not write chunk to disk")
 
     return {"status": "chunk_received", "chunk_index": chunk_index, "session_id": session_id}
+
+async def _verify_chunk_impl(session_id: str, chunk_index: int):
+    """
+    Internal implementation for chunk verification.
+    Shared by both /api/verify and /upload/verify endpoints.
+    
+    CRITICAL: This does a deep verification including:
+    1. Check file exists
+    2. Check file size > 0
+    3. Read first byte to ensure file is readable and data is persisted
+    """
+    print(f"🔍 Verify request: session={session_id}, chunk={chunk_index}")
+    
+    try:
+        chunk_path = get_chunk_path(session_id, chunk_index)
+        
+        if not chunk_path.exists():
+            print(f"⚠️ Chunk {chunk_index} NOT found for session {session_id} at path: {chunk_path}")
+            return {"exists": False, "chunk_index": chunk_index, "session_id": session_id, "path": str(chunk_path)}
+        
+        # Check file size
+        size = chunk_path.stat().st_size
+        if size == 0:
+            print(f"⚠️ Chunk {chunk_index} exists but is EMPTY (0 bytes)")
+            return {"exists": False, "chunk_index": chunk_index, "session_id": session_id, "reason": "empty_file", "size": 0}
+        
+        # CRITICAL: Read first byte to ensure data is actually persisted to disk
+        # This forces the OS to actually access the file data, not just the inode
+        try:
+            with open(chunk_path, "rb") as f:
+                first_byte = f.read(1)
+                if not first_byte:
+                    print(f"⚠️ Chunk {chunk_index} exists but cannot read data")
+                    return {"exists": False, "chunk_index": chunk_index, "session_id": session_id, "reason": "unreadable"}
+        except Exception as read_err:
+            print(f"⚠️ Chunk {chunk_index} exists but read failed: {read_err}")
+            return {"exists": False, "chunk_index": chunk_index, "session_id": session_id, "reason": "read_error", "error": str(read_err)}
+        
+        print(f"✓ Chunk {chunk_index} verified for session {session_id} ({size} bytes, readable)")
+        return {"exists": True, "chunk_index": chunk_index, "session_id": session_id, "size": size}
+        
+    except Exception as e:
+        print(f"❌ Error verifying chunk {chunk_index} for session {session_id}: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"exists": False, "chunk_index": chunk_index, "session_id": session_id, "error": str(e)}
+
+@app.get("/api/verify/{session_id}/{chunk_index}")
+async def verify_chunk_api(session_id: str, chunk_index: int):
+    """
+    Verify if a specific chunk exists on the server (new endpoint).
+    Used by Service Worker to confirm chunk was actually saved before removing from queue.
+    """
+    return await _verify_chunk_impl(session_id, chunk_index)
+
+@app.get("/upload/verify/{session_id}/{chunk_index}")
+async def verify_chunk_legacy(session_id: str, chunk_index: int):
+    """
+    Legacy verify endpoint for backward compatibility with cached Service Workers.
+    Redirects to same implementation as /api/verify.
+    """
+    print("⚠️ Using legacy /upload/verify endpoint - Service Worker should be updated")
+    return await _verify_chunk_impl(session_id, chunk_index)
 
 @app.get("/debug/session/{session_id}")
 async def debug_session(session_id: str):

@@ -1853,7 +1853,8 @@
                     
                     // Show tooltip on hover
                     this.element.addEventListener('mouseenter', () => {
-                        if (this.state === 'uploading' || this.state === 'paused') {
+                        // Only show tooltip when there's actual recording activity (totalChunks > 0)
+                        if ((this.state === 'uploading' || this.state === 'paused') && this.totalChunks > 0) {
                             this.tooltip.style.display = 'block';
                             setTimeout(() => this.tooltip.style.opacity = '1', 10);
                         }
@@ -1863,14 +1864,14 @@
                         setTimeout(() => this.tooltip.style.display = 'none', 200);
                     });
                     
-                    // Only disable for file:// protocol - show offline state for no connection
+                    // Only disable for file:// protocol - show offline state when no recording active
                     if (window.location.protocol === 'file:' || (ENV && ENV.cloudUpload === false)) {
                         this.setState('disabled');
                     } else if (!navigator.onLine) {
                         this.setState('offline');
                     } else {
-                        // Ready to upload when recording starts
-                        this.setState('disabled');
+                        // Show offline state when no recording active (not disabled)
+                        this.setState('offline');
                     }
                     
                     console.log('✅ LiveUploadIndicator initialized with tooltip');
@@ -1903,12 +1904,12 @@
                         },
                         paused: { 
                             classes: 'bg-yellow-900/30 text-yellow-400 border-yellow-500 cursor-pointer hover:opacity-80',
-                            label: 'Upload paused - retrying',
+                            label: 'Upload paused - server unavailable',
                             hidden: false
                         },
                         offline: { 
                             classes: 'bg-gray-800/30 text-gray-400 border-gray-600 cursor-pointer hover:opacity-80',
-                            label: 'Offline - waiting for connection',
+                            label: 'Waiting for recording',
                             hidden: false
                         },
                         disabled: { 
@@ -1943,9 +1944,29 @@
                         } else {
                             this.element.disabled = false;
                         }
+                        
+                        // Update button text based on state and whether recording is active
+                        this.updateButtonText();
                     }
                 } catch (err) {
                     console.error('LiveUploadIndicator.setState error:', err);
+                }
+            },
+            
+            updateButtonText: function() {
+                try {
+                    if (!this.element) return;
+                    const span = this.element.querySelector('span');
+                    if (!span) return;
+                    
+                    // Show "UPLOAD" when no recording active, or counts when recording
+                    if (this.totalChunks === 0) {
+                        span.textContent = 'UPLOAD';
+                    } else {
+                        span.textContent = `${this.uploadedChunks}/${this.totalChunks}`;
+                    }
+                } catch (err) {
+                    console.error('LiveUploadIndicator.updateButtonText error:', err);
                 }
             },
             
@@ -1960,6 +1981,9 @@
                     } else if (this.state === 'offline') {
                         this.tooltip.innerHTML = `<span class="text-gray-400">📡</span> <span class="text-white font-bold">${this.uploadedChunks}/${this.totalChunks}</span> - Offline`;
                     }
+                    
+                    // Update button text as well
+                    this.updateButtonText();
                 } catch (err) {
                     console.error('LiveUploadIndicator.updateTooltip error:', err);
                 }
@@ -1985,6 +2009,7 @@
                         this.totalChunks = totalCount;
                     }
                     this.updateTooltip();
+                    this.updateButtonText();
                     
                     // Change to uploading state when chunks are successfully uploading
                     // This includes transitions from disabled, offline, AND paused states
@@ -2241,8 +2266,8 @@
                                     }
                                 } else if (type === 'UPLOAD_COMPLETE') {
                                     if (typeof LiveUploadIndicator !== 'undefined' && sessionId === LiveUploadIndicator.currentSessionId) {
-                                        // Keep box visible but change to disabled state after 2 seconds
-                                        setTimeout(() => LiveUploadIndicator.setState('disabled'), 2000);
+                                        // Keep box visible but change to offline state after 2 seconds (not disabled)
+                                        setTimeout(() => LiveUploadIndicator.setState('offline'), 2000);
                                     }
                                     if (sessionId) {
                                         UploadManager.setUploadStatusForSession(sessionId, 'success');
@@ -2253,7 +2278,10 @@
                                     loadTracksFromDB();
                                 } else if (type === 'UPLOAD_PENDING') {
                                     if (typeof LiveUploadIndicator !== 'undefined' && sessionId === LiveUploadIndicator.currentSessionId) {
-                                        LiveUploadIndicator.setState('paused');
+                                        // Only set paused if we're currently uploading (don't override paused from UPLOAD_OFFLINE)
+                                        if (LiveUploadIndicator.state === 'uploading' || LiveUploadIndicator.state === 'offline') {
+                                            LiveUploadIndicator.setState('paused');
+                                        }
                                     }
                                     // Silent pending state - chunks are retrying
                                     if (sessionId) {
@@ -2261,7 +2289,9 @@
                                     }
                                 } else if (type === 'UPLOAD_OFFLINE') {
                                     if (typeof LiveUploadIndicator !== 'undefined' && sessionId === LiveUploadIndicator.currentSessionId) {
+                                        // CRITICAL: Set paused state and prevent it from being overridden
                                         LiveUploadIndicator.setState('paused');
+                                        console.log('⚠️ Server unavailable - showing yellow paused indicator');
                                     }
                                     // Connection lost - show paused status (yellow indicator)
                                     if (sessionId) {
@@ -2391,7 +2421,12 @@
                     console.warn('⚠ Service Worker controller not ready. Please reload the page.');
                     showToast('Service Worker not active. Reload the page!', true);
                 }
-                document.getElementById('uploadStatus').classList.remove('hidden');
+                
+                // Update upload status UI if element exists (legacy code)
+                const uploadStatusEl = document.getElementById('uploadStatus');
+                if (uploadStatusEl) {
+                    uploadStatusEl.classList.remove('hidden');
+                }
             },
             updateUI: function (fileId, progress) {
                 const bar = document.getElementById(`progress-${fileId}`);
@@ -3062,15 +3097,19 @@
 
         // Monitor connection status and auto-resume uploads
         window.addEventListener('online', async () => {
-            console.log('🌐 Connection restored, checking for pending uploads...');
+            console.log('🌐 Connection restored - resetting retry delays for immediate upload');
             UploadManager.setUploadStatus('idle');
             
-            // Update Live Upload Indicator - keep visible but disabled
+            // Update Live Upload Indicator
             if (typeof LiveUploadIndicator !== 'undefined') {
-                LiveUploadIndicator.setState('disabled');
+                if (LiveUploadIndicator.totalChunks === 0) {
+                    LiveUploadIndicator.setState('offline');
+                } else {
+                    LiveUploadIndicator.setState('uploading');
+                }
             }
 
-            // Check queue size
+            // CRITICAL: Reset retry delays for all pending chunks to trigger immediate retry
             try {
                 const db = await new Promise((resolve, reject) => {
                     const req = indexedDB.open('WaveForgeDB_V4', 3);
@@ -3079,16 +3118,50 @@
                 });
 
                 if (db.objectStoreNames.contains('upload_queue')) {
-                    const countReq = db.transaction('upload_queue', 'readonly').objectStore('upload_queue').count();
-                    countReq.onsuccess = () => {
-                        console.log(`📦 Found ${countReq.result} chunks waiting to upload`);
-                        if (countReq.result > 0 && navigator.serviceWorker && navigator.serviceWorker.controller) {
-                            navigator.serviceWorker.controller.postMessage('TRIGGER_UPLOAD');
+                    const tx = db.transaction('upload_queue', 'readwrite');
+                    const store = tx.objectStore('upload_queue');
+                    const getAllReq = store.getAll();
+                    
+                    getAllReq.onsuccess = async () => {
+                        const items = getAllReq.result;
+                        let resetCount = 0;
+                        const now = Date.now();
+                        
+                        // Reset nextRetryAt for all items that have a retry delay
+                        for (const item of items) {
+                            if (item.nextRetryAt && item.nextRetryAt > now) {
+                                item.nextRetryAt = 0;  // Retry immediately
+                                item.retryCount = Math.max(0, (item.retryCount || 0) - 1); // Reduce retry count by 1
+                                store.put(item);
+                                resetCount++;
+                            }
                         }
+                        
+                        tx.oncomplete = () => {
+                            if (resetCount > 0) {
+                                console.log(`🔄 Reset retry delays for ${resetCount} chunks - triggering immediate upload`);
+                            } else {
+                                console.log(`📦 Found ${items.length} chunks in queue (no retry delays to reset)`);
+                            }
+                            
+                            // Trigger Service Worker to process uploads immediately
+                            if (items.length > 0 && navigator.serviceWorker && navigator.serviceWorker.controller) {
+                                navigator.serviceWorker.controller.postMessage('TRIGGER_UPLOAD');
+                            }
+                            
+                            db.close();
+                        };
                     };
+                    
+                    getAllReq.onerror = () => {
+                        console.error('❌ Failed to reset retry delays:', getAllReq.error);
+                        db.close();
+                    };
+                } else {
+                    db.close();
                 }
             } catch (err) {
-                console.error('Error checking queue:', err);
+                console.error('❌ Error resetting retry delays:', err);
             }
         });
 
@@ -3119,12 +3192,23 @@
             },
             generateSessionId: () => 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
             logChunk: function (blob) {
-                if (!db || !currentSessionId) return;
+                if (!db || !currentSessionId) {
+                    console.error(`❌❌❌ CRITICAL: Cannot log chunk - db=${!!db}, sessionId=${!!currentSessionId}`);
+                    console.error(`❌❌❌ This chunk will be LOST! Blob size: ${blob?.size || 0} bytes`);
+                    return;
+                }
 
                 // Get current chunk index
                 if (!this.chunkCounter) this.chunkCounter = {};
                 if (!this.chunkCounter[currentSessionId]) this.chunkCounter[currentSessionId] = 0;
                 const chunkIndex = this.chunkCounter[currentSessionId]++;
+
+                console.log(`🎤 Recording chunk ${chunkIndex} (${blob.size} bytes) for session ${currentSessionId}`);
+
+                // Track chunks being generated for this session
+                if (!this.chunksGenerating) this.chunksGenerating = {};
+                if (!this.chunksGenerating[currentSessionId]) this.chunksGenerating[currentSessionId] = 0;
+                this.chunksGenerating[currentSessionId]++;
 
                 // Save to IndexedDB for crash recovery
                 const transaction = db.transaction([STORE_RECOVERY], 'readwrite');
@@ -3197,8 +3281,19 @@
                             navigator.serviceWorker.controller.postMessage('TRIGGER_UPLOAD');
                         }
                     };
+                    
+                    tx.onerror = (e) => {
+                        console.error(`❌❌❌ CRITICAL: Failed to save chunk ${chunkIndex} to IndexedDB queue:`, e);
+                        console.error(`❌ Error name: ${e?.target?.error?.name}`);
+                        console.error(`❌ Error message: ${e?.target?.error?.message}`);
+                        console.error(`❌ This chunk will be LOST!`);
+                    };
                 } catch (err) {
-                    console.warn('Live upload queuing failed:', err);
+                    console.error(`❌❌❌ CRITICAL: Live upload queuing exception for chunk ${chunkIndex}:`, err);
+                    console.error(`❌ Error name: ${err?.name}`);
+                    console.error(`❌ Error message: ${err?.message}`);
+                    console.error(`❌ Stack trace:`, err?.stack);
+                    console.error(`❌ This chunk will be LOST unless saved to recovery storage!`);
                 }
             },
             waitForAllChunksUploaded: async function (sessionId, maxWaitMs = 120000) {
@@ -3411,16 +3506,14 @@
             },
             uploadAndAssembleRecoveredChunks: async function (chunks, sessionId, userName, userFormat) {
                 try {
-                    // Upload all recovered chunks to server
-                    console.log('⬆️ Uploading recovered chunks to server with name:', userName);
+                    console.log('📥 Queuing recovered chunks for upload with name:', userName);
+                    
+                    // Queue all recovered chunks for upload (doesn't require server connection)
+                    // Chunks are already in STORE_RECOVERY, just add to upload_queue
                     for (let i = 0; i < chunks.length; i++) {
                         await this.uploadChunkLive(chunks[i].blob, sessionId, i);
                     }
                     console.log('✓ All recovered chunks queued for upload');
-
-                    // Wait for all chunks to upload, then signal server to assemble
-                    console.log('⏳ Waiting for all recovered chunks to upload...');
-                    await this.waitForAllChunksUploaded(sessionId, 120000);
 
                     // Detect mime type from first chunk or use global defaults
                     let mimeType = 'audio/webm;codecs=opus';
@@ -3428,24 +3521,19 @@
                     
                     if (chunks.length > 0 && chunks[0].blob && chunks[0].blob.type) {
                         mimeType = chunks[0].blob.type;
-                        // Extract extension from mime type (only if user didn't specify format)
                         if (!userFormat) {
                             if (mimeType.includes('webm')) extension = 'webm';
                             else if (mimeType.includes('mp4')) extension = 'mp4';
                             else if (mimeType.includes('ogg')) extension = 'ogg';
                         }
                     } else if (typeof preferredMimeType !== 'undefined') {
-                        // Fallback to global variables if they exist
                         mimeType = preferredMimeType;
                         if (!userFormat) {
                             extension = preferredExt || 'webm';
                         }
                     }
 
-                    // Use real filename from user input
                     const recoveredFileName = `${userName}.${extension}`;
-                    
-                    // Calculate total size from chunks
                     const totalSize = chunks.reduce((sum, chunk) => sum + (chunk.blob?.size || 0), 0);
                     
                     const recoveredMetadata = {
@@ -3458,16 +3546,17 @@
                         isRecovery: true
                     };
 
-                    // Signal server to assemble the recovered chunks
-                    console.log('📡 Signaling server to assemble recovered chunks...');
-                    await this.signalRecordingComplete(sessionId, recoveredFileName, recoveredMetadata);
+                    // Queue assembly signal for when server becomes available
+                    console.log('📥 Queuing assembly signal for when server is available...');
+                    await this.queueRecordingComplete(sessionId, recoveredFileName, recoveredMetadata);
+                    
+                    showToast('Recovery saved - will upload when server available', false);
+                    console.log('✅ Recovery queued successfully');
 
-                    console.log('✅ Recovery upload and assembly complete with name:', userName);
-
-                    // Clean up recovery chunks after successful upload
+                    // Clean up STORE_RECOVERY (chunks are now in upload_queue)
                     this.clearSession(sessionId);
                 } catch (err) {
-                    console.error('Recovery upload failed:', err);
+                    console.error('Recovery queueing failed:', err);
                     throw err;
                 }
             },
@@ -3507,7 +3596,11 @@
             clearSession: function (sessionId) {
                 if (!db) return;
                 try {
-                    // Clear recovery store
+                    // CRITICAL: Only clear recovery store, NOT upload queue!
+                    // Upload queue will be cleared automatically by Service Worker after successful upload
+                    // If we clear it here, chunks that are still uploading will be lost!
+                    console.log(`🗑️ Clearing recovery chunks for session ${sessionId}`);
+                    
                     const tx = db.transaction([STORE_RECOVERY], 'readwrite');
                     const store = tx.objectStore(STORE_RECOVERY);
 
@@ -3524,8 +3617,8 @@
                         store.clear();
                     }
                     
-                    // CRITICAL: Also clear upload queue for this session
-                    this.clearUploadQueue(sessionId);
+                    // DO NOT CLEAR UPLOAD QUEUE HERE!
+                    // Chunks are still being uploaded by Service Worker
                 } catch (e) {
                     console.error('Error clearing session:', e);
                 }
@@ -3707,23 +3800,51 @@
                     
                     // IMPORTANT: Count total chunks in queue for this session and register upload
                     const savedSessionId = currentSessionId; // Store before resetting
-                    const countTx = db.transaction(['upload_queue'], 'readonly');
-                    const countStore = countTx.objectStore('upload_queue');
-                    const countReq = countStore.getAll();
-                    countReq.onsuccess = () => {
-                        const sessionChunks = countReq.result.filter(item => item.sessionId === savedSessionId);
+                    
+                    // CRITICAL: Reset retry delays for all chunks in this session BEFORE queuing assembly signal
+                    // This ensures immediate upload instead of waiting for exponential backoff
+                    const resetTx = db.transaction(['upload_queue'], 'readwrite');
+                    const resetStore = resetTx.objectStore('upload_queue');
+                    const resetReq = resetStore.getAll();
+                    
+                    resetReq.onsuccess = () => {
+                        const allItems = resetReq.result;
+                        const sessionChunks = allItems.filter(item => item.sessionId === savedSessionId && item.type !== 'assembly_signal');
                         const totalChunks = sessionChunks.length;
                         
                         console.log(`📦 Recording saved: ${totalChunks} chunks queued for upload`);
+                        
+                        // Reset nextRetryAt for all chunks in this session to trigger immediate upload
+                        let resetCount = 0;
+                        const now = Date.now();
+                        sessionChunks.forEach(item => {
+                            if (item.nextRetryAt && item.nextRetryAt > now) {
+                                item.nextRetryAt = 0;  // Retry immediately
+                                item.retryCount = Math.max(0, (item.retryCount || 0) - 1);
+                                resetStore.put(item);
+                                resetCount++;
+                            }
+                        });
+                        
+                        if (resetCount > 0) {
+                            console.log(`🚀 Reset retry delays for ${resetCount} chunks - immediate upload triggered`);
+                        }
                         
                         // Register upload with total chunks BEFORE rendering playlist
                         if (typeof UploadCoordinator !== 'undefined' && totalChunks > 0) {
                             UploadCoordinator.registerUpload(savedSessionId, 'custom', totalChunks);
                             console.log(`📦 Upload registered immediately for ${savedSessionId}`);
                         }
+                        
+                        // CRITICAL: Queue assembly signal AFTER resetting retry delays
+                        console.log('📥 Queuing assembly signal (will be sent after all chunks upload)');
+                        CrashGuard.queueRecordingComplete(savedSessionId, fileName, metadata);
+                        
+                        // Trigger Service Worker immediately
+                        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                            navigator.serviceWorker.controller.postMessage('TRIGGER_UPLOAD');
+                        }
                     };
-                    
-                    CrashGuard.signalRecordingComplete(currentSessionId, fileName, metadata);
                 }
 
                 // Clear recovery data after successful save
@@ -3896,7 +4017,17 @@
                 };
 
                 mediaRecorder.onstop = () => {
-                    CrashGuard.assembleSession(currentSessionId, false); // false = not recovery
+                    // CRITICAL: Wait briefly for any final ondataavailable events
+                    // MediaRecorder may have 1-2 buffered chunks that haven't been delivered yet
+                    const stoppedSessionId = currentSessionId;
+                    console.log('🛑 Recording stopped, waiting 300ms for final chunks...');
+                    
+                    // Simple fixed delay - most reliable approach
+                    // Previous approach was flawed because it counted chunks already uploaded and removed from queue
+                    setTimeout(() => {
+                        console.log('✅ Opening save modal');
+                        CrashGuard.assembleSession(stoppedSessionId, false);
+                    }, 300); // Just 300ms is enough for final ondataavailable events
                 };
 
                 mediaRecorder.start(1000);

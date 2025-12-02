@@ -1,3 +1,7 @@
+// Service Worker Version - increment to force update
+const SW_VERSION = '2.3.3'; // Fixed syntax error (removed duplicate processUploads function)
+console.log(`[SW] Service Worker version ${SW_VERSION} initializing...`);
+
 const DB_NAME = 'WaveForgeDB_V4';
 const DB_VERSION = 3;
 const STORE_UPLOAD_QUEUE = 'upload_queue';
@@ -279,22 +283,56 @@ async function uploadChunkCustom(item) {
     formData.append('chunk_index', String(item.chunkIndex));
     formData.append('file', item.blob);
     
-    const response = await fetch('/upload/chunk', {
-        method: 'POST',
-        body: formData
-    });
+    // CRITICAL: Use AbortController for timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
     
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[SW Custom] Server error ${response.status}: ${errorText}`);
-        throw new Error(`Server error: ${response.status}`);
+    try {
+        const response = await fetch('/upload/chunk', {
+            method: 'POST',
+            body: formData,
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId); // Clear timeout if request completes
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[SW Custom] Server error ${response.status}: ${errorText}`);
+            throw new Error(`Server error: ${response.status}`);
+        }
+        
+        // CRITICAL: Validate server response to ensure chunk was actually saved
+        const result = await response.json();
+        
+        if (result.status === 'chunk_already_exists') {
+            console.log(`[SW Custom] ✓ Chunk ${item.chunkIndex} already exists on server (idempotent retry)`);
+        } else if (result.status === 'chunk_received') {
+            console.log(`[SW Custom] ✓ Server confirmed chunk ${item.chunkIndex} saved successfully`);
+        } else {
+            console.error(`[SW Custom] ⚠️ Unexpected server response:`, result);
+            throw new Error(`Unexpected server response: ${result.status}`);
+        }
+        
+        // Verify the response matches what we sent
+        if (result.chunk_index !== item.chunkIndex) {
+            console.error(`[SW Custom] ❌ Chunk index mismatch! Sent ${item.chunkIndex}, server confirmed ${result.chunk_index}`);
+            throw new Error(`Chunk index mismatch: sent ${item.chunkIndex}, got ${result.chunk_index}`);
+        }
+        
+        broadcastStatus({
+            type: 'CHUNK_UPLOADED',
+            sessionId: item.sessionId,
+            chunkIndex: item.chunkIndex
+        });
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+            console.error(`[SW Custom] ⏱️ Upload timeout for chunk ${item.chunkIndex}`);
+            throw new Error(`Upload timeout after 30 seconds`);
+        }
+        throw error;
     }
-    
-    broadcastStatus({
-        type: 'CHUNK_UPLOADED',
-        sessionId: item.sessionId,
-        chunkIndex: item.chunkIndex
-    });
 }
 
 // Main Upload Logic
@@ -351,12 +389,19 @@ async function processUploads() {
         return;
     }
 
-    // CRITICAL: Sort by sessionId first, then by chunkIndex to ensure correct order
+    // CRITICAL: Sort by sessionId first, then by type (chunks before assembly), then by chunkIndex
     readyQueue.sort((a, b) => {
         // First compare sessionId
         if (a.sessionId < b.sessionId) return -1;
         if (a.sessionId > b.sessionId) return 1;
-        // If same session, sort by chunkIndex
+        
+        // CRITICAL: Assembly signals must be processed LAST (after all chunks)
+        // If a is assembly but b is not, a comes after
+        if (a.type === 'assembly_signal' && b.type !== 'assembly_signal') return 1;
+        // If b is assembly but a is not, b comes after
+        if (b.type === 'assembly_signal' && a.type !== 'assembly_signal') return -1;
+        
+        // If same session and both are chunks, sort by chunkIndex
         return (a.chunkIndex || 0) - (b.chunkIndex || 0);
     });
     
@@ -368,7 +413,41 @@ async function processUploads() {
             if (item.type === 'assembly_signal') {
                 const retryCount = item.retryCount || 0;
                 const retryInfo = retryCount > 0 ? ` (attempt ${retryCount + 1})` : '';
-                console.log(`[SW] 📢 Sending assembly signal for session ${item.sessionId}${retryInfo}`);
+                console.log(`[SW] 📢 Processing assembly signal for session ${item.sessionId}${retryInfo}`);
+                
+                // CRITICAL: Check if any chunks for this session are still in queue OR being retried
+                const allItems = await getUploadQueue(db);
+                const remainingChunks = allItems.filter(i => 
+                    i.sessionId === item.sessionId && 
+                    i.type !== 'assembly_signal'
+                );
+                
+                if (remainingChunks.length > 0) {
+                    // Check if any chunks are waiting for retry (have future nextRetryAt)
+                    const now = Date.now();
+                    const waitingChunks = remainingChunks.filter(c => (c.nextRetryAt || 0) > now);
+                    const readyChunks = remainingChunks.filter(c => (c.nextRetryAt || 0) <= now);
+                    
+                    console.log(`[SW] ⏸⏸⏸ ASSEMBLY SIGNAL DELAYED - ${remainingChunks.length} chunks still in queue for session ${item.sessionId}`);
+                    console.log(`[SW] 📋 Ready to upload: [${readyChunks.map(c => c.chunkIndex).sort((a,b) => a-b).join(', ')}]`);
+                    console.log(`[SW] ⏳ Waiting for retry: [${waitingChunks.map(c => c.chunkIndex).sort((a,b) => a-b).join(', ')}]`);
+                    console.log(`[SW] 📋 Total pending: [${remainingChunks.map(c => c.chunkIndex).sort((a,b) => a-b).join(', ')}]`);
+                    console.log(`[SW] ⏰ Assembly will retry in 5 seconds once all chunks are uploaded`);
+                    
+                    // Update retry time to check again later (after chunks are done)
+                    const retryDelay = 5000;
+                    await updateRetryCount(db, item.id, retryCount, Date.now() + retryDelay);
+                    
+                    // Schedule retry to check again after chunks are uploaded
+                    setTimeout(() => {
+                        console.log(`[SW] ⏰ Retrying assembly signal check for session ${item.sessionId}`);
+                        processUploads();
+                    }, retryDelay);
+                    
+                    continue; // Skip to next item - will retry when chunks are done
+                }
+                
+                console.log(`[SW] ✓ All chunks uploaded for session ${item.sessionId}, sending assembly signal...`);
                 
                 const formData = new FormData();
                 formData.append('session_id', item.sessionId);
@@ -420,9 +499,45 @@ async function processUploads() {
             console.log(`[SW] 📤 Sending chunk ${item.chunkIndex} to server (custom upload)...`);
             await uploadChunkCustom(item);
 
-            // Success: Remove chunk from DB
+            // Success: Chunk uploaded, now verify it exists on server before removing from queue
             console.log(`[SW] ✓ Chunk ${item.chunkIndex} uploaded successfully (session: ${item.sessionId})`);
-            console.log(`[SW] 🗑 Attempting to remove from queue - ID: "${item.id}"`);
+            console.log(`[SW] 🔍 Verifying chunk exists on server before removing from queue...`);
+            
+            // CRITICAL: Double-check that chunk actually exists on server with timeout
+            const verifyController = new AbortController();
+            const verifyTimeoutId = setTimeout(() => verifyController.abort(), 10000); // 10 second timeout for verify
+            
+            let verifyResponse;
+            try {
+                verifyResponse = await fetch(`/api/verify/${item.sessionId}/${item.chunkIndex}`, {
+                    signal: verifyController.signal
+                });
+                clearTimeout(verifyTimeoutId);
+            } catch (verifyError) {
+                clearTimeout(verifyTimeoutId);
+                if (verifyError.name === 'AbortError') {
+                    console.error(`[SW] ⏱️ Verify timeout for chunk ${item.chunkIndex}`);
+                    throw new Error(`Verify timeout after 10 seconds`);
+                }
+                throw verifyError;
+            }
+            
+            if (!verifyResponse.ok) {
+                console.error(`[SW] ⚠️ Verify request failed with status ${verifyResponse.status}`);
+                throw new Error(`Failed to verify chunk ${item.chunkIndex} on server (HTTP ${verifyResponse.status})`);
+            }
+            
+            const verifyResult = await verifyResponse.json();
+            if (!verifyResult.exists) {
+                console.error(`[SW] ❌ CRITICAL: Chunk ${item.chunkIndex} NOT found on server after upload!`);
+                if (verifyResult.path) {
+                    console.error(`[SW] Expected path: ${verifyResult.path}`);
+                }
+                throw new Error(`Chunk ${item.chunkIndex} not found on server after upload - will retry`);
+            }
+            
+            console.log(`[SW] ✅ Chunk ${item.chunkIndex} verified on server (${verifyResult.size} bytes)`);
+            console.log(`[SW] 🗑 Removing chunk from queue - ID: "${item.id}"`);
             
             try {
                 await removeFromQueue(db, item.id);
@@ -477,14 +592,15 @@ async function processUploads() {
                                      error.message.includes('Server error: 5') ||
                                      error.message.includes('fetch');
             
-            // Check for fatal errors (non-recoverable)
+            // Check for fatal errors (non-recoverable - but only for data corruption, NOT retry count)
+            // CRITICAL: Never remove chunks from queue due to retry count - they must be uploaded!
             const isFatalError = !isConnectionError && (
                 error.message.includes('Server error: 400') || // Bad request
                 error.message.includes('Server error: 413') || // Payload too large
                 error.message.includes('Server error: 422') || // Unprocessable entity
                 error.message.includes('Invalid chunk data') ||
-                error.message.includes('Corrupted') ||
-                retryCount >= 20 // Too many retries = something is broken
+                error.message.includes('Corrupted')
+                // NOTE: We removed "retryCount >= 20" - chunks should NEVER be deleted due to retries
             );
             
             if (isFatalError) {
@@ -503,6 +619,15 @@ async function processUploads() {
                 });
                 
                 continue; // Skip to next item
+            }
+            
+            // SAFETY CHECK: If too many retries, increase backoff but KEEP in queue
+            if (retryCount >= 20) {
+                console.warn(`[SW] ⚠️ Chunk ${item.chunkIndex} has failed ${retryCount} times - extending retry delay`);
+                // Use very long backoff for stuck chunks (5 minutes)
+                const longBackoff = 300000; // 5 minutes
+                await updateRetryCount(db, item.id, retryCount, Date.now() + longBackoff);
+                continue; // Skip this attempt, will retry later
             }
             
             // Notify UploadCoordinator about error (only after multiple failures)
