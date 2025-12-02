@@ -1614,7 +1614,87 @@
     </div>
 
     <script>
-        // --- 1. FEATURE FLAGS ---
+        // --- 1. RUNTIME ENVIRONMENT DETECTION ---
+        
+        const RuntimeEnvironment = {
+            isFileProtocol: location.protocol === 'file:',
+            isLocalhost: ['localhost', '127.0.0.1', ''].includes(location.hostname),
+            isHTTP: location.protocol.startsWith('http'),
+            
+            // Feature availability based on protocol
+            features: {
+                serviceWorker: false,
+                backgroundSync: false,
+                cloudUpload: false,
+                serverFetch: false,
+                localRecording: true,
+                localPlayback: true,
+                localStorage: true,
+                downloadBlob: true
+            },
+            
+            init: function() {
+                // Detect available features based on protocol
+                if (this.isHTTP) {
+                    // Full feature set for HTTP(S)
+                    this.features.serviceWorker = 'serviceWorker' in navigator;
+                    this.features.backgroundSync = 'serviceWorker' in navigator && 'sync' in ServiceWorkerRegistration.prototype;
+                    this.features.cloudUpload = true;
+                    this.features.serverFetch = true;
+                    console.log('🌐 HTTP Mode: All features enabled');
+                } else if (this.isFileProtocol) {
+                    // Limited feature set for file://
+                    console.warn('📁 FILE Mode: Running with limited features (no cloud sync)');
+                    console.log('✅ Available: Recording, Playback, EQ, Visualizer, Local Storage, Download');
+                    console.log('❌ Disabled: Service Worker, Background Sync, Cloud Upload');
+                    this.showFileProtocolWarning();
+                }
+                
+                return this.features;
+            },
+            
+            showFileProtocolWarning: function() {
+                // Show persistent warning banner for file:// mode
+                const banner = document.createElement('div');
+                banner.id = 'fileProtocolBanner';
+                banner.className = 'fixed top-0 left-0 right-0 bg-yellow-900/90 border-b-2 border-yellow-500 text-yellow-200 px-4 py-2 z-[9999] text-center text-sm font-mono';
+                banner.innerHTML = `
+                    <span class="font-bold">⚠ OFFLINE MODE:</span> 
+                    Running from file:// - Cloud features disabled. 
+                    <a href="#" onclick="RuntimeEnvironment.showOfflineModeHelp(); return false;" 
+                       class="underline hover:text-yellow-100 ml-2">Learn more</a>
+                `;
+                document.body.insertBefore(banner, document.body.firstChild);
+                
+                // Adjust body padding to prevent content overlap
+                document.body.style.paddingTop = '40px';
+            },
+            
+            showOfflineModeHelp: function() {
+                const modal = document.getElementById('infoModal');
+                if (modal) {
+                    openInfoModal();
+                    // Scroll to offline mode section
+                    setTimeout(() => {
+                        const offlineSection = document.getElementById('offlineModeInfo');
+                        if (offlineSection) {
+                            offlineSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            offlineSection.classList.add('bg-yellow-900/20');
+                            setTimeout(() => offlineSection.classList.remove('bg-yellow-900/20'), 2000);
+                        }
+                    }, 300);
+                }
+            },
+            
+            canUseFeature: function(featureName) {
+                return this.features[featureName] === true;
+            }
+        };
+        
+        // Initialize environment detection immediately
+        const ENV = RuntimeEnvironment.init();
+
+        // --- 2. FEATURE FLAGS ---
         
         const FeatureFlags = {
             // Show live upload progress during recording
@@ -1969,6 +2049,11 @@
         const UploadManager = {
             retryInterval: null,
             register: async function () {
+                // CRITICAL: Skip Service Worker registration in file:// mode
+                if (!ENV.canUseFeature('serviceWorker')) {
+                    console.log('⏭️ Service Worker registration skipped (not available in current environment)');
+                    return;
+                }
                 if ('serviceWorker' in navigator) {
                     try {
                         // Use external sw.js file instead of blob URL
@@ -2043,6 +2128,13 @@
                 }, 30000); // Check every 30 seconds (reduced CPU usage)
             },
             queueUpload: async function (id, blob, fileName, metadata = {}, sessionId = null) {
+                // CRITICAL: Block upload queue in file:// mode
+                if (!ENV.canUseFeature('cloudUpload')) {
+                    console.warn('⏭️ Upload queue disabled in offline mode');
+                    showToast('Upload not available in offline mode - use DL button', false);
+                    return;
+                }
+                
                 const CHUNK_SIZE = 1024 * 1024; // 1MB chunks
                 const totalChunks = Math.ceil(blob.size / CHUNK_SIZE);
 
@@ -2817,6 +2909,12 @@
                 this.uploadChunkLive(blob, currentSessionId, chunkIndex);
             },
             uploadChunkLive: async function (blob, sessionId, chunkIndex) {
+                // CRITICAL: Skip live upload in file:// mode
+                if (!ENV.canUseFeature('cloudUpload')) {
+                    console.log('⏭️ Live chunk upload skipped (cloud upload not available)');
+                    return;
+                }
+                
                 try {
                     const db = await new Promise((resolve, reject) => {
                         const req = indexedDB.open('WaveForgeDB_V4', 3);
@@ -2939,6 +3037,13 @@
                 return false;
             },
             signalRecordingComplete: async function (sessionId, fileName, metadata) {
+                // CRITICAL: Skip server signal in file:// mode
+                if (!ENV.canUseFeature('serverFetch')) {
+                    console.log('⏭️ Server signal skipped (not available in offline mode)');
+                    showToast('Recording saved locally - cloud sync disabled in offline mode', false);
+                    return;
+                }
+                
                 console.log(`📢 Signaling recording complete for session ${sessionId}`);
 
                 // CRITICAL: Wait for all chunks to upload first
@@ -3916,12 +4021,17 @@
                 const ext = t.extension || 'webm';
                 let col = 'text-gray-500'; if (ext === 'wav') col = 'text-cyan-400'; if (ext === 'mp3') col = 'text-pink-400';
 
+                // CONDITIONAL: Show upload button only if cloud upload is available
+                const uploadButtonHTML = ENV.canUseFeature('cloudUpload') 
+                    ? `<button class="up-btn-${t.id} w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:border-cyan-400 hover:text-cyan-400 upload-icon transition-all" title="Upload to Cloud" aria-label="In Cloud hochladen: ${t.name}" type="button"><span aria-hidden="true">☁</span></button>`
+                    : `<button class="w-8 h-8 rounded-full border border-gray-700 flex items-center justify-center text-gray-700 cursor-not-allowed opacity-30" title="Upload not available in offline mode" disabled><span aria-hidden="true">☁</span></button>`;
+
                 el.innerHTML = `
                     <div class="flex justify-between items-center w-full">
                         <div><div class="font-bold text-gray-200 group-hover:text-cyan-400 transition-colors filename">${t.name}</div><div class="text-[10px] ${col} font-mono">${date} | ${ext.toUpperCase()}</div></div>
                         <div class="flex gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
                             <button class="play-btn-${t.id} w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:border-cyan-400 hover:text-cyan-400 hover:shadow-[0_0_10px_rgba(0,243,255,0.3)] transition-all" aria-label="Abspielen: ${t.name}" type="button"><span aria-hidden="true">▶</span></button>
-                            <button class="up-btn-${t.id} w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:border-cyan-400 hover:text-cyan-400 upload-icon transition-all" title="Upload to Cloud" aria-label="In Cloud hochladen: ${t.name}" type="button"><span aria-hidden="true">☁</span></button>
+                            ${uploadButtonHTML}
                             <button class="dl-btn-${t.id} px-2 h-8 rounded border border-gray-600 flex items-center justify-center hover:border-green-400 hover:text-green-400 text-[10px] font-mono transition-all" aria-label="Herunterladen: ${t.name}" type="button">DL</button>
                             <button class="del-btn-${t.id} w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:border-red-500 hover:text-red-500 transition-all" aria-label="Löschen: ${t.name}" type="button"><span aria-hidden="true">×</span></button>
                         </div>
@@ -3935,17 +4045,21 @@
                 el.querySelector(`.play-btn-${t.id}`).onclick = () => loadTrack(t.id, t.name, t.blob);
                 el.querySelector(`.dl-btn-${t.id}`).onclick = () => { const u = URL.createObjectURL(t.blob); const a = document.createElement('a'); a.href = u; a.download = `${t.name}.${ext}`; a.click(); URL.revokeObjectURL(u); };
                 el.querySelector(`.del-btn-${t.id}`).onclick = () => openDeleteModal(t.id, t.name);
-                el.querySelector(`.up-btn-${t.id}`).onclick = () => {
-                    document.getElementById(`progress-bar-${t.id}`).style.display = 'block';
-                    const metadata = {
-                        name: t.name,
-                        mimeType: t.mimeType || preferredMimeType,
-                        extension: ext,
-                        savedAt: t.date,
-                        fileSize: t.blob.size
+                
+                // CONDITIONAL: Only add upload handler if cloud upload is available
+                if (ENV.canUseFeature('cloudUpload')) {
+                    el.querySelector(`.up-btn-${t.id}`).onclick = () => {
+                        document.getElementById(`progress-bar-${t.id}`).style.display = 'block';
+                        const metadata = {
+                            name: t.name,
+                            mimeType: t.mimeType || preferredMimeType,
+                            extension: ext,
+                            savedAt: t.date,
+                            fileSize: t.blob.size
+                        };
+                        UploadManager.queueUpload(t.id, t.blob, `${t.name}.${ext}`, metadata, t.sessionId);
                     };
-                    UploadManager.queueUpload(t.id, t.blob, `${t.name}.${ext}`, metadata, t.sessionId);
-                };
+                }
                 
                 // IMPORTANT: Immediately show upload status if this recording has an active upload
                 if (t.sessionId && UploadCoordinator.activeUploads.has(t.sessionId)) {

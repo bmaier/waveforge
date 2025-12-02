@@ -36,10 +36,18 @@
 
 ## 🚀 Quick Start
 
+### Two Usage Modes
+
+WaveForge Pro supports **two deployment modes** with automatic feature detection:
+
+1. **🌐 HTTP Mode (Full Features)** - All features including cloud sync
+2. **📁 Offline Mode (file://)** - Local-only features, no server required
+
 ### Prerequisites
-- **Python 3.13+** installed
+- **Python 3.13+** installed (only for HTTP mode)
 - **uv** package manager (installs automatically if not present)
 - **Git** for cloning the repository
+- **Modern Browser** with Web Audio API support
 
 > **Note:** The start script will automatically install `uv` if it's not found. Alternatively, you can install it manually:
 > ```bash
@@ -82,6 +90,83 @@ That's it! The script will automatically:
 ```bash
 ./stop.sh
 ```
+
+## 📁 Offline Mode (file:// URL)
+
+**WaveForge Pro can run without a web server** by opening `index.html` directly in your browser. Perfect for offline use or quick testing!
+
+### What Works in Offline Mode
+
+✅ **Available Features:**
+- Audio Recording (Microphone) up to 8+ hours
+- Web Audio API (EQ, Visualizer, Playback)
+- IndexedDB Storage (local persistence)
+- Local Download (WAV, WebM, MP3)
+- Playback with Speed Control
+- CrashGuard (local chunk recovery)
+
+❌ **Unavailable Features:**
+- Service Worker (browser security restriction)
+- Cloud Synchronization (no backend)
+- Background Upload Queue (requires Service Worker)
+- TUS Resumable Uploads (requires server)
+- Offline Sync (requires Service Worker API)
+
+### How to Use Offline Mode
+
+1. **Open directly in browser:**
+   ```bash
+   # macOS
+   open frontend/src/index.html
+   
+   # Linux
+   xdg-open frontend/src/index.html
+   
+   # Windows
+   start frontend/src/index.html
+   ```
+
+2. **Yellow warning banner appears:** "⚠ OFFLINE MODE: Running from file:// - Cloud features disabled"
+
+3. **Use local features:** Record, playback, download - all work perfectly!
+
+4. **Upload buttons disabled:** Cloud icon (☁) is grayed out automatically
+
+### Recommendation: Local Web Server
+
+For **full functionality** including cloud sync, use a local web server (no internet required!):
+
+```bash
+# Simple Python server
+python3 -m http.server 8080
+# Then open: http://localhost:8080/frontend/src/index.html
+
+# Benefits:
+✅ All features work (Service Worker, Upload Queue, etc.)
+✅ No internet connection needed
+✅ Same as production environment
+```
+
+### Technical Details
+
+The app uses **automatic protocol detection** to enable/disable features:
+
+```javascript
+// Automatic environment detection
+const RuntimeEnvironment = {
+    isFileProtocol: location.protocol === 'file:',
+    isHTTP: location.protocol.startsWith('http'),
+    
+    features: {
+        serviceWorker: false,  // ❌ Blocked by browser in file://
+        cloudUpload: false,     // ❌ No server available
+        localRecording: true,   // ✅ Always works
+        downloadBlob: true      // ✅ Always works
+    }
+};
+```
+
+**Your existing HTTP installation is NOT affected** - both modes coexist perfectly!
 
 ## 📋 Project Structure
 
