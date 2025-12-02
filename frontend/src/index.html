@@ -645,102 +645,43 @@
         }
 
         /* Live Upload Indicator (during recording) */
-        .live-upload-indicator {
-            position: relative;
-        }
-
-        .live-upload-icon {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
+        /* Live Upload Indicator - Redesigned with 4 States */
+        .live-upload-active {
             background: rgba(0, 243, 255, 0.1);
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 10px;
-            color: var(--neon-cyan);
-        }
-
-        .live-upload-icon:hover {
-            background: rgba(0, 243, 255, 0.2);
             border-color: rgba(0, 243, 255, 0.5);
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+            color: #00f3ff;
+            animation: pulse-upload 2s infinite;
         }
 
-        .live-upload-icon.uploading {
-            animation: pulse-live-upload 2s infinite;
+        .live-upload-paused {
+            background: rgba(234, 179, 8, 0.1);
+            border-color: rgba(234, 179, 8, 0.5);
+            color: #eab308;
         }
 
-        @keyframes pulse-live-upload {
-            0%, 100% {
-                opacity: 1;
-                box-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
-            }
-            50% {
-                opacity: 0.7;
-                box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
-            }
-        }
-
-        .live-upload-details {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            padding: 12px;
-            background: rgba(10, 10, 26, 0.95);
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            min-width: 220px;
-            z-index: 1000;
-            transform: translateY(-10px);
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.2s;
-        }
-
-        .live-upload-details.active {
-            transform: translateY(0);
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .live-upload-details-header {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--neon-cyan);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .live-upload-details-stat {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 9px;
-        }
-
-        .live-upload-details-stat:last-child {
-            border-bottom: none;
-        }
-
-        .live-upload-details-label {
+        .live-upload-offline {
+            background: rgba(156, 163, 175, 0.1);
+            border-color: rgba(156, 163, 175, 0.5);
             color: #9ca3af;
         }
 
-        .live-upload-details-value {
-            color: #fff;
-            font-weight: 600;
-            font-family: 'Share Tech Mono', monospace;
+        .live-upload-disabled {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.5);
+            color: #ef4444;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @keyframes pulse-upload {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.7;
+                transform: scale(0.95);
+            }
         }
     </style>
 </head>
@@ -1826,143 +1767,112 @@
             }, 3000);
         }
 
-        // === LIVE UPLOAD INDICATOR (DURING RECORDING) ===
-        let liveUploadIndicator = null;
-        let liveUploadDetailsVisible = false;
-        let liveUploadAutoHideTimeout = null;
-        let liveUploadChunkCount = 0;
-        let liveUploadLastTime = null;
-
-        function createLiveUploadIndicator() {
-            if (!FeatureFlags.SHOW_LIVE_UPLOAD_PROGRESS) return null;
+        // === LIVE UPLOAD INDICATOR (Redesigned with Real Server Status) ===
+        const LiveUploadIndicator = {
+            element: null,
+            state: 'hidden',
+            currentSessionId: null,
             
-            // Find timer display container
-            const timerContainer = document.getElementById('timerDisplay').parentElement;
-            
-            // Create indicator container
-            const indicator = document.createElement('div');
-            indicator.id = 'liveUploadIndicator';
-            indicator.className = 'live-upload-indicator';
-            indicator.innerHTML = `
-                <div class="live-upload-icon uploading" 
-                     onclick="toggleLiveUploadDetails()" 
-                     role="button" 
-                     tabindex="0"
-                     aria-label="Live upload status: Click to show details"
-                     title="Background upload active - Click for details">
-                    <span aria-hidden="true">☁↑</span>
-                    <span id="liveUploadCount" aria-live="polite">0</span>
-                </div>
-                <div id="liveUploadDetails" class="live-upload-details" role="tooltip">
-                    <div class="live-upload-details-header">
-                        <span aria-hidden="true">⇪</span> Live Background Upload
-                    </div>
-                    <div class="live-upload-details-stat">
-                        <span class="live-upload-details-label">Chunks Uploaded:</span>
-                        <span class="live-upload-details-value" id="liveUploadChunksValue">0</span>
-                    </div>
-                    <div class="live-upload-details-stat">
-                        <span class="live-upload-details-label">Last Upload:</span>
-                        <span class="live-upload-details-value" id="liveUploadLastTime">just now</span>
-                    </div>
-                    <div class="live-upload-details-stat">
-                        <span class="live-upload-details-label">Status:</span>
-                        <span class="live-upload-details-value" style="color: #22c55e;">✓ Syncing</span>
-                    </div>
-                </div>
-            `;
-            
-            // Insert before timer display
-            timerContainer.insertBefore(indicator, document.getElementById('timerDisplay'));
-            
-            return indicator;
-        }
-
-        function toggleLiveUploadDetails() {
-            if (!liveUploadIndicator) return;
-            
-            const details = document.getElementById('liveUploadDetails');
-            if (!details) return;
-            
-            liveUploadDetailsVisible = !liveUploadDetailsVisible;
-            
-            if (liveUploadDetailsVisible) {
-                details.classList.add('active');
-                clearTimeout(liveUploadAutoHideTimeout);
-                
-                // Auto-hide after configured seconds
-                if (FeatureFlags.LIVE_UPLOAD_AUTO_HIDE_SECONDS > 0) {
-                    liveUploadAutoHideTimeout = setTimeout(() => {
-                        liveUploadDetailsVisible = false;
-                        details.classList.remove('active');
-                    }, FeatureFlags.LIVE_UPLOAD_AUTO_HIDE_SECONDS * 1000);
+            init: function() {
+                try {
+                    // Check if upload available
+                    if (typeof ENV !== 'undefined' && ENV && ENV.cloudUpload === false) {
+                        this.createIndicator();
+                        this.setState('disabled');
+                        return;
+                    }
+                    // Indicator created on first upload
+                } catch (err) {
+                    console.error('LiveUploadIndicator.init error:', err);
                 }
-            } else {
-                details.classList.remove('active');
-                clearTimeout(liveUploadAutoHideTimeout);
+            },
+            
+            createIndicator: function() {
+                try {
+                    if (this.element) return;
+                    
+                    const uploadStatusEl = document.getElementById('uploadStatus');
+                    const dbStatusEl = document.getElementById('dbStatus');
+                    
+                    if (!uploadStatusEl || !dbStatusEl) {
+                        console.warn('LiveUploadIndicator: Target elements not found');
+                        return;
+                    }
+                    
+                    const statusContainer = uploadStatusEl.parentElement;
+                    if (!statusContainer) {
+                        console.warn('LiveUploadIndicator: Parent container not found');
+                        return;
+                    }
+                    
+                    this.element = document.createElement('span');
+                    this.element.id = 'liveUploadIndicator';
+                    this.element.className = 'text-[10px] px-2 py-1 rounded border hidden';
+                    this.element.setAttribute('role', 'status');
+                    this.element.setAttribute('aria-live', 'polite');
+                    this.element.innerHTML = '<span aria-hidden="true">☁</span> <span>UPLOAD</span>';
+                    
+                    // Insert before dbStatus (correct position between UPLOADING and DB ONLINE)
+                    statusContainer.insertBefore(this.element, dbStatusEl);
+                } catch (err) {
+                    console.error('LiveUploadIndicator.createIndicator error:', err);
+                }
+            },
+            
+            setState: function(state) {
+                try {
+                    if (!this.element) this.createIndicator();
+                    if (!this.element) return;
+                    
+                    this.state = state;
+                    this.element.classList.remove('hidden', 'live-upload-active', 'live-upload-paused', 
+                                                   'live-upload-offline', 'live-upload-disabled');
+                    
+                    const states = {
+                        uploading: { class: 'live-upload-active', label: 'Uploading to server' },
+                        paused: { class: 'live-upload-paused', label: 'Upload paused - retrying' },
+                        offline: { class: 'live-upload-offline', label: 'Upload offline - waiting for connection' },
+                        disabled: { class: 'live-upload-disabled', label: 'Upload disabled in offline mode' },
+                        hidden: { class: 'hidden', label: '' }
+                    };
+                    
+                    const config = states[state];
+                    if (config) {
+                        this.element.classList.add(config.class);
+                        if (config.label) {
+                            this.element.setAttribute('aria-label', config.label);
+                            this.element.title = config.label;
+                        }
+                    }
+                } catch (err) {
+                    console.error('LiveUploadIndicator.setState error:', err);
+                }
+            },
+            
+            onRecordingStart: function(sessionId) {
+                try {
+                    if (typeof ENV !== 'undefined' && ENV && ENV.cloudUpload === false) {
+                        this.setState('disabled');
+                        return;
+                    }
+                    this.currentSessionId = sessionId;
+                    // Don't show until first actual upload
+                } catch (err) {
+                    console.error('LiveUploadIndicator.onRecordingStart error:', err);
+                }
+            },
+            
+            onRecordingStop: function() {
+                try {
+                    this.currentSessionId = null;
+                    setTimeout(() => this.setState('hidden'), 3000);
+                } catch (err) {
+                    console.error('LiveUploadIndicator.onRecordingStop error:', err);
+                }
             }
-        }
+        };
 
-        function updateLiveUploadIndicator(chunkCount) {
-            if (!FeatureFlags.SHOW_LIVE_UPLOAD_PROGRESS) return;
-            if (chunkCount < FeatureFlags.LIVE_UPLOAD_MIN_CHUNKS) return;
-            
-            // Create indicator if it doesn't exist
-            if (!liveUploadIndicator) {
-                liveUploadIndicator = createLiveUploadIndicator();
-                if (!liveUploadIndicator) return; // Feature disabled
-            }
-            
-            liveUploadChunkCount = chunkCount;
-            liveUploadLastTime = new Date();
-            
-            // Update count badge
-            const countEl = document.getElementById('liveUploadCount');
-            if (countEl) {
-                countEl.textContent = chunkCount;
-            }
-            
-            // Update details if visible
-            const chunksValueEl = document.getElementById('liveUploadChunksValue');
-            if (chunksValueEl) {
-                chunksValueEl.textContent = chunkCount;
-            }
-            
-            const lastTimeEl = document.getElementById('liveUploadLastTime');
-            if (lastTimeEl) {
-                lastTimeEl.textContent = 'just now';
-            }
-        }
 
-        function removeLiveUploadIndicator() {
-            if (liveUploadIndicator) {
-                liveUploadIndicator.remove();
-                liveUploadIndicator = null;
-                liveUploadDetailsVisible = false;
-                liveUploadChunkCount = 0;
-                liveUploadLastTime = null;
-                clearTimeout(liveUploadAutoHideTimeout);
-            }
-        }
-
-        // Update "Last Upload" time every second if details are visible
-        setInterval(() => {
-            if (!liveUploadDetailsVisible || !liveUploadLastTime) return;
-            
-            const lastTimeEl = document.getElementById('liveUploadLastTime');
-            if (!lastTimeEl) return;
-            
-            const secondsAgo = Math.floor((new Date() - liveUploadLastTime) / 1000);
-            
-            if (secondsAgo < 5) {
-                lastTimeEl.textContent = 'just now';
-            } else if (secondsAgo < 60) {
-                lastTimeEl.textContent = `${secondsAgo}s ago`;
-            } else {
-                const minutesAgo = Math.floor(secondsAgo / 60);
-                lastTimeEl.textContent = `${minutesAgo}m ago`;
-            }
-        }, 1000);
 
         // === MODAL ACCESSIBILITY: Focus Trap & ESC Key Handler (BITV 2.0) ===
         let lastFocusedElement = null;
@@ -2082,31 +1992,51 @@
                         navigator.serviceWorker.addEventListener('message', (event) => {
                             const { type, sessionId, hasPendingChunks } = event.data;
 
-                            if (type === 'UPLOAD_PROGRESS') {
-                                if (sessionId) {
-                                    UploadManager.setUploadStatusForSession(sessionId, 'uploading');
+                            // Update LiveUploadIndicator based on real server status
+                            try {
+                                if (type === 'UPLOAD_PROGRESS') {
+                                    if (typeof LiveUploadIndicator !== 'undefined' && sessionId === LiveUploadIndicator.currentSessionId) {
+                                        LiveUploadIndicator.setState('uploading');
+                                    }
+                                    if (sessionId) {
+                                        UploadManager.setUploadStatusForSession(sessionId, 'uploading');
+                                    }
+                                } else if (type === 'UPLOAD_COMPLETE') {
+                                    if (typeof LiveUploadIndicator !== 'undefined' && sessionId === LiveUploadIndicator.currentSessionId) {
+                                        setTimeout(() => LiveUploadIndicator.setState('hidden'), 2000);
+                                    }
+                                    if (sessionId) {
+                                        UploadManager.setUploadStatusForSession(sessionId, 'success');
+                                        setTimeout(() => {
+                                            UploadManager.setUploadStatusForSession(sessionId, 'idle');
+                                        }, 2000);
+                                    }
+                                    loadTracksFromDB();
+                                } else if (type === 'UPLOAD_PENDING') {
+                                    if (typeof LiveUploadIndicator !== 'undefined' && sessionId === LiveUploadIndicator.currentSessionId) {
+                                        LiveUploadIndicator.setState('paused');
+                                    }
+                                    // Silent pending state - chunks are retrying
+                                    if (sessionId) {
+                                        UploadManager.setUploadStatusForSession(sessionId, 'pending');
+                                    }
+                                } else if (type === 'UPLOAD_OFFLINE') {
+                                    if (typeof LiveUploadIndicator !== 'undefined' && sessionId === LiveUploadIndicator.currentSessionId) {
+                                        LiveUploadIndicator.setState('offline');
+                                    }
+                                    // Connection lost - show pending status
+                                    if (sessionId) {
+                                        UploadManager.setUploadStatusForSession(sessionId, 'pending');
+                                    }
+                                    console.log('📡 Upload paused - waiting for connection (checking every 5s)');
+                                } else if (type === 'CONNECTION_RESTORED') {
+                                    if (typeof LiveUploadIndicator !== 'undefined' && LiveUploadIndicator.state === 'offline') {
+                                        LiveUploadIndicator.setState('uploading');
+                                    }
+                                    console.log('✅ Connection restored - resuming uploads');
                                 }
-                            } else if (type === 'UPLOAD_COMPLETE') {
-                                if (sessionId) {
-                                    UploadManager.setUploadStatusForSession(sessionId, 'success');
-                                    setTimeout(() => {
-                                        UploadManager.setUploadStatusForSession(sessionId, 'idle');
-                                    }, 2000);
-                                }
-                                loadTracksFromDB();
-                            } else if (type === 'UPLOAD_PENDING') {
-                                // Silent pending state - chunks are retrying
-                                if (sessionId) {
-                                    UploadManager.setUploadStatusForSession(sessionId, 'pending');
-                                }
-                            } else if (type === 'UPLOAD_OFFLINE') {
-                                // Connection lost - show pending status
-                                if (sessionId) {
-                                    UploadManager.setUploadStatusForSession(sessionId, 'pending');
-                                }
-                                console.log('📡 Upload paused - waiting for connection (checking every 5s)');
-                            } else if (type === 'CONNECTION_RESTORED') {
-                                console.log('✅ Connection restored - resuming uploads');
+                            } catch (err) {
+                                console.error('Service Worker message handler error:', err);
                             }
                         });
 
@@ -2912,11 +2842,6 @@
                     chunkIndex: chunkIndex
                 });
 
-                // Update live upload indicator (Feature-Flag controlled)
-                if (typeof updateLiveUploadIndicator === 'function') {
-                    updateLiveUploadIndicator(chunkIndex + 1);
-                }
-
                 // Register upload with UploadCoordinator on first chunk
                 if (chunkIndex === 0 && typeof UploadCoordinator !== 'undefined') {
                     UploadCoordinator.registerUpload(currentSessionId, 'custom', 0);
@@ -3263,6 +3188,7 @@
             clearSession: function (sessionId) {
                 if (!db) return;
                 try {
+                    // Clear recovery store
                     const tx = db.transaction([STORE_RECOVERY], 'readwrite');
                     const store = tx.objectStore(STORE_RECOVERY);
 
@@ -3278,8 +3204,48 @@
                         // This happens when database was cleared or is newly created
                         store.clear();
                     }
+                    
+                    // CRITICAL: Also clear upload queue for this session
+                    this.clearUploadQueue(sessionId);
                 } catch (e) {
                     console.error('Error clearing session:', e);
+                }
+            },
+            clearUploadQueue: async function (sessionId) {
+                if (!db) return;
+                try {
+                    // Check if upload_queue store exists
+                    if (!db.objectStoreNames.contains('upload_queue')) {
+                        console.log('⏭️ Upload queue store does not exist yet');
+                        return;
+                    }
+                    
+                    const tx = db.transaction(['upload_queue'], 'readwrite');
+                    const store = tx.objectStore('upload_queue');
+                    const getAllReq = store.getAll();
+                    
+                    getAllReq.onsuccess = () => {
+                        const items = getAllReq.result;
+                        const sessionItems = items.filter(item => item.fileId === sessionId);
+                        
+                        if (sessionItems.length > 0) {
+                            console.log(`🗑️ Clearing ${sessionItems.length} upload queue items for session ${sessionId}`);
+                            const deleteTx = db.transaction(['upload_queue'], 'readwrite');
+                            const deleteStore = deleteTx.objectStore('upload_queue');
+                            
+                            sessionItems.forEach(item => {
+                                deleteStore.delete(item.id);
+                            });
+                            
+                            deleteTx.oncomplete = () => {
+                                console.log(`✓ Upload queue cleared for session ${sessionId}`);
+                            };
+                        } else {
+                            console.log(`✓ No upload queue items found for session ${sessionId}`);
+                        }
+                    };
+                } catch (e) {
+                    console.error('Error clearing upload queue:', e);
                 }
             },
             clearAllRecoveryData: function () {
@@ -3611,6 +3577,9 @@
                 document.getElementById('stopButton').disabled = false;
                 startTimer();
                 applyInputEQ();
+                
+                // Initialize live upload indicator for this recording session
+                LiveUploadIndicator.onRecordingStart(currentSessionId);
             } catch (err) { console.error(err); showToast("Mic Error", true); }
         }
 
@@ -3629,8 +3598,8 @@
                 document.getElementById('stopButton').disabled = true;
                 stopTimer();
                 
-                // Remove live upload indicator
-                removeLiveUploadIndicator();
+                // Stop live upload indicator
+                LiveUploadIndicator.onRecordingStop();
             }
         }
 
@@ -4199,6 +4168,9 @@
             });
             getSliderValues('input'); getSliderValues('output');
             updateFormatWarning();
+            
+            // Initialize live upload indicator
+            LiveUploadIndicator.init();
 
             // BITV 2.0: Keyboard accessibility - Escape key closes modals
             document.addEventListener('keydown', (e) => {
