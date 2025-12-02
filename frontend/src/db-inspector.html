@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IndexedDB Inspector</title>
+</head>
+<body>
+    <h1>IndexedDB Inspector</h1>
+    <button onclick="inspectDB()">Inspect WaveForgeDB_V4</button>
+    <pre id="output"></pre>
+    
+    <script>
+    async function inspectDB() {
+        const output = document.getElementById('output');
+        output.textContent = 'Opening database...\n';
+        
+        try {
+            const request = indexedDB.open('WaveForgeDB_V4');
+            
+            request.onsuccess = async (e) => {
+                const db = e.target.result;
+                output.textContent += `✓ Database opened\n`;
+                output.textContent += `Version: ${db.version}\n`;
+                output.textContent += `Stores: ${Array.from(db.objectStoreNames).join(', ')}\n\n`;
+                
+                // Check recordings store
+                if (db.objectStoreNames.contains('recordings')) {
+                    const tx = db.transaction(['recordings'], 'readonly');
+                    const store = tx.objectStore('recordings');
+                    const req = store.getAll();
+                    
+                    req.onsuccess = () => {
+                        const recordings = req.result;
+                        output.textContent += `📀 Recordings: ${recordings.length}\n\n`;
+                        recordings.forEach((rec, i) => {
+                            output.textContent += `${i+1}. ${rec.name} (${rec.mimeType}, ${rec.date})\n`;
+                        });
+                    };
+                } else {
+                    output.textContent += '❌ No recordings store found\n';
+                }
+            };
+            
+            request.onerror = (e) => {
+                output.textContent += `❌ Error: ${e.target.error}\n`;
+            };
+        } catch (err) {
+            output.textContent += `❌ Exception: ${err.message}\n`;
+        }
+    }
+    </script>
+</body>
+</html>

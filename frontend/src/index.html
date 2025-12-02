@@ -900,8 +900,15 @@
                             data-i18n="format.detecting">FORMAT: DETECTING...</div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span id="uploadStatus" class="text-[10px] text-cyan-400 hidden animate-pulse"
-                            aria-live="polite" role="status">UPLOADING...</span>
+                        <!-- Live Upload Indicator: Replaces UPLOADING text -->
+                        <button id="liveUploadIndicator" 
+                            class="text-[10px] px-2 py-1 rounded border cursor-pointer transition-all hover:opacity-80 hidden"
+                            role="button" 
+                            aria-label="Upload status"
+                            tabindex="0"
+                            style="min-width: 70px;">
+                            <span class="font-mono">UPLOAD</span>
+                        </button>
                         <span id="dbStatus"
                             class="text-[10px] bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-900">DB
                             ONLINE</span>
@@ -1794,94 +1801,147 @@
 
         let toastTimeout;
         function showToast(msg, isError) {
-            const t = document.getElementById('toast');
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            
+            // Reset classes first
+            toast.className = `fixed bottom-10 left-1/2 transform -translate-x-1/2 ${isError ? 'bg-red-900/90 border-red-500 text-red-400' : 'bg-gray-900/90 border-cyan-500 text-cyan-400'} px-6 py-3 rounded-lg shadow-[0_0_20px_rgba(0,243,255,0.2)] transition-all duration-300 z-[200] font-mono text-sm max-w-2xl opacity-100 translate-y-0`;
+            toast.innerHTML = msg; // Support styled popups
+            
+            // Clear existing timeout
             clearTimeout(toastTimeout);
-            const baseClasses = "fixed bottom-24 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow transition-all duration-300 z-[200] font-mono text-sm border";
-            const colorClasses = isError ? "bg-red-900/90 border-red-500 text-red-300" : "bg-gray-900/90 border-cyan-500 text-cyan-400";
-            const visibleClasses = "opacity-100 translate-y-0";
-            t.textContent = msg;
-            t.className = `${baseClasses} ${colorClasses} ${visibleClasses}`;
+            
+            // Hide after 5 seconds
             toastTimeout = setTimeout(() => {
-                t.classList.remove('opacity-100', 'translate-y-0');
-                t.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
-            }, 3000);
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-10');
+                
+                // Completely hide after animation completes
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 300); // Wait for transition
+            }, 5000);
+            
+            // Make sure it's visible
+            toast.style.display = 'block';
         }
 
-        // === LIVE UPLOAD INDICATOR (Redesigned with Real Server Status) ===
+        // === LIVE UPLOAD INDICATOR (Complete Redesign - UPLOAD Box with Click Handler) ===
         const LiveUploadIndicator = {
             element: null,
+            tooltip: null,
             state: 'hidden',
             currentSessionId: null,
+            currentChunk: 0,
+            totalChunks: 0,
+            uploadedChunks: 0,
             
             init: function() {
                 try {
-                    // Check if upload available
-                    if (typeof ENV !== 'undefined' && ENV && ENV.cloudUpload === false) {
-                        this.createIndicator();
-                        this.setState('disabled');
+                    this.element = document.getElementById('liveUploadIndicator');
+                    if (!this.element) {
+                        console.warn('LiveUploadIndicator: Element not found');
                         return;
                     }
-                    // Indicator created on first upload
+                    
+                    // Create small tooltip balloon
+                    this.tooltip = document.createElement('div');
+                    this.tooltip.className = 'absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 border border-cyan-500 rounded px-3 py-1.5 text-[10px] whitespace-nowrap shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 z-50';
+                    this.tooltip.style.display = 'none';
+                    this.element.parentElement.style.position = 'relative';
+                    this.element.parentElement.appendChild(this.tooltip);
+                    
+                    // Show tooltip on hover
+                    this.element.addEventListener('mouseenter', () => {
+                        if (this.state === 'uploading' || this.state === 'paused') {
+                            this.tooltip.style.display = 'block';
+                            setTimeout(() => this.tooltip.style.opacity = '1', 10);
+                        }
+                    });
+                    this.element.addEventListener('mouseleave', () => {
+                        this.tooltip.style.opacity = '0';
+                        setTimeout(() => this.tooltip.style.display = 'none', 200);
+                    });
+                    
+                    // Only disable for file:// protocol - show offline state for no connection
+                    if (window.location.protocol === 'file:' || (ENV && ENV.cloudUpload === false)) {
+                        this.setState('disabled');
+                    } else if (!navigator.onLine) {
+                        this.setState('offline');
+                    } else {
+                        // Ready to upload when recording starts
+                        this.setState('disabled');
+                    }
+                    
+                    console.log('✅ LiveUploadIndicator initialized with tooltip');
                 } catch (err) {
                     console.error('LiveUploadIndicator.init error:', err);
                 }
             },
             
-            createIndicator: function() {
+            setState: function(state, chunkInfo) {
                 try {
-                    if (this.element) return;
-                    
-                    const uploadStatusEl = document.getElementById('uploadStatus');
-                    const dbStatusEl = document.getElementById('dbStatus');
-                    
-                    if (!uploadStatusEl || !dbStatusEl) {
-                        console.warn('LiveUploadIndicator: Target elements not found');
-                        return;
-                    }
-                    
-                    const statusContainer = uploadStatusEl.parentElement;
-                    if (!statusContainer) {
-                        console.warn('LiveUploadIndicator: Parent container not found');
-                        return;
-                    }
-                    
-                    this.element = document.createElement('span');
-                    this.element.id = 'liveUploadIndicator';
-                    this.element.className = 'text-[10px] px-2 py-1 rounded border hidden';
-                    this.element.setAttribute('role', 'status');
-                    this.element.setAttribute('aria-live', 'polite');
-                    this.element.innerHTML = '<span aria-hidden="true">☁</span> <span>UPLOAD</span>';
-                    
-                    // Insert before dbStatus (correct position between UPLOADING and DB ONLINE)
-                    statusContainer.insertBefore(this.element, dbStatusEl);
-                } catch (err) {
-                    console.error('LiveUploadIndicator.createIndicator error:', err);
-                }
-            },
-            
-            setState: function(state) {
-                try {
-                    if (!this.element) this.createIndicator();
                     if (!this.element) return;
                     
                     this.state = state;
-                    this.element.classList.remove('hidden', 'live-upload-active', 'live-upload-paused', 
-                                                   'live-upload-offline', 'live-upload-disabled');
+                    
+                    // Update chunk info if provided
+                    if (chunkInfo) {
+                        this.currentChunk = chunkInfo.current || 0;
+                        this.totalChunks = chunkInfo.total || 0;
+                        this.updateTooltip();
+                    }
+                    
+                    // Reset all classes
+                    this.element.className = 'text-[10px] px-2 py-1 rounded border transition-all';
                     
                     const states = {
-                        uploading: { class: 'live-upload-active', label: 'Uploading to server' },
-                        paused: { class: 'live-upload-paused', label: 'Upload paused - retrying' },
-                        offline: { class: 'live-upload-offline', label: 'Upload offline - waiting for connection' },
-                        disabled: { class: 'live-upload-disabled', label: 'Upload disabled in offline mode' },
-                        hidden: { class: 'hidden', label: '' }
+                        uploading: { 
+                            classes: 'bg-cyan-900/30 text-cyan-400 border-cyan-500 shadow-[0_0_10px_rgba(0,243,255,0.3)] animate-pulse cursor-pointer hover:opacity-80',
+                            label: 'Uploading chunks to server',
+                            hidden: false
+                        },
+                        paused: { 
+                            classes: 'bg-yellow-900/30 text-yellow-400 border-yellow-500 cursor-pointer hover:opacity-80',
+                            label: 'Upload paused - retrying',
+                            hidden: false
+                        },
+                        offline: { 
+                            classes: 'bg-gray-800/30 text-gray-400 border-gray-600 cursor-pointer hover:opacity-80',
+                            label: 'Offline - waiting for connection',
+                            hidden: false
+                        },
+                        disabled: { 
+                            classes: 'bg-red-900/20 text-red-400 border-red-900 opacity-50 cursor-not-allowed',
+                            label: 'Upload disabled in offline mode',
+                            hidden: false
+                        },
+                        hidden: { 
+                            classes: 'hidden',
+                            label: '',
+                            hidden: true
+                        }
                     };
                     
                     const config = states[state];
                     if (config) {
-                        this.element.classList.add(config.class);
+                        this.element.className += ' ' + config.classes;
+                        
+                        if (config.hidden) {
+                            this.element.classList.add('hidden');
+                        } else {
+                            this.element.classList.remove('hidden');
+                        }
+                        
                         if (config.label) {
                             this.element.setAttribute('aria-label', config.label);
                             this.element.title = config.label;
+                        }
+                        
+                        if (state === 'disabled') {
+                            this.element.disabled = true;
+                        } else {
+                            this.element.disabled = false;
                         }
                     }
                 } catch (err) {
@@ -1889,14 +1949,152 @@
                 }
             },
             
-            onRecordingStart: function(sessionId) {
+            updateTooltip: function() {
                 try {
-                    if (typeof ENV !== 'undefined' && ENV && ENV.cloudUpload === false) {
-                        this.setState('disabled');
+                    if (!this.tooltip) return;
+                    
+                    if (this.state === 'uploading') {
+                        this.tooltip.innerHTML = `<span class="text-cyan-400">⬆</span> <span class="text-green-400 font-bold">${this.uploadedChunks}</span>/<span class="text-white font-bold">${this.totalChunks}</span> übertragen`;
+                    } else if (this.state === 'paused') {
+                        this.tooltip.innerHTML = `<span class="text-yellow-400">⏸</span> <span class="text-white font-bold">${this.uploadedChunks}/${this.totalChunks}</span> - Pausiert`;
+                    } else if (this.state === 'offline') {
+                        this.tooltip.innerHTML = `<span class="text-gray-400">📡</span> <span class="text-white font-bold">${this.uploadedChunks}/${this.totalChunks}</span> - Offline`;
+                    }
+                } catch (err) {
+                    console.error('LiveUploadIndicator.updateTooltip error:', err);
+                }
+            },
+            
+            updateProgress: function(currentChunk, totalChunks) {
+                try {
+                    // Only track generated chunks internally, don't show in UI
+                    this.currentChunk = currentChunk;
+                    if (totalChunks > this.totalChunks) {
+                        this.totalChunks = totalChunks;
+                        this.updateTooltip();
+                    }
+                } catch (err) {
+                    console.error('LiveUploadIndicator.updateProgress error:', err);
+                }
+            },
+            
+            updateUploaded: function(uploadedCount, totalCount) {
+                try {
+                    this.uploadedChunks = uploadedCount;
+                    if (totalCount && totalCount > 0) {
+                        this.totalChunks = totalCount;
+                    }
+                    this.updateTooltip();
+                    
+                    // Change to uploading state when chunks are successfully uploading
+                    // This includes transitions from disabled, offline, AND paused states
+                    if (navigator.onLine && (this.state === 'disabled' || this.state === 'offline' || this.state === 'paused')) {
+                        this.setState('uploading');
+                    }
+                } catch (err) {
+                    console.error('LiveUploadIndicator.updateUploaded error:', err);
+                }
+            },
+            
+            showQueueInfo: async function() {
+                try {
+                    if (this.state === 'disabled' || this.state === 'hidden') return;
+                    
+                    const db = await new Promise((resolve, reject) => {
+                        const req = indexedDB.open('WaveForgeDB_V4', 3);
+                        req.onsuccess = e => resolve(e.target.result);
+                        req.onerror = e => reject(e);
+                    });
+                    
+                    if (!db.objectStoreNames.contains('upload_queue')) {
+                        showToast('No uploads in queue', false);
                         return;
                     }
+                    
+                    const tx = db.transaction('upload_queue', 'readonly');
+                    const store = tx.objectStore('upload_queue');
+                    const allItems = await new Promise((resolve) => {
+                        const req = store.getAll();
+                        req.onsuccess = () => resolve(req.result);
+                        req.onerror = () => resolve([]);
+                    });
+                    
+                    // Group by session
+                    const sessions = {};
+                    allItems.forEach(item => {
+                        const sid = item.sessionId || item.fileId;
+                        if (!sessions[sid]) {
+                            sessions[sid] = {
+                                chunks: [],
+                                totalChunks: item.totalChunks || 0
+                            };
+                        }
+                        sessions[sid].chunks.push(item.chunkIndex);
+                    });
+                    
+                    // Build info HTML
+                    let infoHTML = '<div class="bg-gray-900 border-2 border-cyan-500 rounded-lg p-4 max-w-md shadow-2xl text-left">';
+                    infoHTML += '<h3 class="text-cyan-400 font-bold text-sm mb-3 flex items-center gap-2">';
+                    infoHTML += '<span aria-hidden="true">📤</span> Upload Queue Status</h3>';
+                    
+                    if (Object.keys(sessions).length === 0) {
+                        infoHTML += '<p class="text-gray-400 text-xs">No pending uploads</p>';
+                    } else {
+                        infoHTML += `<div class="space-y-3 text-xs">`;
+                        infoHTML += `<div class="text-gray-300">Total Sessions: <span class="text-cyan-400 font-bold">${Object.keys(sessions).length}</span></div>`;
+                        
+                        for (const [sid, data] of Object.entries(sessions)) {
+                            const pending = data.chunks.length;
+                            const total = data.totalChunks || pending;
+                            const uploaded = total - pending;
+                            
+                            infoHTML += `<div class="bg-gray-800 border border-gray-700 rounded p-3">`;
+                            infoHTML += `<div class="font-mono text-gray-400 text-[10px] mb-2">Session: ${sid.substring(0, 20)}...</div>`;
+                            infoHTML += `<div class="space-y-1">`;
+                            infoHTML += `<div class="text-green-400">✓ Uploaded: <span class="font-bold">${uploaded}${total > 0 ? '/' + total : ''}</span> chunks</div>`;
+                            infoHTML += `<div class="text-yellow-400">⏳ Pending: <span class="font-bold">${pending}</span> chunks</div>`;
+                            
+                            // Show chunk indices (max 10)
+                            const chunkList = data.chunks.sort((a, b) => a - b).slice(0, 10).join(', ');
+                            const moreChunks = data.chunks.length > 10 ? ` ... +${data.chunks.length - 10} more` : '';
+                            infoHTML += `<div class="text-gray-500 text-[10px] mt-2">Chunks: ${chunkList}${moreChunks}</div>`;
+                            infoHTML += `</div></div>`;
+                        }
+                        
+                        infoHTML += `</div>`;
+                    }
+                    
+                    infoHTML += `<div class="mt-3 pt-3 border-t border-gray-700 text-[10px] text-gray-500">`;
+                    infoHTML += `Status: <span class="${
+                        this.state === 'uploading' ? 'text-cyan-400' : 
+                        this.state === 'paused' ? 'text-yellow-400' : 
+                        'text-gray-400'
+                    } font-bold">${this.state.toUpperCase()}</span>`;
+                    infoHTML += `</div></div>`;
+                    
+                    showToast(infoHTML, false);
+                    
+                } catch (err) {
+                    console.error('Error showing queue info:', err);
+                    showToast('Error loading queue info', true);
+                }
+            },
+            
+            onRecordingStart: function(sessionId) {
+                try {
                     this.currentSessionId = sessionId;
-                    // Don't show until first actual upload
+                    this.uploadedChunks = 0;
+                    this.totalChunks = 0;
+                    
+                    // Only disable for file:// mode - otherwise show appropriate state
+                    if (window.location.protocol === 'file:' || (ENV && ENV.cloudUpload === false)) {
+                        this.setState('disabled');
+                    } else if (!navigator.onLine) {
+                        this.setState('offline');
+                    } else {
+                        // Ready to start uploading when chunks arrive
+                        this.setState('uploading');
+                    }
                 } catch (err) {
                     console.error('LiveUploadIndicator.onRecordingStart error:', err);
                 }
@@ -1904,8 +2102,8 @@
             
             onRecordingStop: function() {
                 try {
-                    this.currentSessionId = null;
-                    setTimeout(() => this.setState('hidden'), 3000);
+                    // Keep sessionId and don't hide indicator
+                    // Box stays visible to show upload progress even after recording stops
                 } catch (err) {
                     console.error('LiveUploadIndicator.onRecordingStop error:', err);
                 }
@@ -2043,7 +2241,8 @@
                                     }
                                 } else if (type === 'UPLOAD_COMPLETE') {
                                     if (typeof LiveUploadIndicator !== 'undefined' && sessionId === LiveUploadIndicator.currentSessionId) {
-                                        setTimeout(() => LiveUploadIndicator.setState('hidden'), 2000);
+                                        // Keep box visible but change to disabled state after 2 seconds
+                                        setTimeout(() => LiveUploadIndicator.setState('disabled'), 2000);
                                     }
                                     if (sessionId) {
                                         UploadManager.setUploadStatusForSession(sessionId, 'success');
@@ -2062,18 +2261,27 @@
                                     }
                                 } else if (type === 'UPLOAD_OFFLINE') {
                                     if (typeof LiveUploadIndicator !== 'undefined' && sessionId === LiveUploadIndicator.currentSessionId) {
-                                        LiveUploadIndicator.setState('offline');
+                                        LiveUploadIndicator.setState('paused');
                                     }
-                                    // Connection lost - show pending status
+                                    // Connection lost - show paused status (yellow indicator)
                                     if (sessionId) {
                                         UploadManager.setUploadStatusForSession(sessionId, 'pending');
                                     }
                                     console.log('📡 Upload paused - waiting for connection (checking every 5s)');
                                 } else if (type === 'CONNECTION_RESTORED') {
-                                    if (typeof LiveUploadIndicator !== 'undefined' && LiveUploadIndicator.state === 'offline') {
+                                    if (typeof LiveUploadIndicator !== 'undefined' && (LiveUploadIndicator.state === 'offline' || LiveUploadIndicator.state === 'paused')) {
                                         LiveUploadIndicator.setState('uploading');
                                     }
                                     console.log('✅ Connection restored - resuming uploads');
+                                } else if (type === 'CHUNK_UPLOADED') {
+                                    // Update uploaded chunks count
+                                    const { sessionId, chunkIndex, totalChunks } = event.data;
+                                    if (typeof LiveUploadIndicator !== 'undefined' && sessionId === LiveUploadIndicator.currentSessionId) {
+                                        const uploadedCount = (typeof chunkIndex === 'number') ? chunkIndex + 1 : parseInt(chunkIndex || 0) + 1;
+                                        const total = totalChunks || LiveUploadIndicator.totalChunks || 0;
+                                        LiveUploadIndicator.updateUploaded(uploadedCount, total);
+                                        console.log(`📤 Chunk ${uploadedCount}/${total} uploaded for session ${sessionId}`);
+                                    }
                                 }
                             } catch (err) {
                                 console.error('Service Worker message handler error:', err);
@@ -2191,9 +2399,30 @@
             },
             sessionStatus: {}, // Track status per session
 
-            setUploadStatusForSession: function (sessionId, status) {
+            setUploadStatusForSession: function (sessionId, status, chunkInfo) {
                 // Update status tracking
                 this.sessionStatus[sessionId] = status;
+                
+                // Update Live Upload Indicator
+                const hasActiveUploads = Object.values(this.sessionStatus).some(s => s === 'uploading');
+                if (typeof LiveUploadIndicator !== 'undefined') {
+                    if (status === 'uploading' || hasActiveUploads) {
+                        if (chunkInfo) {
+                            LiveUploadIndicator.updateProgress(chunkInfo.current, chunkInfo.total);
+                        } else {
+                            LiveUploadIndicator.setState('uploading');
+                        }
+                    } else if (status === 'pending') {
+                        LiveUploadIndicator.setState('paused');
+                    } else if (status === 'offline') {
+                        LiveUploadIndicator.setState('offline');
+                    } else if (status === 'idle' || status === 'complete') {
+                        // Change to disabled state if NO active uploads
+                        if (!hasActiveUploads) {
+                            LiveUploadIndicator.setState('disabled');
+                        }
+                    }
+                }
 
                 // Find icon for this session (stored in data-session-id attribute)
                 const icon = document.querySelector(`.upload-icon[data-session-id="${sessionId}"]`);
@@ -2228,6 +2457,20 @@
             },
 
             setUploadStatus: function (status) {
+                // Update Live Upload Indicator
+                if (typeof LiveUploadIndicator !== 'undefined') {
+                    if (status === 'uploading') {
+                        LiveUploadIndicator.setState('uploading');
+                    } else if (status === 'pending') {
+                        LiveUploadIndicator.setState('paused');
+                    } else if (status === 'offline') {
+                        LiveUploadIndicator.setState('offline');
+                    } else {
+                        // Keep box visible with disabled state
+                        LiveUploadIndicator.setState('disabled');
+                    }
+                }
+                
                 // Legacy function - update all icons (used for global events)
                 const uploadIcons = document.querySelectorAll('.upload-icon');
 
@@ -2821,6 +3064,11 @@
         window.addEventListener('online', async () => {
             console.log('🌐 Connection restored, checking for pending uploads...');
             UploadManager.setUploadStatus('idle');
+            
+            // Update Live Upload Indicator - keep visible but disabled
+            if (typeof LiveUploadIndicator !== 'undefined') {
+                LiveUploadIndicator.setState('disabled');
+            }
 
             // Check queue size
             try {
@@ -2847,6 +3095,11 @@
         window.addEventListener('offline', () => {
             console.log('📴 Connection lost, uploads will resume when online');
             UploadManager.setUploadStatus('pending');
+            
+            // Update Live Upload Indicator
+            if (typeof LiveUploadIndicator !== 'undefined') {
+                LiveUploadIndicator.setState('offline');
+            }
         });
 
         // --- 2. CRASH GUARD RAID SYSTEM ---
@@ -2939,7 +3192,7 @@
                         console.log(`💾 Chunk ${chunkIndex} saved to IndexedDB (session: ${sessionId})`);
 
                         // Trigger upload immediately for live chunks
-                        // This ensures chunks are uploaded during recording, not just at the end
+                        // Chunk counting happens in ondataavailable event (above)
                         if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                             navigator.serviceWorker.controller.postMessage('TRIGGER_UPLOAD');
                         }
@@ -3130,7 +3383,7 @@
 
                         // CRITICAL: Set currentSessionId from recovered chunks
                         currentSessionId = chunks[0].sessionId;
-                        console.log(`📦 Assembled ${chunks.length} chunks from recovery (session: ${currentSessionId})`);
+                        console.log(`📦 Assembled ${chunks.length} chunks (session: ${currentSessionId})`);
 
                         // Close recovery modal immediately
                         if (isRecovery) {
@@ -3138,8 +3391,7 @@
                             setTimeout(() => document.getElementById('recoveryModal').style.display = 'none', 200);
                         }
 
-                        // Open save modal and wait for user to enter name
-                        // Recovery upload will happen in confirmSave() with the real name
+                        // ALWAYS open save modal so user can save the recording
                         openSaveModal(isRecovery);
                         
                         // Store recovery info for later upload in confirmSave()
@@ -3221,7 +3473,34 @@
             },
             discardSession: function () {
                 if (!confirm("Are you sure? This data will be lost forever.")) return;
-                this.clearAllRecoveryData();
+                
+                // Get current sessionId before clearing
+                const currentSessionId = this.currentSessionId;
+                
+                console.log('🗑️ DISCARD: Clearing all recovery data for session:', currentSessionId);
+                
+                // CRITICAL: Clear recovery store SYNCHRONOUSLY and COMPLETELY
+                if (db) {
+                    const tx = db.transaction([STORE_RECOVERY], 'readwrite');
+                    const store = tx.objectStore(STORE_RECOVERY);
+                    
+                    // Clear ALL recovery data immediately
+                    store.clear();
+                    
+                    tx.oncomplete = () => {
+                        console.log('✅ DISCARD: Recovery store cleared completely');
+                    };
+                    
+                    tx.onerror = (e) => {
+                        console.error('❌ DISCARD: Failed to clear recovery store:', e);
+                    };
+                }
+                
+                // Also clear upload queue for this session
+                if (currentSessionId) {
+                    this.clearUploadQueue(currentSessionId);
+                }
+                
                 document.getElementById('recoveryModal').classList.remove('modal-open');
                 setTimeout(() => document.getElementById('recoveryModal').style.display = 'none', 200);
             },
@@ -3266,7 +3545,8 @@
                     
                     getAllReq.onsuccess = () => {
                         const items = getAllReq.result;
-                        const sessionItems = items.filter(item => item.fileId === sessionId);
+                        // FIX: Search by sessionId field (live chunks) not fileId field
+                        const sessionItems = items.filter(item => item.sessionId === sessionId || item.fileId === sessionId);
                         
                         if (sessionItems.length > 0) {
                             console.log(`🗑️ Clearing ${sessionItems.length} upload queue items for session ${sessionId}`);
@@ -3274,6 +3554,7 @@
                             const deleteStore = deleteTx.objectStore('upload_queue');
                             
                             sessionItems.forEach(item => {
+                                console.log(`  🗑️ Deleting chunk ${item.chunkIndex || 'unknown'} (ID: ${item.id})`);
                                 deleteStore.delete(item.id);
                             });
                             
@@ -3372,6 +3653,7 @@
                         CrashGuard.init();
                         loadTracksFromDB();
                         UploadManager.register();
+                        LiveUploadIndicator.init(); // Initialize Live Upload Indicator
                         resolve(db);
                     };
 
@@ -3602,11 +3884,19 @@
                 mediaRecorder.ondataavailable = e => {
                     if (e.data.size > 0) {
                         CrashGuard.logChunk(e.data);
+                        
+                        // CRITICAL: Update chunk count IMMEDIATELY when chunk is generated
+                        // This ensures the counter updates even when server is offline
+                        if (typeof LiveUploadIndicator !== 'undefined' && currentSessionId === LiveUploadIndicator.currentSessionId) {
+                            LiveUploadIndicator.totalChunks++;
+                            LiveUploadIndicator.updateTooltip();
+                            console.log(`📊 Chunk generated: ${LiveUploadIndicator.uploadedChunks}/${LiveUploadIndicator.totalChunks}`);
+                        }
                     }
                 };
 
                 mediaRecorder.onstop = () => {
-                    CrashGuard.assembleSession(currentSessionId);
+                    CrashGuard.assembleSession(currentSessionId, false); // false = not recovery
                 };
 
                 mediaRecorder.start(1000);
@@ -3668,6 +3958,20 @@
             }, 10);
         }
         function closeSaveModal() {
+            // CRITICAL: Clear recovery data when discarding save modal
+            if (currentSessionId && db) {
+                console.log('🗑️ DISCARD: Clearing recovery data for session:', currentSessionId);
+                const tx = db.transaction([STORE_RECOVERY], 'readwrite');
+                const store = tx.objectStore(STORE_RECOVERY);
+                store.clear();
+                tx.oncomplete = () => {
+                    console.log('✅ DISCARD: Recovery store cleared');
+                };
+            }
+            
+            // Clear pending recovery upload
+            window.pendingRecoveryUpload = null;
+            
             modal.classList.remove('modal-open');
             modal.setAttribute('aria-hidden', 'true');
             setTimeout(() => {

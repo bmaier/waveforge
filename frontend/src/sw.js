@@ -433,20 +433,24 @@ async function processUploads() {
                 throw err; // Re-throw to trigger retry logic
             }
             
+            // Count total chunks for this session (including this one + remaining in queue)
+            const allRemainingChunks = await getUploadQueue(db);
+            const sessionChunksRemaining = allRemainingChunks.filter(c => c.sessionId === item.sessionId);
+            const totalChunksForSession = item.chunkIndex + 1 + sessionChunksRemaining.length;
+            
             // Notify UploadCoordinator about chunk upload
             broadcastStatus({
                 type: 'CHUNK_UPLOADED',
                 sessionId: item.sessionId,
-                chunkId: item.chunkIndex,
-                totalChunks: item.totalChunks
+                chunkIndex: item.chunkIndex,
+                totalChunks: totalChunksForSession
             });
             
             // Clear blob reference to free memory
             item.blob = null;
 
-            // Check if all chunks for this session are uploaded
-            const remainingChunks = await getUploadQueue(db);
-            const sessionChunks = remainingChunks.filter(c => c.sessionId === item.sessionId);
+            // Check if all chunks for this session are uploaded (reuse the already fetched data)
+            const sessionChunks = sessionChunksRemaining;
             
             if (sessionChunks.length === 0) {
                 console.log(`[SW] ✅ All chunks uploaded for session ${item.sessionId}`);
