@@ -16,15 +16,19 @@ import time
 
 @pytest.fixture
 def app():
-    """Import and return the FastAPI app."""
+    """Import and return the FastAPI app with disabled TrustedHostMiddleware for testing."""
     from app.server import app
+    # Remove TrustedHostMiddleware for tests
+    app.user_middleware = [m for m in app.user_middleware if "TrustedHost" not in str(m)]
+    app.middleware_stack = None  # Force rebuild
+    app.build_middleware_stack()
     return app
 
 
 @pytest.fixture
 def test_client(app):
     """Create a test client for the FastAPI app."""
-    return TestClient(app)
+    return TestClient(app, base_url="http://testserver")
 
 
 @pytest.fixture
@@ -95,8 +99,8 @@ class TestOnlineRecordingFlow:
         # Step 4: Wait for background assembly (give it a moment)
         time.sleep(0.5)
         
-        # Step 5: Verify final file exists
-        final_path = temp_upload_dir / session_id / f"my_recording_{session_id[:8]}.webm"
+        # Step 5: Verify final file exists in completed/ directory
+        final_path = temp_upload_dir / session_id / "completed" / f"my_recording_{session_id[:8]}.webm"
         # File should exist after assembly completes
         # (In real scenario, background task runs async)
     

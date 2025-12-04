@@ -47,18 +47,26 @@ def mock_session(temp_upload_dir, monkeypatch):
     # Also need to patch for recording_complete import
     monkeypatch.setattr(recording_complete, "upload_sessions", mock_sessions)
     
-    # Create mock chunks on disk
+    # Create mock chunks on disk with proper directory structure
     session_dir = temp_upload_dir / session_id
     session_dir.mkdir(parents=True)
+    
+    # Create temp/shard_0000 directory for chunks
+    temp_dir = session_dir / "temp" / "shard_0000"
+    temp_dir.mkdir(parents=True)
+    
+    # Create completed directory for final files
+    completed_dir = session_dir / "completed"
+    completed_dir.mkdir(parents=True)
     
     # Patch UPLOAD_DIR so get_session_dir works
     import routes.recording_complete
     routes.recording_complete.Path = lambda x: temp_upload_dir if str(x) == "UPLOAD_DIR" else Path(x)
     
-    # Create 3 test chunks
+    # Create 3 test chunks in temp/shard_0000
     for i in range(3):
         chunk_data = f"Audio chunk {i} data" * 100  # Make it substantial
-        chunk_path = session_dir / f"{i}.part"
+        chunk_path = temp_dir / f"{i}.part"
         chunk_path.write_text(chunk_data)
     
     return {
@@ -209,13 +217,13 @@ class TestChunkAssembly:
                 metadata=metadata
             )
             
-            # Verify final file exists
-            final_path = mock_session["session_dir"] / mock_session["file_name"]
-            assert final_path.exists()
+            # Verify final file exists in completed/ directory
+            final_path = mock_session["session_dir"] / "completed" / mock_session["file_name"]
+            assert final_path.exists(), f"Expected file at {final_path}"
             
-            # Verify metadata file exists
-            metadata_path = mock_session["session_dir"] / f"{mock_session['file_name']}.meta.json"
-            assert metadata_path.exists()
+            # Verify metadata file exists in completed/ directory
+            metadata_path = mock_session["session_dir"] / "completed" / f"{mock_session['file_name']}.meta.json"
+            assert metadata_path.exists(), f"Expected metadata at {metadata_path}"
             
             # Verify metadata content
             with open(metadata_path) as f:
@@ -269,10 +277,11 @@ class TestChunkAssembly:
         """Test that chunk files are cleaned up after assembly."""
         from routes.recording_complete import assemble_chunks_with_metadata
         
-        # Verify chunks exist before
-        chunk_paths = [mock_session["session_dir"] / f"{i}.part" for i in range(3)]
+        # Verify chunks exist before (in temp/shard_0000)
+        temp_dir = mock_session["session_dir"] / "temp" / "shard_0000"
+        chunk_paths = [temp_dir / f"{i}.part" for i in range(3)]
         for chunk_path in chunk_paths:
-            assert chunk_path.exists()
+            assert chunk_path.exists(), f"Expected chunk at {chunk_path}"
         
         # Run assembly
         await assemble_chunks_with_metadata(
@@ -284,11 +293,11 @@ class TestChunkAssembly:
         
         # Verify chunks are deleted after assembly
         for chunk_path in chunk_paths:
-            assert not chunk_path.exists()
+            assert not chunk_path.exists(), f"Chunk should be deleted: {chunk_path}"
         
-        # Verify final file still exists
-        final_path = mock_session["session_dir"] / mock_session["file_name"]
-        assert final_path.exists()
+        # Verify final file exists in completed/ directory
+        final_path = mock_session["session_dir"] / "completed" / mock_session["file_name"]
+        assert final_path.exists(), f"Expected final file at {final_path}"
     
     @pytest.mark.anyio
     async def test_assemble_with_large_chunks(self, temp_upload_dir, monkeypatch):
@@ -300,10 +309,14 @@ class TestChunkAssembly:
         session_dir = temp_upload_dir / session_id
         session_dir.mkdir()
         
+        # Create temp/shard_0000 directory structure
+        temp_dir = session_dir / "temp" / "shard_0000"
+        temp_dir.mkdir(parents=True)
+        
         # Create 3 large chunks (2MB each)
         large_data = b"X" * (2 * 1024 * 1024)  # 2MB
         for i in range(3):
-            chunk_path = session_dir / f"{i}.part"
+            chunk_path = temp_dir / f"{i}.part"
             chunk_path.write_bytes(large_data)
         
         mock_sessions = {
@@ -324,8 +337,8 @@ class TestChunkAssembly:
             metadata={"size": 6 * 1024 * 1024}
         )
         
-        final_path = session_dir / "large_recording.webm"
-        assert final_path.exists()
+        final_path = session_dir / "completed" / "large_recording.webm"
+        assert final_path.exists(), f"Expected final file at {final_path}"
         assert final_path.stat().st_size == 3 * 2 * 1024 * 1024  # 6MB
 
 
@@ -380,8 +393,8 @@ class TestMetadataStorage:
             metadata=metadata
         )
         
-        metadata_path = mock_session["session_dir"] / f"{mock_session['file_name']}.meta.json"
-        assert metadata_path.exists()
+        metadata_path = mock_session["session_dir"] / "completed" / f"{mock_session['file_name']}.meta.json"
+        assert metadata_path.exists(), f"Expected metadata at {metadata_path}"
         
         with open(metadata_path) as f:
             saved = json.load(f)
@@ -410,7 +423,7 @@ class TestMetadataStorage:
             metadata=metadata
         )
         
-        metadata_path = mock_session["session_dir"] / f"{mock_session['file_name']}.meta.json"
+        metadata_path = mock_session["session_dir"] / "completed" / f"{mock_session['file_name']}.meta.json"
         
         with open(metadata_path, encoding='utf-8') as f:
             saved = json.load(f)

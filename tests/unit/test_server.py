@@ -13,15 +13,19 @@ import uuid
 
 @pytest.fixture
 def app():
-    """Import and return the FastAPI app."""
+    """Import and return the FastAPI app with disabled TrustedHostMiddleware for testing."""
     from app.server import app
+    # Remove TrustedHostMiddleware for tests
+    app.user_middleware = [m for m in app.user_middleware if "TrustedHost" not in str(m)]
+    app.middleware_stack = None  # Force rebuild
+    app.build_middleware_stack()
     return app
 
 
 @pytest.fixture
 def test_client(app):
     """Create a test client for the FastAPI app."""
-    return TestClient(app)
+    return TestClient(app, base_url="http://testserver")
 
 
 @pytest.mark.unit
