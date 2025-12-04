@@ -113,9 +113,10 @@ def assemble_chunks(session_id: str, recording_name: str, format: str):
             print(f"[TUS] Cannot assemble - missing chunks: {missing_chunks}")
             return
         
-        # Assemble file
-        output_file = UPLOAD_DIR / session_id / f"{recording_name}.{format}"
-        output_file.parent.mkdir(parents=True, exist_ok=True)
+        # Assemble file in completed/ directory (consistent with live uploads)
+        completed_dir = UPLOAD_DIR / session_id / "completed"
+        completed_dir.mkdir(parents=True, exist_ok=True)
+        output_file = completed_dir / f"{recording_name}.{format}"
         
         print(f"[TUS] Assembling {total_chunks} chunks into {output_file}")
         
@@ -124,6 +125,24 @@ def assemble_chunks(session_id: str, recording_name: str, format: str):
                 chunk_path = session_dir / f"chunk_{i}.bin"
                 with open(chunk_path, 'rb') as infile:
                     shutil.copyfileobj(infile, outfile)
+        
+        # Create metadata file (consistent with live uploads)
+        file_size = output_file.stat().st_size
+        metadata_path = completed_dir / f"{recording_name}.{format}.meta.json"
+        
+        metadata = {
+            "file_name": f"{recording_name}.{format}",
+            "session_id": session_id,
+            "file_size_bytes": file_size,
+            "total_chunks": total_chunks,
+            "missing_chunks": [],
+            "client_metadata": {}
+        }
+        
+        with open(metadata_path, "w") as meta_file:
+            json.dump(metadata, meta_file, indent=2)
+        
+        print(f"✓ Metadata saved: {metadata_path}")
         
         # Cleanup chunks after successful assembly
         shutil.rmtree(session_dir)

@@ -537,6 +537,12 @@ async function processUploads() {
             }
             
             console.log(`[SW] ✅ Chunk ${item.chunkIndex} verified on server (${verifyResult.size} bytes)`);
+            
+            // IMPORTANT: Save fileName and metadata BEFORE removing chunk from queue
+            const fileName = item.fileName;
+            const metadata = item.metadata;
+            const totalChunks = item.totalChunks;
+            
             console.log(`[SW] 🗑 Removing chunk from queue - ID: "${item.id}"`);
             
             try {
@@ -571,7 +577,10 @@ async function processUploads() {
                 console.log(`[SW] ✅ All chunks uploaded for session ${item.sessionId}`);
                 broadcastStatus({ 
                     type: 'SESSION_UPLOAD_COMPLETE', 
-                    sessionId: item.sessionId 
+                    sessionId: item.sessionId,
+                    fileName: fileName,
+                    metadata: metadata,
+                    totalChunks: totalChunks
                 });
                 // Keep legacy UPLOAD_COMPLETE for compatibility
                 broadcastStatus({ 

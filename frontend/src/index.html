@@ -2747,6 +2747,40 @@
                 this.updateUI(sessionId);
             },
             
+
+            triggerAssembly: async function(sessionId, data) {
+                try {
+                    console.log(`🔧 Triggering assembly for session ${sessionId}`);
+                    
+                    // Get fileName and metadata from event data (sent by Service Worker before chunk deletion)
+                    const fileName = data.fileName || `Recording.webm`;
+                    const metadata = data.metadata || {};
+                    
+                    const formData = new FormData();
+                    formData.append('session_id', sessionId);
+                    formData.append('file_name', fileName);
+                    formData.append('metadata', JSON.stringify(metadata));
+                    
+                    const response = await fetch('/recording/complete', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('✅ Assembly completed:', result);
+                        this.completeUpload(sessionId);
+                    } else {
+                        const errorText = await response.text();
+                        console.error('❌ Assembly failed:', response.status, errorText);
+                        showToast(`Assembly failed: ${response.status}`, true);
+                    }
+                } catch (error) {
+                    console.error('❌ Error triggering assembly:', error);
+                    showToast('Assembly failed - see console', true);
+                }
+            },
+            
             completeUpload: function(sessionId) {
                 const upload = this.activeUploads.get(sessionId);
                 if (!upload) return;
@@ -2829,7 +2863,15 @@
                         break;
                         
                     case 'SESSION_UPLOAD_COMPLETE':
-                        this.completeUpload(sessionId);
+                        // Only trigger assembly for MANUAL uploads (indicated by manualUpload flag in metadata)
+                        // Live recordings handle assembly via mediaRecorder.onstop
+                        if (data.metadata && data.metadata.manualUpload === true) {
+                            console.log(`📦 Manual upload complete - triggering assembly for ${sessionId}`);
+                            this.triggerAssembly(sessionId, data);
+                        } else {
+                            console.log(`📦 Live recording upload complete - ${sessionId} (assembly handled separately)`);
+                            this.completeUpload(sessionId);
+                        }
                         break;
                         
                     case 'ASSEMBLY_COMPLETE':
@@ -4516,7 +4558,8 @@
                             mimeType: t.mimeType || preferredMimeType,
                             extension: ext,
                             savedAt: t.date,
-                            fileSize: t.blob.size
+                            fileSize: t.blob.size,
+                            manualUpload: true  // Flag to indicate this is a manual upload
                         };
                         UploadManager.queueUpload(t.id, t.blob, `${t.name}.${ext}`, metadata, t.sessionId);
                     };
