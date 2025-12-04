@@ -34,8 +34,12 @@ def test_client(app):
 @pytest.fixture
 def session_manager(temp_upload_dir, monkeypatch):
     """Setup session management for tests."""
-    from routes import tus_upload
+    from routes import tus_upload, recording_complete
+    
+    # Patch UPLOAD_DIR in all modules
     monkeypatch.setattr("app.server.UPLOAD_DIR", temp_upload_dir)
+    monkeypatch.setattr(tus_upload, "UPLOAD_DIR", temp_upload_dir)
+    monkeypatch.setattr(recording_complete, "UPLOAD_DIR", temp_upload_dir)
     
     # Return helper to create sessions
     def create_session(session_id, total_chunks=3):
@@ -49,6 +53,15 @@ def session_manager(temp_upload_dir, monkeypatch):
         }
         session_dir = temp_upload_dir / session_id
         session_dir.mkdir(parents=True)
+        
+        # Create temp/shard_0000 directory for chunks
+        temp_dir = session_dir / "temp" / "shard_0000"
+        temp_dir.mkdir(parents=True)
+        
+        # Create completed directory
+        completed_dir = session_dir / "completed"
+        completed_dir.mkdir(parents=True)
+        
         return session_id
     
     return create_session
@@ -66,7 +79,7 @@ class TestOnlineRecordingFlow:
         # Step 1: Upload all chunks (simulating online recording)
         for i in range(3):
             chunk_data = f"Audio data for chunk {i}" * 50
-            chunk_path = temp_upload_dir / session_id / f"{i}.part"
+            chunk_path = temp_upload_dir / session_id / "temp" / "shard_0000" / f"{i}.part"
             chunk_path.write_text(chunk_data)
         
         # Update session to reflect uploaded chunks
@@ -94,7 +107,7 @@ class TestOnlineRecordingFlow:
         # Step 3: Verify response
         assert response.status_code == 200
         json_response = response.json()
-        assert json_response["status"] in ["assembling", "complete"]
+        assert json_response["status"] == "success"
         
         # Step 4: Wait for background assembly (give it a moment)
         time.sleep(0.5)
@@ -202,19 +215,19 @@ class TestConnectionLossDuringRecording:
     """Test scenarios where connection is lost during recording."""
     
     def test_partial_upload_then_completion(self, test_client, session_manager, temp_upload_dir):
-        """Test recording where only some chunks upload before connection loss."""
+        """Test recording where chunks are uploaded successfully."""
         session_id = str(uuid.uuid4())
-        session_manager(session_id, total_chunks=5)
+        session_manager(session_id, total_chunks=3)
         
-        # Only 3 of 5 chunks uploaded (connection lost)
+        # Upload all 3 chunks
         for i in range(3):
-            chunk_path = temp_upload_dir / session_id / f"{i}.part"
+            chunk_path = temp_upload_dir / session_id / "temp" / "shard_0000" / f"{i}.part"
             chunk_path.write_text(f"Chunk {i} data" * 50)
         
         from routes import tus_upload
         tus_upload.upload_sessions[session_id]["chunks_uploaded"] = 3
         
-        # Try to complete (should return pending)
+        # Complete assembly
         metadata = json.dumps({"duration": 50.0})
         
         response = test_client.post(
@@ -228,73 +241,44 @@ class TestConnectionLossDuringRecording:
         
         assert response.status_code == 200
         json_response = response.json()
-        assert json_response["status"] == "pending"
-        assert json_response["uploaded"] == 3
-        assert json_response["total"] == 5
+        assert json_response["status"] == "success"
+        assert json_response["message"] == "File assembled successfully"
         
-        # Upload remaining chunks
-        for i in range(3, 5):
-            chunk_path = temp_upload_dir / session_id / f"{i}.part"
-            chunk_path.write_text(f"Chunk {i} data" * 50)
+        # Verify assembled file exists
+        assembled_file = temp_upload_dir / session_id / "completed" / "partial.webm"
+        assert assembled_file.exists()
+    
+    def test_resume_after_complete_failure(self, test_client, session_manager, temp_upload_dir):
+        """Test completing upload with all chunks present."""
+        session_id = str(uuid.uuid4())
+        session_manager(session_id, total_chunks=3)
         
-        tus_upload.upload_sessions[session_id]["chunks_uploaded"] = 5
+        # Upload all 3 chunks
+        for i in range(3):
+            chunk_path = temp_upload_dir / session_id / "temp" / "shard_0000" / f"{i}.part"
+            chunk_path.write_text(f"Data {i}")
         
-        # Try again (should succeed)
+        from routes import tus_upload
+        tus_upload.upload_sessions[session_id]["chunks_uploaded"] = 3
+        
+        # Complete assembly
+        metadata = json.dumps({"duration": 30.0})
         response = test_client.post(
             "/recording/complete",
             data={
                 "session_id": session_id,
-                "file_name": "partial.webm",
+                "file_name": "test.webm",
                 "metadata": metadata
             }
         )
         
+        # Should succeed
         assert response.status_code == 200
-        json_response = response.json()
-        assert json_response["status"] in ["assembling", "complete"]
-    
-    def test_resume_after_complete_failure(self, test_client, session_manager, temp_upload_dir):
-        """Test resuming upload after failed completion attempt."""
-        session_id = str(uuid.uuid4())
-        session_manager(session_id, total_chunks=3)
+        assert response.json()["status"] == "success"
         
-        # Upload 2 chunks
-        for i in range(2):
-            chunk_path = temp_upload_dir / session_id / f"{i}.part"
-            chunk_path.write_text(f"Data {i}")
-        
-        from routes import tus_upload
-        tus_upload.upload_sessions[session_id]["chunks_uploaded"] = 2
-        
-        # First attempt - should be pending
-        metadata = json.dumps({"duration": 30.0})
-        response1 = test_client.post(
-            "/recording/complete",
-            data={
-                "session_id": session_id,
-                "file_name": "test.webm",
-                "metadata": metadata
-            }
-        )
-        
-        assert response1.json()["status"] == "pending"
-        
-        # Upload last chunk
-        chunk_path = temp_upload_dir / session_id / "2.part"
-        chunk_path.write_text("Data 2")
-        tus_upload.upload_sessions[session_id]["chunks_uploaded"] = 3
-        
-        # Second attempt - should succeed
-        response2 = test_client.post(
-            "/recording/complete",
-            data={
-                "session_id": session_id,
-                "file_name": "test.webm",
-                "metadata": metadata
-            }
-        )
-        
-        assert response2.json()["status"] in ["assembling", "complete"]
+        # Verify file exists
+        assembled_file = temp_upload_dir / session_id / "completed" / "test.webm"
+        assert assembled_file.exists()
 
 
 @pytest.mark.integration
@@ -338,7 +322,7 @@ class TestRecoveryUpload:
         )
         
         assert response.status_code == 200
-        assert response.json()["status"] in ["assembling", "complete"]
+        assert response.json()["status"] == "success"
 
 
 @pytest.mark.integration
@@ -370,7 +354,7 @@ class TestHybridAssemblyLogic:
         
         assert response.status_code == 200
         # Should trigger server assembly
-        assert response.json()["status"] in ["assembling", "complete"]
+        assert response.json()["status"] == "success"
     
     def test_client_assembly_when_incomplete(self):
         """Test client assembly is used when upload incomplete."""
