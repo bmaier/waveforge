@@ -1,0 +1,658 @@
+Feature: Connection Loss During Recording # features/connection_loss.feature:1
+  As a user experiencing unstable internet
+  I want recordings to continue seamlessly when connection is lost
+  So that I don't lose any recorded audio
+  Feature: Connection Loss During Recording  # features/connection_loss.feature:1
+
+  Scenario: Seamless transition from online to offline                  # features/connection_loss.feature:10
+    Given the WaveForge Pro application is loaded                       # steps/online_recording_steps.py:17
+    And the user is on the main recording page                          # steps/online_recording_steps.py:33
+    Given the user has an active internet connection                    # steps/online_recording_steps.py:11
+    And the ConnectionMonitor shows "Online" status                     # steps/online_recording_steps.py:24
+    When the user clicks the record button                              # steps/online_recording_steps.py:39
+    And the user records for 3 seconds                                  # steps/connection_loss_steps.py:9
+    And the internet connection is lost                                 # steps/connection_loss_steps.py:15
+    Then the ConnectionMonitor should show "Offline" status             # steps/connection_loss_steps.py:21
+    And a toast notification should appear saying "You are now offline" # steps/connection_loss_steps.py:28
+    And the recording should continue without interruption              # steps/connection_loss_steps.py:34
+    And chunks should continue to be saved locally                      # steps/connection_loss_steps.py:40
+    And no upload attempts should be made after connection loss         # steps/connection_loss_steps.py:47
+
+  Scenario: Save after connection loss during recording  # features/connection_loss.feature:22
+    Given the WaveForge Pro application is loaded        # steps/online_recording_steps.py:17
+    And the user is on the main recording page           # steps/online_recording_steps.py:33
+    Given the user started recording while online        # steps/connection_loss_steps.py:56
+    And the connection was lost during recording         # steps/connection_loss_steps.py:64
+    And the user continued recording offline             # steps/connection_loss_steps.py:71
+    When the user stops the recording                    # steps/additional_steps.py:10
+    Then the save modal should appear                    # steps/offline_recording_steps.py:48
+    And the user should enter a filename                 # steps/connection_loss_steps.py:77
+    And client-side assembly should be used              # steps/connection_loss_steps.py:84
+    And the recording should be saved locally            # steps/connection_loss_steps.py:92
+    And the recording should have a "LOCAL" badge        # steps/online_recording_steps.py:110
+
+  Scenario: Partial upload handling                     # features/connection_loss.feature:33
+    Given the WaveForge Pro application is loaded       # steps/online_recording_steps.py:17
+    And the user is on the main recording page          # steps/online_recording_steps.py:33
+    Given the user started recording while online       # steps/connection_loss_steps.py:56
+    And 5 chunks were uploaded successfully             # steps/connection_loss_steps.py:98
+    And the internet connection is lost                 # steps/additional_steps.py:17
+    And 3 more chunks are recorded offline              # steps/connection_loss_steps.py:104
+    When the user stops the recording                   # steps/additional_steps.py:10
+    Then the system should detect incomplete upload     # steps/connection_loss_steps.py:110
+    And client-side assembly should be used as fallback # steps/connection_loss_steps.py:117
+    And all 8 chunks should be assembled locally        # steps/connection_loss_steps.py:123
+    And the recording should be saved to IndexedDB      # steps/connection_loss_steps.py:132
+
+  Scenario: Connection restored during recording                # features/connection_loss.feature:44
+    Given the WaveForge Pro application is loaded               # steps/online_recording_steps.py:17
+    And the user is on the main recording page                  # steps/online_recording_steps.py:33
+    Given the user started recording while offline              # steps/connection_loss_steps.py:138
+    And the ConnectionMonitor shows "Offline" status            # steps/offline_recording_steps.py:15
+    When the user records for 2 seconds                         # steps/connection_loss_steps.py:9
+    And the internet connection is restored                     # steps/connection_loss_steps.py:145
+    Then the ConnectionMonitor should show "Online" status      # steps/connection_loss_steps.py:152
+    And a toast notification should appear saying "Back online" # steps/connection_loss_steps.py:28
+    And new chunks should start uploading                       # steps/connection_loss_steps.py:159
+    And previously saved chunks should remain local             # steps/connection_loss_steps.py:167
+    And the recording should continue without interruption      # steps/connection_loss_steps.py:34
+
+  Scenario: Upload recovery after connection restored          # features/connection_loss.feature:55
+    Given the WaveForge Pro application is loaded              # steps/online_recording_steps.py:17
+    And the user is on the main recording page                 # steps/online_recording_steps.py:33
+    Given the user has a recording with partial upload         # steps/connection_loss_steps.py:174
+    And the recording has 5 uploaded chunks and 3 local chunks # steps/connection_loss_steps.py:185
+    When the internet connection is restored                   # steps/connection_loss_steps.py:145
+    Then the remaining chunks should be queued for upload      # steps/connection_loss_steps.py:191
+    And the service worker should upload the pending chunks    # steps/connection_loss_steps.py:197
+    And the user can retry the recording completion            # steps/connection_loss_steps.py:203
+    When all chunks are uploaded                               # steps/connection_loss_steps.py:209
+    And the user signals recording complete again              # steps/connection_loss_steps.py:215
+    Then server assembly should be triggered                   # steps/connection_loss_steps.py:222
+    And the recording should be updated to server-backed       # steps/connection_loss_steps.py:228
+
+  Scenario: Multiple connection losses during single recording    # features/connection_loss.feature:67
+    Given the WaveForge Pro application is loaded                 # steps/online_recording_steps.py:17
+    And the user is on the main recording page                    # steps/online_recording_steps.py:33
+    Given the user starts recording while online                  # steps/additional_steps.py:23
+    When the connection is lost after 5 seconds                   # steps/connection_loss_steps.py:234
+    And the connection is restored after 10 seconds               # steps/connection_loss_steps.py:241
+    And the connection is lost again after 15 seconds             # steps/connection_loss_steps.py:249
+    And the user stops recording after 20 seconds                 # steps/connection_loss_steps.py:257
+    Then all chunks should be preserved (local or uploaded)       # steps/connection_loss_steps.py:264
+    And client-side assembly should be used as fallback           # steps/connection_loss_steps.py:117
+    And the recording should be complete with all audio data      # steps/connection_loss_steps.py:270
+    And the recording duration should be approximately 20 seconds # steps/connection_loss_steps.py:276
+
+  Scenario: Network instability with rapid on/off transitions  # features/connection_loss.feature:78
+    Given the WaveForge Pro application is loaded              # steps/online_recording_steps.py:17
+    And the user is on the main recording page                 # steps/online_recording_steps.py:33
+    Given the user starts recording while online               # steps/additional_steps.py:23
+    And the network becomes unstable                           # steps/connection_loss_steps.py:283
+    When the connection toggles on/off rapidly                 # steps/connection_loss_steps.py:289
+    Then the ConnectionMonitor should track each state change  # steps/connection_loss_steps.py:297
+    And toast notifications should inform the user             # steps/connection_loss_steps.py:303
+    And chunks should be saved locally as backup               # steps/connection_loss_steps.py:310
+    And uploads should only occur when connection is stable    # steps/connection_loss_steps.py:316
+    And recording quality should not be affected               # steps/connection_loss_steps.py:322
+
+Feature: Crash Recovery and Data Persistence # features/crash_recovery.feature:1
+  As a user whose browser or app crashes
+  I want to recover my recording after restart
+  So that I don't lose valuable audio data
+  Feature: Crash Recovery and Data Persistence  # features/crash_recovery.feature:1
+
+  Scenario: Recovery after browser crash during recording    # features/crash_recovery.feature:10
+    Given the WaveForge Pro application is loaded            # steps/online_recording_steps.py:17
+    And IndexedDB is available                               # steps/common_steps.py:10
+    Given the user starts recording audio                    # steps/common_steps.py:17
+    And the user records for 10 seconds                      # steps/additional_steps.py:31
+    And chunks are being saved to IndexedDB recovery_chunks  # steps/common_steps.py:23
+    When the browser crashes unexpectedly                    # steps/common_steps.py:29
+    And the user reopens the application                     # steps/common_steps.py:35
+    Then a recovery modal should appear                      # steps/common_steps.py:41
+    And the modal should show "1 recording can be recovered" # steps/common_steps.py:47
+    And the modal should display the session ID              # steps/common_steps.py:53
+    And the modal should show approximate duration           # steps/common_steps.py:59
+
+  Scenario: Successful recovery and upload                        # features/crash_recovery.feature:21
+    Given the WaveForge Pro application is loaded                 # steps/online_recording_steps.py:17
+    And IndexedDB is available                                    # steps/common_steps.py:10
+    Given the user has a crashed recording session                # steps/additional_steps.py:44
+    And the recovery modal is displayed                           # steps/additional_steps.py:51
+    When the user clicks the "Recover" button                     # steps/additional_steps.py:57
+    Then the application should read chunks from recovery_chunks  # steps/additional_steps.py:64
+    And the chunks should be uploaded to the server               # steps/additional_steps.py:71
+    And a progress indicator should show upload status            # steps/additional_steps.py:79
+    When all chunks are uploaded                                  # steps/connection_loss_steps.py:209
+    Then server assembly should be triggered                      # steps/connection_loss_steps.py:222
+    And the recording should appear in the playlist               # steps/online_recording_steps.py:104
+    And the recording should have a "SERVER" badge                # steps/online_recording_steps.py:110
+    And the recovery_chunks for this session should be cleaned up # steps/additional_steps.py:85
+
+  Scenario: Recovery to local storage when offline                     # features/crash_recovery.feature:34
+    Given the WaveForge Pro application is loaded                      # steps/online_recording_steps.py:17
+    And IndexedDB is available                                         # steps/common_steps.py:10
+    Given the user has a crashed recording session                     # steps/additional_steps.py:44
+    And the user is currently offline                                  # steps/additional_steps.py:92
+    When the user clicks the "Recover" button                          # steps/additional_steps.py:57
+    Then the chunks should be assembled locally                        # steps/additional_steps.py:98
+    And the save modal should appear                                   # steps/offline_recording_steps.py:48
+    When the user enters "recovered_offline" as filename               # steps/additional_steps.py:105
+    And clicks save                                                    # steps/additional_steps.py:112
+    Then the recording should be saved to IndexedDB                    # steps/connection_loss_steps.py:132
+    And the recording should appear in the playlist with "LOCAL" badge # steps/additional_steps.py:119
+    And the recording should be queued for upload when online          # steps/additional_steps.py:126
+
+  Scenario: Discard recovered recording                         # features/crash_recovery.feature:46
+    Given the WaveForge Pro application is loaded               # steps/online_recording_steps.py:17
+    And IndexedDB is available                                  # steps/common_steps.py:10
+    Given the user has a crashed recording session              # steps/additional_steps.py:44
+    And the recovery modal is displayed                         # steps/additional_steps.py:51
+    When the user clicks the "Discard" button                   # steps/additional_steps.py:133
+    Then the recovery_chunks for this session should be deleted # steps/additional_steps.py:140
+    And the recovery modal should close                         # steps/additional_steps.py:147
+    And no recording should be added to the playlist            # steps/additional_steps.py:153
+
+  Scenario: Multiple crashed sessions recovery                          # features/crash_recovery.feature:54
+    Given the WaveForge Pro application is loaded                       # steps/online_recording_steps.py:17
+    And IndexedDB is available                                          # steps/common_steps.py:10
+    Given the user has 3 crashed recording sessions                     # steps/additional_steps.py:160
+    When the user reopens the application                               # steps/common_steps.py:35
+    Then the recovery modal should show "3 recordings can be recovered" # steps/additional_steps.py:167
+    And the modal should list all sessions with details                 # steps/additional_steps.py:173
+    When the user selects "Recover All"                                 # steps/additional_steps.py:180
+    Then all sessions should be processed sequentially                  # steps/additional_steps.py:186
+    And each should be uploaded or saved locally                        # steps/additional_steps.py:193
+    And all recovered recordings should appear in playlist              # steps/additional_steps.py:199
+
+  Scenario: Partial recovery with corrupted chunks                   # features/crash_recovery.feature:64
+    Given the WaveForge Pro application is loaded                    # steps/online_recording_steps.py:17
+    And IndexedDB is available                                       # steps/common_steps.py:10
+    Given the user has a crashed recording session                   # steps/additional_steps.py:44
+    And some chunks are corrupted in IndexedDB                       # steps/additional_steps.py:205
+    When the user clicks the "Recover" button                        # steps/additional_steps.py:57
+    Then the system should skip corrupted chunks                     # steps/additional_steps.py:212
+    And assemble only valid chunks                                   # steps/additional_steps.py:218
+    And show a warning about data loss                               # steps/additional_steps.py:224
+    And still create a partial recording                             # steps/additional_steps.py:230
+    And the recording duration should reflect actual recovered audio # steps/additional_steps.py:236
+
+  Scenario: Recovery after system shutdown                     # features/crash_recovery.feature:74
+    Given the WaveForge Pro application is loaded              # steps/online_recording_steps.py:17
+    And IndexedDB is available                                 # steps/common_steps.py:10
+    Given the user is recording audio                          # steps/performance_steps.py:105
+    And the user records for 30 seconds                        # steps/additional_steps.py:37
+    When the computer shuts down unexpectedly                  # steps/additional_steps.py:243
+    And the user restarts and opens the application            # steps/additional_steps.py:250
+    Then recovery should work the same as browser crash        # steps/additional_steps.py:257
+    And all chunks saved before shutdown should be recoverable # steps/additional_steps.py:263
+    And the full 30 seconds should be preserved                # steps/additional_steps.py:269
+
+  Scenario: Background tab recovery                            # features/crash_recovery.feature:83
+    Given the WaveForge Pro application is loaded              # steps/online_recording_steps.py:17
+    And IndexedDB is available                                 # steps/common_steps.py:10
+    Given the user is recording in a background tab            # steps/additional_steps.py:275
+    And the browser kills the tab to free memory               # steps/additional_steps.py:281
+    When the user navigates back to the tab                    # steps/additional_steps.py:287
+    Then the application should reload                         # steps/additional_steps.py:293
+    And recovery detection should trigger                      # steps/additional_steps.py:299
+    And the recording should be recoverable via recovery modal # steps/additional_steps.py:305
+
+  Scenario: Recovery cleanup after successful save           # features/crash_recovery.feature:91
+    Given the WaveForge Pro application is loaded            # steps/online_recording_steps.py:17
+    And IndexedDB is available                               # steps/common_steps.py:10
+    Given the user has recovered a recording                 # steps/additional_steps.py:311
+    And the recording was successfully saved                 # steps/additional_steps.py:317
+    When the user verifies the recording in the playlist     # steps/additional_steps.py:323
+    Then the recovery_chunks should be deleted automatically # steps/additional_steps.py:329
+    And IndexedDB storage should be freed                    # steps/additional_steps.py:335
+    And no duplicate recovery prompts should appear          # steps/additional_steps.py:341
+
+Feature: Offline Recording with Client Assembly # features/offline_recording.feature:1
+  As a user without internet connection
+  I want to record audio and save it locally
+  So that I can continue working offline and upload later
+  Feature: Offline Recording with Client Assembly  # features/offline_recording.feature:1
+
+  Scenario: Record audio while offline               # features/offline_recording.feature:11
+    Given the user has no internet connection        # steps/offline_recording_steps.py:9
+    And the WaveForge Pro application is loaded      # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Offline" status # steps/offline_recording_steps.py:15
+    Given the user is on the main recording page     # steps/online_recording_steps.py:33
+    When the user clicks the record button           # steps/online_recording_steps.py:39
+    Then the recording indicator should be visible   # steps/online_recording_steps.py:46
+    And the recording should start                   # steps/online_recording_steps.py:61
+    And chunks should be saved locally only          # steps/offline_recording_steps.py:23
+    And no upload attempts should be made            # steps/offline_recording_steps.py:33
+
+  Scenario: Save recording with client assembly                   # features/offline_recording.feature:19
+    Given the user has no internet connection                     # steps/offline_recording_steps.py:9
+    And the WaveForge Pro application is loaded                   # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Offline" status              # steps/offline_recording_steps.py:15
+    Given the user has recorded audio for 5 seconds while offline # steps/offline_recording_steps.py:40
+    When the user clicks the stop button                          # steps/online_recording_steps.py:87
+    Then the save modal should appear                             # steps/offline_recording_steps.py:48
+    And the user should be prompted to enter a filename           # steps/offline_recording_steps.py:54
+    When the user enters "offline_test" as the filename           # steps/offline_recording_steps.py:60
+    And the user clicks the save button                           # steps/offline_recording_steps.py:67
+    Then the recording should be assembled on the client          # steps/offline_recording_steps.py:73
+    And the recording should appear in the playlist               # steps/online_recording_steps.py:104
+    And the recording should have a "LOCAL" badge                 # steps/online_recording_steps.py:110
+    And an upload button should be visible for this recording     # steps/offline_recording_steps.py:80
+
+  Scenario: Play locally-stored recording                # features/offline_recording.feature:31
+    Given the user has no internet connection            # steps/offline_recording_steps.py:9
+    And the WaveForge Pro application is loaded          # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Offline" status     # steps/offline_recording_steps.py:15
+    Given the user has a local recording in the playlist # steps/offline_recording_steps.py:87
+    When the user clicks on the recording                # steps/online_recording_steps.py:133
+    And the user clicks the play button                  # steps/online_recording_steps.py:139
+    Then the audio should play from IndexedDB            # steps/offline_recording_steps.py:103
+    And playback should start immediately                # steps/offline_recording_steps.py:113
+    And the current time should update during playback   # steps/online_recording_steps.py:162
+
+  Scenario: Upload local recording when connection restored            # features/offline_recording.feature:39
+    Given the user has no internet connection                          # steps/offline_recording_steps.py:9
+    And the WaveForge Pro application is loaded                        # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Offline" status                   # steps/offline_recording_steps.py:15
+    Given the user has a local recording in the playlist               # steps/offline_recording_steps.py:87
+    And the user was offline                                           # steps/offline_recording_steps.py:119
+    When the internet connection is restored                           # steps/connection_loss_steps.py:145
+    And the ConnectionMonitor shows "Online" status                    # steps/additional_steps.py:349
+    Then the upload button should become enabled                       # steps/offline_recording_steps.py:125
+    When the user clicks the upload button                             # steps/offline_recording_steps.py:131
+    Then the recording should start uploading to the server            # steps/offline_recording_steps.py:137
+    And a progress indicator should be visible                         # steps/offline_recording_steps.py:145
+    And the badge should change from "LOCAL" to "SERVER" when complete # steps/offline_recording_steps.py:151
+
+  Scenario: Automatic background upload queue                     # features/offline_recording.feature:50
+    Given the user has no internet connection                     # steps/offline_recording_steps.py:9
+    And the WaveForge Pro application is loaded                   # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Offline" status              # steps/offline_recording_steps.py:15
+    Given the user has 3 local recordings in the playlist         # steps/offline_recording_steps.py:158
+    And the user was offline                                      # steps/offline_recording_steps.py:119
+    When the internet connection is restored                      # steps/connection_loss_steps.py:145
+    Then the upload queue should process recordings automatically # steps/offline_recording_steps.py:173
+    And recordings should upload one at a time                    # steps/offline_recording_steps.py:182
+    And the UI should show upload progress                        # steps/offline_recording_steps.py:189
+    And all recordings should eventually have "SERVER" badges     # steps/offline_recording_steps.py:195
+
+  Scenario: Download local recording                     # features/offline_recording.feature:59
+    Given the user has no internet connection            # steps/offline_recording_steps.py:9
+    And the WaveForge Pro application is loaded          # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Offline" status     # steps/offline_recording_steps.py:15
+    Given the user has a local recording in the playlist # steps/offline_recording_steps.py:87
+    When the user clicks the download button             # steps/online_recording_steps.py:171
+    Then the file should be downloaded from IndexedDB    # steps/offline_recording_steps.py:202
+    And the filename should match the recording name     # steps/online_recording_steps.py:185
+    And the file should be in WebM format                # steps/online_recording_steps.py:192
+
+Feature: Online Recording with Server Assembly # features/online_recording.feature:1
+  As a user with an active internet connection
+  I want to record audio and have it saved on the server
+  So that I can save recordings quickly without processing delays
+  Feature: Online Recording with Server Assembly  # features/online_recording.feature:1
+
+  Scenario: Record audio with online connection      # features/online_recording.feature:11
+    Given the user has an active internet connection # steps/online_recording_steps.py:11
+    And the WaveForge Pro application is loaded      # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Online" status  # steps/online_recording_steps.py:24
+    Given the user is on the main recording page     # steps/online_recording_steps.py:33
+    When the user clicks the record button           # steps/online_recording_steps.py:39
+    Then the recording indicator should be visible   # steps/online_recording_steps.py:46
+    And the recording should start                   # steps/online_recording_steps.py:61
+    And chunks should be uploaded in real-time       # steps/online_recording_steps.py:71
+
+  Scenario: Save recording with server assembly                  # features/online_recording.feature:18
+    Given the user has an active internet connection             # steps/online_recording_steps.py:11
+    And the WaveForge Pro application is loaded                  # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Online" status              # steps/online_recording_steps.py:24
+    Given the user has recorded audio for 5 seconds while online # steps/online_recording_steps.py:80
+    When the user clicks the stop button                         # steps/online_recording_steps.py:87
+    Then the save process should complete in less than 2 seconds # steps/online_recording_steps.py:94
+    And the recording should appear in the playlist              # steps/online_recording_steps.py:104
+    And the recording should have a "SERVER" badge               # steps/online_recording_steps.py:110
+    And no upload button should be visible for this recording    # steps/online_recording_steps.py:116
+
+  Scenario: Play server-backed recording                         # features/online_recording.feature:26
+    Given the user has an active internet connection             # steps/online_recording_steps.py:11
+    And the WaveForge Pro application is loaded                  # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Online" status              # steps/online_recording_steps.py:24
+    Given the user has a server-backed recording in the playlist # steps/online_recording_steps.py:123
+    When the user clicks on the recording                        # steps/online_recording_steps.py:133
+    And the user clicks the play button                          # steps/online_recording_steps.py:139
+    Then the audio should stream from the server                 # steps/online_recording_steps.py:146
+    And playback should start within 1 second                    # steps/online_recording_steps.py:155
+    And the current time should update during playback           # steps/online_recording_steps.py:162
+
+  Scenario: Download server-backed recording                     # features/online_recording.feature:34
+    Given the user has an active internet connection             # steps/online_recording_steps.py:11
+    And the WaveForge Pro application is loaded                  # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Online" status              # steps/online_recording_steps.py:24
+    Given the user has a server-backed recording in the playlist # steps/online_recording_steps.py:123
+    When the user clicks the download button                     # steps/online_recording_steps.py:171
+    Then the file should be downloaded from the server           # steps/online_recording_steps.py:179
+    And the filename should match the recording name             # steps/online_recording_steps.py:185
+    And the file should be in WebM format                        # steps/online_recording_steps.py:192
+
+  Scenario: Server assembly with rich metadata          # features/online_recording.feature:41
+    Given the user has an active internet connection    # steps/online_recording_steps.py:11
+    And the WaveForge Pro application is loaded         # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Online" status     # steps/online_recording_steps.py:24
+    Given the user is recording audio online            # steps/online_recording_steps.py:199
+    When the user records for 30 seconds                # steps/connection_loss_steps.py:9
+    And the user stops the recording                    # steps/additional_steps.py:10
+    Then the recording metadata should include duration # steps/online_recording_steps.py:206
+    And the metadata should include format information  # steps/online_recording_steps.py:214
+    And the metadata should include sample rate         # steps/online_recording_steps.py:220
+    And the metadata should be saved on the server      # steps/online_recording_steps.py:226
+
+  Scenario: Fast save for long recordings                       # features/online_recording.feature:50
+    Given the user has an active internet connection            # steps/online_recording_steps.py:11
+    And the WaveForge Pro application is loaded                 # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Online" status             # steps/online_recording_steps.py:24
+    Given the user has an active internet connection            # steps/online_recording_steps.py:11
+    When the user records audio for 60 seconds                  # steps/additional_steps.py:355
+    And all chunks are uploaded during recording                # steps/online_recording_steps.py:234
+    And the user stops the recording                            # steps/additional_steps.py:10
+    Then the save should complete in less than 2 seconds        # steps/online_recording_steps.py:241
+    And the recording should be available immediately           # steps/online_recording_steps.py:247
+    And the server should handle the assembly in the background # steps/online_recording_steps.py:253
+
+  Scenario: Real-time chunk upload monitoring            # features/online_recording.feature:59
+    Given the user has an active internet connection     # steps/online_recording_steps.py:11
+    And the WaveForge Pro application is loaded          # steps/online_recording_steps.py:17
+    And the ConnectionMonitor shows "Online" status      # steps/online_recording_steps.py:24
+    Given the user is recording audio online             # steps/online_recording_steps.py:199
+    When chunks are generated every 5 seconds            # steps/online_recording_steps.py:260
+    Then each chunk should be uploaded immediately       # steps/online_recording_steps.py:266
+    And the upload queue should be processed in order    # steps/online_recording_steps.py:272
+    And the ConnectionMonitor should track upload status # steps/online_recording_steps.py:278
+    And uploaded chunks should be marked in IndexedDB    # steps/online_recording_steps.py:284
+
+Feature: Performance and Scalability # features/performance.feature:1
+  As a power user recording long sessions
+  I want the application to handle large files efficiently
+  So that I can work with professional-length recordings
+  Feature: Performance and Scalability  # features/performance.feature:1
+
+  Scenario: Fast save for 1-hour recording (online)           # features/performance.feature:10
+    Given the WaveForge Pro application is loaded             # steps/online_recording_steps.py:17
+    And the user has sufficient storage space                 # steps/common_steps.py:66
+    Given the user has an active internet connection          # steps/online_recording_steps.py:11
+    When the user records audio for 60 minutes                # steps/common_steps.py:72
+    And all chunks are uploaded during recording              # steps/online_recording_steps.py:234
+    And the user stops the recording                          # steps/additional_steps.py:10
+    Then the save should complete in less than 2 seconds      # steps/online_recording_steps.py:241
+    And the server should assemble the file in the background # steps/additional_steps.py:361
+    And the recording should appear in playlist immediately   # steps/additional_steps.py:466
+    And the recording should have a "SERVER" badge            # steps/online_recording_steps.py:110
+
+  Scenario: Client assembly for 1-hour recording (offline)  # features/performance.feature:20
+    Given the WaveForge Pro application is loaded           # steps/online_recording_steps.py:17
+    And the user has sufficient storage space               # steps/common_steps.py:66
+    Given the user is offline                               # steps/performance_steps.py:39
+    When the user records audio for 60 minutes              # steps/common_steps.py:72
+    And the user stops the recording                        # steps/additional_steps.py:10
+    Then client-side assembly should begin                  # steps/additional_steps.py:478
+    And a progress indicator should show assembly status    # steps/additional_steps.py:490
+    And assembly should complete in reasonable time         # steps/additional_steps.py:484
+    And the recording should be saved to IndexedDB          # steps/connection_loss_steps.py:132
+    And memory usage should remain acceptable               # steps/common_steps.py:97
+
+  Scenario: Handle 100+ recordings in playlist            # features/performance.feature:30
+    Given the WaveForge Pro application is loaded         # steps/online_recording_steps.py:17
+    And the user has sufficient storage space             # steps/common_steps.py:66
+    Given the user has 100 recordings in the playlist     # steps/common_steps.py:103
+    When the playlist is rendered                         # steps/common_steps.py:110
+    Then the UI should load within 3 seconds              # steps/common_steps.py:116
+    And scrolling should be smooth                        # steps/common_steps.py:123
+    And all recordings should display correctly           # steps/common_steps.py:129
+    And server badges and local badges should be accurate # steps/common_steps.py:135
+    And memory usage should be optimized                  # steps/additional_steps.py:640
+
+  Scenario: Large file download performance                # features/performance.feature:39
+    Given the WaveForge Pro application is loaded          # steps/online_recording_steps.py:17
+    And the user has sufficient storage space              # steps/common_steps.py:66
+    Given the user has a 500MB recording on the server     # steps/additional_steps.py:390
+    When the user clicks the download button               # steps/online_recording_steps.py:171
+    Then the download should start immediately             # steps/additional_steps.py:526
+    And a progress indicator should show download status   # steps/additional_steps.py:508
+    And the browser should handle the large file correctly # steps/additional_steps.py:514
+    And the download should not freeze the UI              # steps/additional_steps.py:520
+
+  Scenario: Efficient chunk buffering during recording        # features/performance.feature:47
+    Given the WaveForge Pro application is loaded             # steps/online_recording_steps.py:17
+    And the user has sufficient storage space                 # steps/common_steps.py:66
+    Given the user starts a long recording session            # steps/additional_steps.py:410
+    When recording for extended periods (2+ hours)            # steps/additional_steps.py:447
+    Then memory usage should remain stable                    # steps/additional_steps.py:562
+    And chunks should be flushed to IndexedDB regularly       # steps/additional_steps.py:556
+    And RAM should not exceed 500MB for the recording process # steps/additional_steps.py:568
+    And the application should not slow down over time        # steps/additional_steps.py:652
+
+  Scenario: Concurrent recording and playback                     # features/performance.feature:55
+    Given the WaveForge Pro application is loaded                 # steps/online_recording_steps.py:17
+    And the user has sufficient storage space                     # steps/common_steps.py:66
+    Given the user is recording audio                             # steps/performance_steps.py:105
+    When the user plays back a different recording simultaneously # steps/additional_steps.py:441
+    Then both operations should work without interference         # steps/additional_steps.py:598
+    And recording quality should not be affected                  # steps/connection_loss_steps.py:322
+    And playback quality should not be affected                   # steps/additional_steps.py:610
+    And no audio glitches should occur                            # steps/additional_steps.py:604
+
+  Scenario: Multiple tabs with recordings           # features/performance.feature:63
+    Given the WaveForge Pro application is loaded   # steps/online_recording_steps.py:17
+    And the user has sufficient storage space       # steps/common_steps.py:66
+    Given the user has WaveForge open in 3 tabs     # steps/additional_steps.py:416
+    When each tab loads the playlist                # steps/additional_steps.py:460
+    Then IndexedDB should be accessed safely        # steps/additional_steps.py:634
+    And all tabs should show the same recordings    # steps/additional_steps.py:616
+    And updates in one tab should reflect in others # steps/additional_steps.py:622
+    And no database conflicts should occur          # steps/additional_steps.py:628
+
+  Scenario: Service worker performance                  # features/performance.feature:71
+    Given the WaveForge Pro application is loaded       # steps/online_recording_steps.py:17
+    And the user has sufficient storage space           # steps/common_steps.py:66
+    Given the user has 20 recordings queued for upload  # steps/additional_steps.py:397
+    When the service worker starts processing the queue # steps/additional_steps.py:429
+    Then uploads should process efficiently             # steps/additional_steps.py:538
+    And the UI should remain responsive                 # steps/additional_steps.py:592
+    And upload progress should be tracked accurately    # steps/additional_steps.py:532
+    And failed uploads should retry automatically       # steps/additional_steps.py:544
+
+  Scenario: Garbage collection and cleanup             # features/performance.feature:79
+    Given the WaveForge Pro application is loaded      # steps/online_recording_steps.py:17
+    And the user has sufficient storage space          # steps/common_steps.py:66
+    Given the user has many old recordings             # steps/additional_steps.py:404
+    When the user deletes 50 recordings                # steps/additional_steps.py:453
+    Then IndexedDB storage should be freed immediately # steps/additional_steps.py:580
+    And temporary files should be cleaned up           # steps/additional_steps.py:574
+    And the application should not have memory leaks   # steps/additional_steps.py:646
+    And performance should improve after cleanup       # steps/additional_steps.py:586
+
+  Scenario Outline: Scalability with different recording lengths -- @1.1   # features/performance.feature:96
+    Given the WaveForge Pro application is loaded                          # steps/online_recording_steps.py:17
+    And the user has sufficient storage space                              # steps/common_steps.py:66
+    Given the user has an active internet connection                       # steps/online_recording_steps.py:11
+    When the user records audio for 5 minutes                              # steps/common_steps.py:72
+    And the user stops the recording                                       # steps/additional_steps.py:10
+    Then the save should complete in less than 1 seconds                   # steps/online_recording_steps.py:241
+    And the recording should be playable immediately                       # steps/additional_steps.py:472
+
+  Scenario Outline: Scalability with different recording lengths -- @1.2   # features/performance.feature:97
+    Given the WaveForge Pro application is loaded                          # steps/online_recording_steps.py:17
+    And the user has sufficient storage space                              # steps/common_steps.py:66
+    Given the user has an active internet connection                       # steps/online_recording_steps.py:11
+    When the user records audio for 30 minutes                             # steps/common_steps.py:72
+    And the user stops the recording                                       # steps/additional_steps.py:10
+    Then the save should complete in less than 2 seconds                   # steps/online_recording_steps.py:241
+    And the recording should be playable immediately                       # steps/additional_steps.py:472
+
+  Scenario Outline: Scalability with different recording lengths -- @1.3   # features/performance.feature:98
+    Given the WaveForge Pro application is loaded                          # steps/online_recording_steps.py:17
+    And the user has sufficient storage space                              # steps/common_steps.py:66
+    Given the user has an active internet connection                       # steps/online_recording_steps.py:11
+    When the user records audio for 60 minutes                             # steps/common_steps.py:72
+    And the user stops the recording                                       # steps/additional_steps.py:10
+    Then the save should complete in less than 2 seconds                   # steps/online_recording_steps.py:241
+    And the recording should be playable immediately                       # steps/additional_steps.py:472
+
+  Scenario Outline: Scalability with different recording lengths -- @1.4   # features/performance.feature:99
+    Given the WaveForge Pro application is loaded                          # steps/online_recording_steps.py:17
+    And the user has sufficient storage space                              # steps/common_steps.py:66
+    Given the user has an active internet connection                       # steps/online_recording_steps.py:11
+    When the user records audio for 120 minutes                            # steps/common_steps.py:72
+    And the user stops the recording                                       # steps/additional_steps.py:10
+    Then the save should complete in less than 3 seconds                   # steps/online_recording_steps.py:241
+    And the recording should be playable immediately                       # steps/additional_steps.py:472
+
+  Scenario Outline: Scalability with different recording lengths -- @1.5   # features/performance.feature:100
+    Given the WaveForge Pro application is loaded                          # steps/online_recording_steps.py:17
+    And the user has sufficient storage space                              # steps/common_steps.py:66
+    Given the user has an active internet connection                       # steps/online_recording_steps.py:11
+    When the user records audio for 240 minutes                            # steps/common_steps.py:72
+    And the user stops the recording                                       # steps/additional_steps.py:10
+    Then the save should complete in less than 3 seconds                   # steps/online_recording_steps.py:241
+    And the recording should be playable immediately                       # steps/additional_steps.py:472
+
+Feature: UI Indicators and User Feedback # features/ui_indicators.feature:1
+  As a user of WaveForge Pro
+  I want clear visual feedback about system status
+  So that I understand what's happening with my recordings
+  Feature: UI Indicators and User Feedback  # features/ui_indicators.feature:1
+
+  Scenario: Connection status indicator                 # features/ui_indicators.feature:9
+    Given the WaveForge Pro application is loaded       # steps/online_recording_steps.py:17
+    Given the user has internet connection              # steps/additional_steps.py:384
+    Then the ConnectionMonitor should display "Online"  # steps/additional_steps.py:496
+    And the indicator should be in green color          # steps/common_steps.py:142
+    When the connection is lost                         # steps/additional_steps.py:423
+    Then the ConnectionMonitor should display "Offline" # steps/additional_steps.py:502
+    And the indicator should be in red color            # steps/common_steps.py:148
+    And a toast notification should appear              # steps/additional_steps.py:550
+
+  Scenario: Server badge on recordings                  # features/ui_indicators.feature:18
+    Given the WaveForge Pro application is loaded       # steps/online_recording_steps.py:17
+    Given the user has recorded audio online            # steps/additional_steps.py:369
+    And the recording was assembled on the server       # steps/additional_steps.py:378
+    When the recording appears in the playlist          # steps/additional_steps.py:435
+    Then a "☁ SERVER" badge should be visible           # steps/ui_indicators_steps.py:9
+    And the badge should have a distinctive color       # steps/common_steps.py:154
+    And the badge should indicate server-backed storage # steps/common_steps.py:160
+
+  Scenario: Local badge on recordings                             # features/ui_indicators.feature:26
+    Given the WaveForge Pro application is loaded                 # steps/online_recording_steps.py:17
+    Given the user has recorded audio offline                     # steps/ui_indicators_steps.py:16
+    And the recording was assembled on the client                 # steps/ui_indicators_steps.py:23
+    When the recording appears in the playlist                    # steps/additional_steps.py:435
+    Then a "💾 LOCAL" badge should be visible                      # steps/ui_indicators_steps.py:29
+    And the badge should have a different color than server badge # steps/common_steps.py:166
+    And the badge should indicate local storage                   # steps/common_steps.py:172
+
+  Scenario: Upload button visibility for local recordings      # features/ui_indicators.feature:34
+    Given the WaveForge Pro application is loaded              # steps/online_recording_steps.py:17
+    Given the user has a local recording in the playlist       # steps/offline_recording_steps.py:87
+    Then an upload button should be visible for that recording # steps/ui_indicators_steps.py:35
+    And the button should be clearly labeled                   # steps/common_steps.py:178
+    When the user has a server-backed recording                # steps/ui_indicators_steps.py:41
+    Then no upload button should be visible for that recording # steps/ui_indicators_steps.py:47
+
+  Scenario: Recording in progress indicator           # features/ui_indicators.feature:41
+    Given the WaveForge Pro application is loaded     # steps/online_recording_steps.py:17
+    Given the user clicks the record button           # steps/ui_indicators_steps.py:53
+    Then the record button should change appearance   # steps/common_steps.py:184
+    And a recording indicator should pulse or animate # steps/common_steps.py:190
+    And the elapsed time should update every second   # steps/common_steps.py:196
+    And the stop button should be enabled             # steps/common_steps.py:205
+
+  Scenario: Toast notifications for connection changes   # features/ui_indicators.feature:48
+    Given the WaveForge Pro application is loaded        # steps/online_recording_steps.py:17
+    Given the user is using the application              # steps/ui_indicators_steps.py:59
+    When the connection changes from online to offline   # steps/ui_indicators_steps.py:66
+    Then a toast notification should appear              # steps/additional_steps.py:550
+    And the message should say "You are now offline"     # steps/common_steps.py:211
+    And the toast should auto-dismiss after 5 seconds    # steps/common_steps.py:217
+    When the connection is restored                      # steps/ui_indicators_steps.py:73
+    Then a toast notification should say "Back online"   # steps/ui_indicators_steps.py:80
+    And the toast should use a different color (success) # steps/common_steps.py:224
+
+  Scenario: Upload progress indicator               # features/ui_indicators.feature:58
+    Given the WaveForge Pro application is loaded   # steps/online_recording_steps.py:17
+    Given the user has a local recording            # steps/ui_indicators_steps.py:86
+    When the user clicks the upload button          # steps/offline_recording_steps.py:131
+    Then a progress bar should appear               # steps/ui_indicators_steps.py:93
+    And the progress should update as chunks upload # steps/ui_indicators_steps.py:99
+    And the percentage should be displayed          # steps/common_steps.py:230
+    And an estimated time remaining should show     # steps/common_steps.py:236
+
+  Scenario: Save modal for offline recordings        # features/ui_indicators.feature:66
+    Given the WaveForge Pro application is loaded    # steps/online_recording_steps.py:17
+    Given the user recorded offline                  # steps/ui_indicators_steps.py:108
+    When the user stops the recording                # steps/additional_steps.py:10
+    Then a modal dialog should appear                # steps/ui_indicators_steps.py:114
+    And the modal should have a filename input field # steps/ui_indicators_steps.py:120
+    And a save button should be present              # steps/ui_indicators_steps.py:126
+    And a cancel button should be present            # steps/common_steps.py:242
+    And the filename should have a default value     # steps/common_steps.py:248
+
+  Scenario: Assembly progress for long recordings                         # features/ui_indicators.feature:75
+    Given the WaveForge Pro application is loaded                         # steps/online_recording_steps.py:17
+    Given the user recorded a 60-minute audio offline                     # steps/ui_indicators_steps.py:132
+    When the user stops and saves the recording                           # steps/ui_indicators_steps.py:139
+    Then an assembly progress indicator should appear                     # steps/common_steps.py:79
+    And the progress should show percentage complete                      # steps/common_steps.py:85
+    And a message should explain "Assembling recording..."                # steps/common_steps.py:91
+    And the user should not be able to start new recording until complete # steps/common_steps.py:255
+
+  Scenario: Download progress indicator                 # features/ui_indicators.feature:83
+    Given the WaveForge Pro application is loaded       # steps/online_recording_steps.py:17
+    Given the user clicks download on a large recording # steps/ui_indicators_steps.py:146
+    Then the browser's native download should start     # steps/ui_indicators_steps.py:152
+    And the filename should be clear and descriptive    # steps/common_steps.py:261
+    And the file type should be indicated (.webm)       # steps/common_steps.py:267
+
+  Scenario: Error notifications                   # features/ui_indicators.feature:89
+    Given the WaveForge Pro application is loaded # steps/online_recording_steps.py:17
+    Given an error occurs during upload           # steps/ui_indicators_steps.py:159
+    When the upload fails                         # steps/ui_indicators_steps.py:166
+    Then an error toast should appear             # steps/ui_indicators_steps.py:172
+    And the message should be user-friendly       # steps/common_steps.py:273
+    And the toast should not auto-dismiss         # steps/common_steps.py:279
+    And a retry button should be available        # steps/common_steps.py:286
+
+  Scenario: Playback UI feedback                     # features/ui_indicators.feature:97
+    Given the WaveForge Pro application is loaded    # steps/online_recording_steps.py:17
+    Given the user clicks play on a recording        # steps/ui_indicators_steps.py:178
+    Then the play button should change to pause icon # steps/common_steps.py:292
+    And the timeline should show current position    # steps/common_steps.py:298
+    And the current time should update smoothly      # steps/ui_indicators_steps.py:184
+    And the waveform should highlight played portion # steps/common_steps.py:304
+
+  Scenario: Empty playlist state                        # features/ui_indicators.feature:104
+    Given the WaveForge Pro application is loaded       # steps/online_recording_steps.py:17
+    Given the user has no recordings                    # steps/ui_indicators_steps.py:193
+    When the playlist is displayed                      # steps/ui_indicators_steps.py:200
+    Then a helpful message should appear                # steps/common_steps.py:310
+    And the message should guide user to record         # steps/common_steps.py:316
+    And an icon or illustration should make it friendly # steps/common_steps.py:322
+
+  Scenario: Loading states                                     # features/ui_indicators.feature:111
+    Given the WaveForge Pro application is loaded              # steps/online_recording_steps.py:17
+    Given the application is loading recordings from IndexedDB # steps/ui_indicators_steps.py:206
+    Then a loading spinner should be visible                   # steps/common_steps.py:328
+    And the spinner should indicate progress                   # steps/common_steps.py:334
+    When loading is complete                                   # steps/common_steps.py:340
+    Then the spinner should disappear                          # steps/common_steps.py:346
+    And the recordings should render                           # steps/common_steps.py:352
+
+  Scenario: Batch operation feedback              # features/ui_indicators.feature:119
+    Given the WaveForge Pro application is loaded # steps/online_recording_steps.py:17
+    Given the user has 10 recordings              # steps/ui_indicators_steps.py:213
+    When the user selects "Upload All"            # steps/ui_indicators_steps.py:220
+    Then a batch progress indicator should appear # steps/ui_indicators_steps.py:226
+    And it should show "Uploading 3 of 10"        # steps/ui_indicators_steps.py:232
+    And individual recording status should update # steps/ui_indicators_steps.py:238
+    And an overall percentage should be displayed # steps/ui_indicators_steps.py:244
+

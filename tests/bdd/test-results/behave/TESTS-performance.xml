@@ -1,0 +1,225 @@
+<testsuite name="performance.Performance and Scalability" tests="14" errors="0" failures="0" skipped="0" time="0.0" timestamp="2025-12-04T18:05:41.489231" hostname="T000a968bd"><testcase classname="performance.Performance and Scalability" name="Fast save for 1-hour recording (online)" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Fast save for 1-hour recording (online)
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user has an active internet connection ... untested in 0.000s
+    When the user records audio for 60 minutes ... untested in 0.000s
+    And all chunks are uploaded during recording ... untested in 0.000s
+    And the user stops the recording ... untested in 0.000s
+    Then the save should complete in less than 2 seconds ... untested in 0.000s
+    And the server should assemble the file in the background ... untested in 0.000s
+    And the recording should appear in playlist immediately ... untested in 0.000s
+    And the recording should have a "SERVER" badge ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Client assembly for 1-hour recording (offline)" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Client assembly for 1-hour recording (offline)
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user is offline ... untested in 0.000s
+    When the user records audio for 60 minutes ... untested in 0.000s
+    And the user stops the recording ... untested in 0.000s
+    Then client-side assembly should begin ... untested in 0.000s
+    And a progress indicator should show assembly status ... untested in 0.000s
+    And assembly should complete in reasonable time ... untested in 0.000s
+    And the recording should be saved to IndexedDB ... untested in 0.000s
+    And memory usage should remain acceptable ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Handle 100+ recordings in playlist" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Handle 100+ recordings in playlist
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user has 100 recordings in the playlist ... untested in 0.000s
+    When the playlist is rendered ... untested in 0.000s
+    Then the UI should load within 3 seconds ... untested in 0.000s
+    And scrolling should be smooth ... untested in 0.000s
+    And all recordings should display correctly ... untested in 0.000s
+    And server badges and local badges should be accurate ... untested in 0.000s
+    And memory usage should be optimized ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Large file download performance" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Large file download performance
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user has a 500MB recording on the server ... untested in 0.000s
+    When the user clicks the download button ... untested in 0.000s
+    Then the download should start immediately ... untested in 0.000s
+    And a progress indicator should show download status ... untested in 0.000s
+    And the browser should handle the large file correctly ... untested in 0.000s
+    And the download should not freeze the UI ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Efficient chunk buffering during recording" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Efficient chunk buffering during recording
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user starts a long recording session ... untested in 0.000s
+    When recording for extended periods (2+ hours) ... untested in 0.000s
+    Then memory usage should remain stable ... untested in 0.000s
+    And chunks should be flushed to IndexedDB regularly ... untested in 0.000s
+    And RAM should not exceed 500MB for the recording process ... untested in 0.000s
+    And the application should not slow down over time ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Concurrent recording and playback" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Concurrent recording and playback
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user is recording audio ... untested in 0.000s
+    When the user plays back a different recording simultaneously ... untested in 0.000s
+    Then both operations should work without interference ... untested in 0.000s
+    And recording quality should not be affected ... untested in 0.000s
+    And playback quality should not be affected ... untested in 0.000s
+    And no audio glitches should occur ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Multiple tabs with recordings" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Multiple tabs with recordings
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user has WaveForge open in 3 tabs ... untested in 0.000s
+    When each tab loads the playlist ... untested in 0.000s
+    Then IndexedDB should be accessed safely ... untested in 0.000s
+    And all tabs should show the same recordings ... untested in 0.000s
+    And updates in one tab should reflect in others ... untested in 0.000s
+    And no database conflicts should occur ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Service worker performance" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Service worker performance
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user has 20 recordings queued for upload ... untested in 0.000s
+    When the service worker starts processing the queue ... untested in 0.000s
+    Then uploads should process efficiently ... untested in 0.000s
+    And the UI should remain responsive ... untested in 0.000s
+    And upload progress should be tracked accurately ... untested in 0.000s
+    And failed uploads should retry automatically ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Garbage collection and cleanup" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Garbage collection and cleanup
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user has many old recordings ... untested in 0.000s
+    When the user deletes 50 recordings ... untested in 0.000s
+    Then IndexedDB storage should be freed immediately ... untested in 0.000s
+    And temporary files should be cleaned up ... untested in 0.000s
+    And the application should not have memory leaks ... untested in 0.000s
+    And performance should improve after cleanup ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Scalability with different recording lengths -- @1.1 " status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario Outline: Scalability with different recording lengths -- @1.1 
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user has an active internet connection ... untested in 0.000s
+    When the user records audio for 5 minutes ... untested in 0.000s
+    And the user stops the recording ... untested in 0.000s
+    Then the save should complete in less than 1 seconds ... untested in 0.000s
+    And the recording should be playable immediately ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Scalability with different recording lengths -- @1.2 " status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario Outline: Scalability with different recording lengths -- @1.2 
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user has an active internet connection ... untested in 0.000s
+    When the user records audio for 30 minutes ... untested in 0.000s
+    And the user stops the recording ... untested in 0.000s
+    Then the save should complete in less than 2 seconds ... untested in 0.000s
+    And the recording should be playable immediately ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Scalability with different recording lengths -- @1.3 " status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario Outline: Scalability with different recording lengths -- @1.3 
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user has an active internet connection ... untested in 0.000s
+    When the user records audio for 60 minutes ... untested in 0.000s
+    And the user stops the recording ... untested in 0.000s
+    Then the save should complete in less than 2 seconds ... untested in 0.000s
+    And the recording should be playable immediately ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Scalability with different recording lengths -- @1.4 " status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario Outline: Scalability with different recording lengths -- @1.4 
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user has an active internet connection ... untested in 0.000s
+    When the user records audio for 120 minutes ... untested in 0.000s
+    And the user stops the recording ... untested in 0.000s
+    Then the save should complete in less than 3 seconds ... untested in 0.000s
+    And the recording should be playable immediately ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="performance.Performance and Scalability" name="Scalability with different recording lengths -- @1.5 " status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario Outline: Scalability with different recording lengths -- @1.5 
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user has sufficient storage space ... untested in 0.000s
+    Given the user has an active internet connection ... untested in 0.000s
+    When the user records audio for 240 minutes ... untested in 0.000s
+    And the user stops the recording ... untested in 0.000s
+    Then the save should complete in less than 3 seconds ... untested in 0.000s
+    And the recording should be playable immediately ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase></testsuite>

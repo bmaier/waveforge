@@ -1,0 +1,162 @@
+<testsuite name="crash_recovery.Crash Recovery and Data Persistence" tests="9" errors="0" failures="0" skipped="0" time="0.0" timestamp="2025-12-04T18:05:41.422890" hostname="T000a968bd"><testcase classname="crash_recovery.Crash Recovery and Data Persistence" name="Recovery after browser crash during recording" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Recovery after browser crash during recording
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And IndexedDB is available ... untested in 0.000s
+    Given the user starts recording audio ... untested in 0.000s
+    And the user records for 10 seconds ... untested in 0.000s
+    And chunks are being saved to IndexedDB recovery_chunks ... untested in 0.000s
+    When the browser crashes unexpectedly ... untested in 0.000s
+    And the user reopens the application ... untested in 0.000s
+    Then a recovery modal should appear ... untested in 0.000s
+    And the modal should show "1 recording can be recovered" ... untested in 0.000s
+    And the modal should display the session ID ... untested in 0.000s
+    And the modal should show approximate duration ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="crash_recovery.Crash Recovery and Data Persistence" name="Successful recovery and upload" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Successful recovery and upload
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And IndexedDB is available ... untested in 0.000s
+    Given the user has a crashed recording session ... untested in 0.000s
+    And the recovery modal is displayed ... untested in 0.000s
+    When the user clicks the "Recover" button ... untested in 0.000s
+    Then the application should read chunks from recovery_chunks ... untested in 0.000s
+    And the chunks should be uploaded to the server ... untested in 0.000s
+    And a progress indicator should show upload status ... untested in 0.000s
+    When all chunks are uploaded ... untested in 0.000s
+    Then server assembly should be triggered ... untested in 0.000s
+    And the recording should appear in the playlist ... untested in 0.000s
+    And the recording should have a "SERVER" badge ... untested in 0.000s
+    And the recovery_chunks for this session should be cleaned up ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="crash_recovery.Crash Recovery and Data Persistence" name="Recovery to local storage when offline" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Recovery to local storage when offline
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And IndexedDB is available ... untested in 0.000s
+    Given the user has a crashed recording session ... untested in 0.000s
+    And the user is currently offline ... untested in 0.000s
+    When the user clicks the "Recover" button ... untested in 0.000s
+    Then the chunks should be assembled locally ... untested in 0.000s
+    And the save modal should appear ... untested in 0.000s
+    When the user enters "recovered_offline" as filename ... untested in 0.000s
+    And clicks save ... untested in 0.000s
+    Then the recording should be saved to IndexedDB ... untested in 0.000s
+    And the recording should appear in the playlist with "LOCAL" badge ... untested in 0.000s
+    And the recording should be queued for upload when online ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="crash_recovery.Crash Recovery and Data Persistence" name="Discard recovered recording" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Discard recovered recording
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And IndexedDB is available ... untested in 0.000s
+    Given the user has a crashed recording session ... untested in 0.000s
+    And the recovery modal is displayed ... untested in 0.000s
+    When the user clicks the "Discard" button ... untested in 0.000s
+    Then the recovery_chunks for this session should be deleted ... untested in 0.000s
+    And the recovery modal should close ... untested in 0.000s
+    And no recording should be added to the playlist ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="crash_recovery.Crash Recovery and Data Persistence" name="Multiple crashed sessions recovery" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Multiple crashed sessions recovery
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And IndexedDB is available ... untested in 0.000s
+    Given the user has 3 crashed recording sessions ... untested in 0.000s
+    When the user reopens the application ... untested in 0.000s
+    Then the recovery modal should show "3 recordings can be recovered" ... untested in 0.000s
+    And the modal should list all sessions with details ... untested in 0.000s
+    When the user selects "Recover All" ... untested in 0.000s
+    Then all sessions should be processed sequentially ... untested in 0.000s
+    And each should be uploaded or saved locally ... untested in 0.000s
+    And all recovered recordings should appear in playlist ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="crash_recovery.Crash Recovery and Data Persistence" name="Partial recovery with corrupted chunks" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Partial recovery with corrupted chunks
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And IndexedDB is available ... untested in 0.000s
+    Given the user has a crashed recording session ... untested in 0.000s
+    And some chunks are corrupted in IndexedDB ... untested in 0.000s
+    When the user clicks the "Recover" button ... untested in 0.000s
+    Then the system should skip corrupted chunks ... untested in 0.000s
+    And assemble only valid chunks ... untested in 0.000s
+    And show a warning about data loss ... untested in 0.000s
+    And still create a partial recording ... untested in 0.000s
+    And the recording duration should reflect actual recovered audio ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="crash_recovery.Crash Recovery and Data Persistence" name="Recovery after system shutdown" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Recovery after system shutdown
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And IndexedDB is available ... untested in 0.000s
+    Given the user is recording audio ... untested in 0.000s
+    And the user records for 30 seconds ... untested in 0.000s
+    When the computer shuts down unexpectedly ... untested in 0.000s
+    And the user restarts and opens the application ... untested in 0.000s
+    Then recovery should work the same as browser crash ... untested in 0.000s
+    And all chunks saved before shutdown should be recoverable ... untested in 0.000s
+    And the full 30 seconds should be preserved ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="crash_recovery.Crash Recovery and Data Persistence" name="Background tab recovery" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Background tab recovery
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And IndexedDB is available ... untested in 0.000s
+    Given the user is recording in a background tab ... untested in 0.000s
+    And the browser kills the tab to free memory ... untested in 0.000s
+    When the user navigates back to the tab ... untested in 0.000s
+    Then the application should reload ... untested in 0.000s
+    And recovery detection should trigger ... untested in 0.000s
+    And the recording should be recoverable via recovery modal ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="crash_recovery.Crash Recovery and Data Persistence" name="Recovery cleanup after successful save" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Recovery cleanup after successful save
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And IndexedDB is available ... untested in 0.000s
+    Given the user has recovered a recording ... untested in 0.000s
+    And the recording was successfully saved ... untested in 0.000s
+    When the user verifies the recording in the playlist ... untested in 0.000s
+    Then the recovery_chunks should be deleted automatically ... untested in 0.000s
+    And IndexedDB storage should be freed ... untested in 0.000s
+    And no duplicate recovery prompts should appear ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase></testsuite>

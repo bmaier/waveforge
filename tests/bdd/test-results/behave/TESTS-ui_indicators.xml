@@ -1,0 +1,224 @@
+<testsuite name="ui_indicators.UI Indicators and User Feedback" tests="15" errors="0" failures="0" skipped="0" time="0.0" timestamp="2025-12-04T18:05:41.519065" hostname="T000a968bd"><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Connection status indicator" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Connection status indicator
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user has internet connection ... untested in 0.000s
+    Then the ConnectionMonitor should display "Online" ... untested in 0.000s
+    And the indicator should be in green color ... untested in 0.000s
+    When the connection is lost ... untested in 0.000s
+    Then the ConnectionMonitor should display "Offline" ... untested in 0.000s
+    And the indicator should be in red color ... untested in 0.000s
+    And a toast notification should appear ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Server badge on recordings" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Server badge on recordings
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user has recorded audio online ... untested in 0.000s
+    And the recording was assembled on the server ... untested in 0.000s
+    When the recording appears in the playlist ... untested in 0.000s
+    Then a "☁ SERVER" badge should be visible ... untested in 0.000s
+    And the badge should have a distinctive color ... untested in 0.000s
+    And the badge should indicate server-backed storage ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Local badge on recordings" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Local badge on recordings
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user has recorded audio offline ... untested in 0.000s
+    And the recording was assembled on the client ... untested in 0.000s
+    When the recording appears in the playlist ... untested in 0.000s
+    Then a "💾 LOCAL" badge should be visible ... untested in 0.000s
+    And the badge should have a different color than server badge ... untested in 0.000s
+    And the badge should indicate local storage ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Upload button visibility for local recordings" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Upload button visibility for local recordings
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user has a local recording in the playlist ... untested in 0.000s
+    Then an upload button should be visible for that recording ... untested in 0.000s
+    And the button should be clearly labeled ... untested in 0.000s
+    When the user has a server-backed recording ... untested in 0.000s
+    Then no upload button should be visible for that recording ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Recording in progress indicator" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Recording in progress indicator
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user clicks the record button ... untested in 0.000s
+    Then the record button should change appearance ... untested in 0.000s
+    And a recording indicator should pulse or animate ... untested in 0.000s
+    And the elapsed time should update every second ... untested in 0.000s
+    And the stop button should be enabled ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Toast notifications for connection changes" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Toast notifications for connection changes
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user is using the application ... untested in 0.000s
+    When the connection changes from online to offline ... untested in 0.000s
+    Then a toast notification should appear ... untested in 0.000s
+    And the message should say "You are now offline" ... untested in 0.000s
+    And the toast should auto-dismiss after 5 seconds ... untested in 0.000s
+    When the connection is restored ... untested in 0.000s
+    Then a toast notification should say "Back online" ... untested in 0.000s
+    And the toast should use a different color (success) ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Upload progress indicator" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Upload progress indicator
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user has a local recording ... untested in 0.000s
+    When the user clicks the upload button ... untested in 0.000s
+    Then a progress bar should appear ... untested in 0.000s
+    And the progress should update as chunks upload ... untested in 0.000s
+    And the percentage should be displayed ... untested in 0.000s
+    And an estimated time remaining should show ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Save modal for offline recordings" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Save modal for offline recordings
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user recorded offline ... untested in 0.000s
+    When the user stops the recording ... untested in 0.000s
+    Then a modal dialog should appear ... untested in 0.000s
+    And the modal should have a filename input field ... untested in 0.000s
+    And a save button should be present ... untested in 0.000s
+    And a cancel button should be present ... untested in 0.000s
+    And the filename should have a default value ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Assembly progress for long recordings" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Assembly progress for long recordings
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user recorded a 60-minute audio offline ... untested in 0.000s
+    When the user stops and saves the recording ... untested in 0.000s
+    Then an assembly progress indicator should appear ... untested in 0.000s
+    And the progress should show percentage complete ... untested in 0.000s
+    And a message should explain "Assembling recording..." ... untested in 0.000s
+    And the user should not be able to start new recording until complete ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Download progress indicator" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Download progress indicator
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user clicks download on a large recording ... untested in 0.000s
+    Then the browser's native download should start ... untested in 0.000s
+    And the filename should be clear and descriptive ... untested in 0.000s
+    And the file type should be indicated (.webm) ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Error notifications" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Error notifications
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given an error occurs during upload ... untested in 0.000s
+    When the upload fails ... untested in 0.000s
+    Then an error toast should appear ... untested in 0.000s
+    And the message should be user-friendly ... untested in 0.000s
+    And the toast should not auto-dismiss ... untested in 0.000s
+    And a retry button should be available ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Playback UI feedback" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Playback UI feedback
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user clicks play on a recording ... untested in 0.000s
+    Then the play button should change to pause icon ... untested in 0.000s
+    And the timeline should show current position ... untested in 0.000s
+    And the current time should update smoothly ... untested in 0.000s
+    And the waveform should highlight played portion ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Empty playlist state" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Empty playlist state
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user has no recordings ... untested in 0.000s
+    When the playlist is displayed ... untested in 0.000s
+    Then a helpful message should appear ... untested in 0.000s
+    And the message should guide user to record ... untested in 0.000s
+    And an icon or illustration should make it friendly ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Loading states" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Loading states
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the application is loading recordings from IndexedDB ... untested in 0.000s
+    Then a loading spinner should be visible ... untested in 0.000s
+    And the spinner should indicate progress ... untested in 0.000s
+    When loading is complete ... untested in 0.000s
+    Then the spinner should disappear ... untested in 0.000s
+    And the recordings should render ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="ui_indicators.UI Indicators and User Feedback" name="Batch operation feedback" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Batch operation feedback
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    Given the user has 10 recordings ... untested in 0.000s
+    When the user selects "Upload All" ... untested in 0.000s
+    Then a batch progress indicator should appear ... untested in 0.000s
+    And it should show "Uploading 3 of 10" ... untested in 0.000s
+    And individual recording status should update ... untested in 0.000s
+    And an overall percentage should be displayed ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase></testsuite>

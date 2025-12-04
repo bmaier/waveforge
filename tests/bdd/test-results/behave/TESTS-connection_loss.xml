@@ -1,0 +1,135 @@
+<testsuite name="connection_loss.Connection Loss During Recording" tests="7" errors="0" failures="0" skipped="0" time="0.0" timestamp="2025-12-04T18:05:41.399660" hostname="T000a968bd"><testcase classname="connection_loss.Connection Loss During Recording" name="Seamless transition from online to offline" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Seamless transition from online to offline
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user is on the main recording page ... untested in 0.000s
+    Given the user has an active internet connection ... untested in 0.000s
+    And the ConnectionMonitor shows "Online" status ... untested in 0.000s
+    When the user clicks the record button ... untested in 0.000s
+    And the user records for 3 seconds ... untested in 0.000s
+    And the internet connection is lost ... untested in 0.000s
+    Then the ConnectionMonitor should show "Offline" status ... untested in 0.000s
+    And a toast notification should appear saying "You are now offline" ... untested in 0.000s
+    And the recording should continue without interruption ... untested in 0.000s
+    And chunks should continue to be saved locally ... untested in 0.000s
+    And no upload attempts should be made after connection loss ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="connection_loss.Connection Loss During Recording" name="Save after connection loss during recording" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Save after connection loss during recording
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user is on the main recording page ... untested in 0.000s
+    Given the user started recording while online ... untested in 0.000s
+    And the connection was lost during recording ... untested in 0.000s
+    And the user continued recording offline ... untested in 0.000s
+    When the user stops the recording ... untested in 0.000s
+    Then the save modal should appear ... untested in 0.000s
+    And the user should enter a filename ... untested in 0.000s
+    And client-side assembly should be used ... untested in 0.000s
+    And the recording should be saved locally ... untested in 0.000s
+    And the recording should have a "LOCAL" badge ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="connection_loss.Connection Loss During Recording" name="Partial upload handling" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Partial upload handling
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user is on the main recording page ... untested in 0.000s
+    Given the user started recording while online ... untested in 0.000s
+    And 5 chunks were uploaded successfully ... untested in 0.000s
+    And the internet connection is lost ... untested in 0.000s
+    And 3 more chunks are recorded offline ... untested in 0.000s
+    When the user stops the recording ... untested in 0.000s
+    Then the system should detect incomplete upload ... untested in 0.000s
+    And client-side assembly should be used as fallback ... untested in 0.000s
+    And all 8 chunks should be assembled locally ... untested in 0.000s
+    And the recording should be saved to IndexedDB ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="connection_loss.Connection Loss During Recording" name="Connection restored during recording" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Connection restored during recording
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user is on the main recording page ... untested in 0.000s
+    Given the user started recording while offline ... untested in 0.000s
+    And the ConnectionMonitor shows "Offline" status ... untested in 0.000s
+    When the user records for 2 seconds ... untested in 0.000s
+    And the internet connection is restored ... untested in 0.000s
+    Then the ConnectionMonitor should show "Online" status ... untested in 0.000s
+    And a toast notification should appear saying "Back online" ... untested in 0.000s
+    And new chunks should start uploading ... untested in 0.000s
+    And previously saved chunks should remain local ... untested in 0.000s
+    And the recording should continue without interruption ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="connection_loss.Connection Loss During Recording" name="Upload recovery after connection restored" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Upload recovery after connection restored
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user is on the main recording page ... untested in 0.000s
+    Given the user has a recording with partial upload ... untested in 0.000s
+    And the recording has 5 uploaded chunks and 3 local chunks ... untested in 0.000s
+    When the internet connection is restored ... untested in 0.000s
+    Then the remaining chunks should be queued for upload ... untested in 0.000s
+    And the service worker should upload the pending chunks ... untested in 0.000s
+    And the user can retry the recording completion ... untested in 0.000s
+    When all chunks are uploaded ... untested in 0.000s
+    And the user signals recording complete again ... untested in 0.000s
+    Then server assembly should be triggered ... untested in 0.000s
+    And the recording should be updated to server-backed ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="connection_loss.Connection Loss During Recording" name="Multiple connection losses during single recording" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Multiple connection losses during single recording
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user is on the main recording page ... untested in 0.000s
+    Given the user starts recording while online ... untested in 0.000s
+    When the connection is lost after 5 seconds ... untested in 0.000s
+    And the connection is restored after 10 seconds ... untested in 0.000s
+    And the connection is lost again after 15 seconds ... untested in 0.000s
+    And the user stops recording after 20 seconds ... untested in 0.000s
+    Then all chunks should be preserved (local or uploaded) ... untested in 0.000s
+    And client-side assembly should be used as fallback ... untested in 0.000s
+    And the recording should be complete with all audio data ... untested in 0.000s
+    And the recording duration should be approximately 20 seconds ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="connection_loss.Connection Loss During Recording" name="Network instability with rapid on/off transitions" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Network instability with rapid on/off transitions
+    Given the WaveForge Pro application is loaded ... untested in 0.000s
+    And the user is on the main recording page ... untested in 0.000s
+    Given the user starts recording while online ... untested in 0.000s
+    And the network becomes unstable ... untested in 0.000s
+    When the connection toggles on/off rapidly ... untested in 0.000s
+    Then the ConnectionMonitor should track each state change ... untested in 0.000s
+    And toast notifications should inform the user ... untested in 0.000s
+    And chunks should be saved locally as backup ... untested in 0.000s
+    And uploads should only occur when connection is stable ... untested in 0.000s
+    And recording quality should not be affected ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase></testsuite>

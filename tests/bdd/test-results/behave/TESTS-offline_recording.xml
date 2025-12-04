@@ -1,0 +1,110 @@
+<testsuite name="offline_recording.Offline Recording with Client Assembly" tests="6" errors="0" failures="0" skipped="0" time="0.0" timestamp="2025-12-04T18:05:41.441470" hostname="T000a968bd"><testcase classname="offline_recording.Offline Recording with Client Assembly" name="Record audio while offline" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Record audio while offline
+    Given the user has no internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Offline" status ... untested in 0.000s
+    Given the user is on the main recording page ... untested in 0.000s
+    When the user clicks the record button ... untested in 0.000s
+    Then the recording indicator should be visible ... untested in 0.000s
+    And the recording should start ... untested in 0.000s
+    And chunks should be saved locally only ... untested in 0.000s
+    And no upload attempts should be made ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="offline_recording.Offline Recording with Client Assembly" name="Save recording with client assembly" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Save recording with client assembly
+    Given the user has no internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Offline" status ... untested in 0.000s
+    Given the user has recorded audio for 5 seconds while offline ... untested in 0.000s
+    When the user clicks the stop button ... untested in 0.000s
+    Then the save modal should appear ... untested in 0.000s
+    And the user should be prompted to enter a filename ... untested in 0.000s
+    When the user enters "offline_test" as the filename ... untested in 0.000s
+    And the user clicks the save button ... untested in 0.000s
+    Then the recording should be assembled on the client ... untested in 0.000s
+    And the recording should appear in the playlist ... untested in 0.000s
+    And the recording should have a "LOCAL" badge ... untested in 0.000s
+    And an upload button should be visible for this recording ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="offline_recording.Offline Recording with Client Assembly" name="Play locally-stored recording" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Play locally-stored recording
+    Given the user has no internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Offline" status ... untested in 0.000s
+    Given the user has a local recording in the playlist ... untested in 0.000s
+    When the user clicks on the recording ... untested in 0.000s
+    And the user clicks the play button ... untested in 0.000s
+    Then the audio should play from IndexedDB ... untested in 0.000s
+    And playback should start immediately ... untested in 0.000s
+    And the current time should update during playback ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="offline_recording.Offline Recording with Client Assembly" name="Upload local recording when connection restored" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Upload local recording when connection restored
+    Given the user has no internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Offline" status ... untested in 0.000s
+    Given the user has a local recording in the playlist ... untested in 0.000s
+    And the user was offline ... untested in 0.000s
+    When the internet connection is restored ... untested in 0.000s
+    And the ConnectionMonitor shows "Online" status ... untested in 0.000s
+    Then the upload button should become enabled ... untested in 0.000s
+    When the user clicks the upload button ... untested in 0.000s
+    Then the recording should start uploading to the server ... untested in 0.000s
+    And a progress indicator should be visible ... untested in 0.000s
+    And the badge should change from "LOCAL" to "SERVER" when complete ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="offline_recording.Offline Recording with Client Assembly" name="Automatic background upload queue" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Automatic background upload queue
+    Given the user has no internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Offline" status ... untested in 0.000s
+    Given the user has 3 local recordings in the playlist ... untested in 0.000s
+    And the user was offline ... untested in 0.000s
+    When the internet connection is restored ... untested in 0.000s
+    Then the upload queue should process recordings automatically ... untested in 0.000s
+    And recordings should upload one at a time ... untested in 0.000s
+    And the UI should show upload progress ... untested in 0.000s
+    And all recordings should eventually have "SERVER" badges ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="offline_recording.Offline Recording with Client Assembly" name="Download local recording" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Download local recording
+    Given the user has no internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Offline" status ... untested in 0.000s
+    Given the user has a local recording in the playlist ... untested in 0.000s
+    When the user clicks the download button ... untested in 0.000s
+    Then the file should be downloaded from IndexedDB ... untested in 0.000s
+    And the filename should match the recording name ... untested in 0.000s
+    And the file should be in WebM format ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase></testsuite>

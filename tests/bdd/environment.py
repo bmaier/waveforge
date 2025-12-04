@@ -35,6 +35,15 @@ def before_scenario(context, scenario):
     # Set up network request tracking
     context.requests = []
     context.page.on('request', lambda request: context.requests.append(request))
+    
+    # Initialize timing tracking for connection loss scenarios
+    context.last_event_time = 0
+    context.record_start_time = None
+    context.stop_time = None
+    context.play_start_time = None
+    context.download = None
+    context.filename = None
+    context.network_unstable = False
 
 
 def after_scenario(context, scenario):

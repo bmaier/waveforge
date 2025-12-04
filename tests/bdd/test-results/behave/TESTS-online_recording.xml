@@ -1,0 +1,120 @@
+<testsuite name="online_recording.Online Recording with Server Assembly" tests="7" errors="0" failures="0" skipped="0" time="0.0" timestamp="2025-12-04T18:05:41.459174" hostname="T000a968bd"><testcase classname="online_recording.Online Recording with Server Assembly" name="Record audio with online connection" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Record audio with online connection
+    Given the user has an active internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Online" status ... untested in 0.000s
+    Given the user is on the main recording page ... untested in 0.000s
+    When the user clicks the record button ... untested in 0.000s
+    Then the recording indicator should be visible ... untested in 0.000s
+    And the recording should start ... untested in 0.000s
+    And chunks should be uploaded in real-time ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="online_recording.Online Recording with Server Assembly" name="Save recording with server assembly" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Save recording with server assembly
+    Given the user has an active internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Online" status ... untested in 0.000s
+    Given the user has recorded audio for 5 seconds while online ... untested in 0.000s
+    When the user clicks the stop button ... untested in 0.000s
+    Then the save process should complete in less than 2 seconds ... untested in 0.000s
+    And the recording should appear in the playlist ... untested in 0.000s
+    And the recording should have a "SERVER" badge ... untested in 0.000s
+    And no upload button should be visible for this recording ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="online_recording.Online Recording with Server Assembly" name="Play server-backed recording" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Play server-backed recording
+    Given the user has an active internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Online" status ... untested in 0.000s
+    Given the user has a server-backed recording in the playlist ... untested in 0.000s
+    When the user clicks on the recording ... untested in 0.000s
+    And the user clicks the play button ... untested in 0.000s
+    Then the audio should stream from the server ... untested in 0.000s
+    And playback should start within 1 second ... untested in 0.000s
+    And the current time should update during playback ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="online_recording.Online Recording with Server Assembly" name="Download server-backed recording" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Download server-backed recording
+    Given the user has an active internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Online" status ... untested in 0.000s
+    Given the user has a server-backed recording in the playlist ... untested in 0.000s
+    When the user clicks the download button ... untested in 0.000s
+    Then the file should be downloaded from the server ... untested in 0.000s
+    And the filename should match the recording name ... untested in 0.000s
+    And the file should be in WebM format ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="online_recording.Online Recording with Server Assembly" name="Server assembly with rich metadata" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Server assembly with rich metadata
+    Given the user has an active internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Online" status ... untested in 0.000s
+    Given the user is recording audio online ... untested in 0.000s
+    When the user records for 30 seconds ... untested in 0.000s
+    And the user stops the recording ... untested in 0.000s
+    Then the recording metadata should include duration ... untested in 0.000s
+    And the metadata should include format information ... untested in 0.000s
+    And the metadata should include sample rate ... untested in 0.000s
+    And the metadata should be saved on the server ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="online_recording.Online Recording with Server Assembly" name="Fast save for long recordings" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Fast save for long recordings
+    Given the user has an active internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Online" status ... untested in 0.000s
+    Given the user has an active internet connection ... untested in 0.000s
+    When the user records audio for 60 seconds ... untested in 0.000s
+    And all chunks are uploaded during recording ... untested in 0.000s
+    And the user stops the recording ... untested in 0.000s
+    Then the save should complete in less than 2 seconds ... untested in 0.000s
+    And the recording should be available immediately ... untested in 0.000s
+    And the server should handle the assembly in the background ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase><testcase classname="online_recording.Online Recording with Server Assembly" name="Real-time chunk upload monitoring" status="untested" time="0"><system-out>
+<![CDATA[
+@scenario.begin
+  Scenario: Real-time chunk upload monitoring
+    Given the user has an active internet connection ... untested in 0.000s
+    And the WaveForge Pro application is loaded ... untested in 0.000s
+    And the ConnectionMonitor shows "Online" status ... untested in 0.000s
+    Given the user is recording audio online ... untested in 0.000s
+    When chunks are generated every 5 seconds ... untested in 0.000s
+    Then each chunk should be uploaded immediately ... untested in 0.000s
+    And the upload queue should be processed in order ... untested in 0.000s
+    And the ConnectionMonitor should track upload status ... untested in 0.000s
+    And uploaded chunks should be marked in IndexedDB ... untested in 0.000s
+
+@scenario.end
+--------------------------------------------------------------------------------
+]]>
+</system-out></testcase></testsuite>
