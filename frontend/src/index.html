@@ -569,18 +569,20 @@
         }
         
         .paused-active {
-            animation: pulse-pause 2s infinite;
+            animation: blink-pause 1s infinite;
             background-color: #f59e0b !important;
             border-color: #f59e0b !important;
             color: white !important;
         }
         
-        @keyframes pulse-pause {
+        @keyframes blink-pause {
             0%, 100% {
-                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+                opacity: 1;
+                background-color: #f59e0b;
             }
             50% {
-                box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+                opacity: 0.3;
+                background-color: #92400e;
             }
         }
 
@@ -4267,6 +4269,7 @@
         // --- 4. AUDIO ENGINE ---
         let audioContext, analyser, dataArray, canvas, canvasCtx;
         let inputSource, mediaRecorder, recordingNodes = {}, isRecording = false, isPaused = false, startTime, timerInterval, pausedTime = 0;
+        let visualizerActive = true; // Control visualizer animation
         let currentAudioBuffer = null, playbackSource = null, outputNodes = {}, isPlaying = false, playbackStartTime = 0, playbackOffset = 0, playbackRafId = null;
         let audioElement = null, mediaElementSource = null, currentBlobUrl = null;
 
@@ -4295,6 +4298,13 @@
         function drawVisualizer() {
             requestAnimationFrame(drawVisualizer);
             if (!canvas || !canvasCtx || !analyser) return;
+            
+            // Stop drawing if visualizer is paused
+            if (!visualizerActive) {
+                canvasCtx.clearRect(0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio);
+                return;
+            }
+            
             canvasCtx.clearRect(0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio);
             analyser.getByteFrequencyData(dataArray);
             const w = (canvas.width / window.devicePixelRatio) / dataArray.length * 2.5;
@@ -4396,6 +4406,7 @@
 
             isRecording = true;
             isPaused = false;
+            visualizerActive = true; // Start visualizer
             document.getElementById('recordButton').classList.add('recording-active');
             document.getElementById('recordButton').disabled = true;
             document.getElementById('recordButton').setAttribute('tabindex', '-1');
@@ -4955,35 +4966,47 @@
                 isPaused = true;
                 pauseTimer();
                 
-                // Update UI
+                // Update UI - stop REC animation, start PAUSE blink
+                const recBtn = document.getElementById('recordButton');
                 const pauseBtn = document.getElementById('pauseButton');
+                
+                recBtn.classList.remove('recording-active'); // Stop REC animation
                 pauseBtn.textContent = 'RESUME';
-                pauseBtn.classList.add('paused-active');
+                pauseBtn.classList.add('paused-active'); // Start PAUSE blink
                 pauseBtn.setAttribute('aria-label', 'Aufnahme fortsetzen');
+                
+                // Stop visualizer animation
+                visualizerActive = false;
                 
                 // Pause live upload indicator
                 if (typeof LiveUploadIndicator !== 'undefined') {
                     LiveUploadIndicator.onRecordingPause();
                 }
                 
-                console.log('⏸ Recording paused');
+                console.log('⏸ Recording paused - all animations stopped (REC + Visualizer)');
             } else if (mediaRecorder && isRecording && isPaused && mediaRecorder.state === 'paused') {
                 mediaRecorder.resume();
                 isPaused = false;
                 resumeTimer();
                 
-                // Update UI
+                // Update UI - restart REC animation, stop PAUSE blink
+                const recBtn = document.getElementById('recordButton');
                 const pauseBtn = document.getElementById('pauseButton');
+                
+                recBtn.classList.add('recording-active'); // Restart REC animation
                 pauseBtn.textContent = 'PAUSE';
-                pauseBtn.classList.remove('paused-active');
+                pauseBtn.classList.remove('paused-active'); // Stop PAUSE blink
                 pauseBtn.setAttribute('aria-label', 'Aufnahme pausieren');
+                
+                // Restart visualizer animation
+                visualizerActive = true;
                 
                 // Resume live upload indicator
                 if (typeof LiveUploadIndicator !== 'undefined') {
                     LiveUploadIndicator.onRecordingResume();
                 }
                 
-                console.log('▶ Recording resumed');
+                console.log('▶ Recording resumed - all animations restarted (REC + Visualizer)');
             }
         }
 
