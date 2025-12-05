@@ -307,6 +307,11 @@
             border-radius: 6px;
         }
         
+        /* Hide upload progress info box in offline mode */
+        .upload-progress-info.upload-progress-element {
+            display: none;
+        }
+        
         .upload-progress-info.paused {
             background: rgba(245, 158, 11, 0.08);
             border-color: rgba(245, 158, 11, 0.2);
@@ -3078,7 +3083,7 @@
                             }
                             
                             statusContainer.innerHTML = `
-                                <div class="upload-progress-info ${statusClass}">
+                                <div class="upload-progress-info upload-progress-element ${statusClass}">
                                     <div class="upload-icon-large ${iconClass}" id="fatal-icon-${sessionId}">
                                         <span aria-hidden="true">${iconSymbol}</span>
                                     </div>
