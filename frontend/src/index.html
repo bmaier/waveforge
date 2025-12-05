@@ -809,20 +809,20 @@
                     <div class="grid grid-cols-3 gap-3 w-full max-w-lg">
                         <button id="recordButton"
                             class="px-6 py-3 rounded border border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-white transition-all font-mono tracking-wider text-sm uppercase flex items-center justify-center gap-2"
-                            aria-label="Aufnahme starten" data-i18n-attr="aria-label:aria.startRecording" type="button">
+                            aria-label="Aufnahme starten" data-i18n-attr="aria-label:aria.startRecording" type="button" tabindex="0">
                             <span class="w-2 h-2 rounded-full bg-current" aria-hidden="true"></span> 
                             <span data-i18n="ui.rec">REC</span>
                         </button>
                         <button id="pauseButton"
                             class="px-6 py-3 rounded border border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 hover:text-white transition-all font-mono tracking-wider text-sm uppercase flex items-center justify-center gap-2"
-                            disabled aria-label="Aufnahme pausieren" aria-disabled="true" type="button">
+                            disabled aria-label="Aufnahme pausieren" aria-disabled="true" type="button" tabindex="-1">
                             <span class="text-xs" aria-hidden="true">⏸</span>
                             <span data-i18n="ui.pause">PAUSE</span>
                         </button>
                         <button id="stopButton"
                             class="px-6 py-3 rounded border border-gray-600 text-gray-400 hover:bg-white/10 transition-all font-mono tracking-wider text-sm uppercase flex items-center justify-center gap-2"
                             disabled aria-label="Aufnahme stoppen" aria-disabled="true"
-                            data-i18n-attr="aria-label:aria.stopRecording" type="button">
+                            data-i18n-attr="aria-label:aria.stopRecording" type="button" tabindex="-1">
                             <span class="text-xs" aria-hidden="true">⏹</span>
                             <span data-i18n="ui.stop">STOP</span>
                         </button>
@@ -1039,7 +1039,7 @@
             <div class="flex gap-3 justify-end">
                 <button onclick="closeSaveModal()" class="px-4 py-2 rounded text-gray-400 hover:bg-white/10 text-sm"
                     aria-label="Verwerfen und schließen" type="button" tabindex="0">DISCARD</button>
-                <button onclick="confirmSave()"
+                <button id="saveModalDefaultBtn" onclick="confirmSave()"
                     class="px-6 py-2 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm shadow-[0_0_15px_rgba(0,243,255,0.4)]"
                     aria-label="In Datenbank speichern" type="button" tabindex="0">SAVE TO DB</button>
             </div>
@@ -1075,7 +1075,7 @@
                 <button onclick="CrashGuard.discardSession()"
                     class="px-4 py-2 rounded text-gray-400 hover:text-red-400 hover:bg-red-900/20 text-sm"
                     aria-label="Wiederherstellungsdaten löschen" type="button" tabindex="0">PURGE DATA</button>
-                <button onclick="CrashGuard.assembleSession(null, true)"
+                <button id="recoveryModalDefaultBtn" onclick="CrashGuard.assembleSession(null, true)"
                     class="recovery-btn px-6 py-2 rounded font-bold text-sm shadow-[0_0_15px_rgba(255,51,51,0.4)]"
                     aria-label="Sitzung wiederherstellen und speichern" type="button" tabindex="0">RESTORE & SAVE</button>
             </div>
@@ -3787,7 +3787,25 @@
                         document.getElementById('recoveryChunks').textContent = chunks;
                         document.getElementById('recoverySize').textContent = (size / 1024 / 1024).toFixed(2) + ' MB';
                         const modal = document.getElementById('recoveryModal');
-                        modal.style.display = 'flex'; setTimeout(() => modal.classList.add('modal-open'), 10);
+                        modal.style.display = 'flex';
+                        modal.setAttribute('aria-hidden', 'false');
+                        
+                        // Add Enter key handler for default action (RESTORE & SAVE)
+                        const handleEnter = (e) => {
+                            if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                                e.preventDefault();
+                                CrashGuard.assembleSession(null, true);
+                            }
+                        };
+                        modal.addEventListener('keydown', handleEnter);
+                        modal._enterHandler = handleEnter;
+                        
+                        setTimeout(() => {
+                            modal.classList.add('modal-open');
+                            // Focus first button in modal
+                            const firstBtn = modal.querySelector('button');
+                            if (firstBtn) firstBtn.focus();
+                        }, 10);
                     }
                 };
             },
@@ -3808,8 +3826,17 @@
 
                         // Close recovery modal immediately
                         if (isRecovery) {
-                            document.getElementById('recoveryModal').classList.remove('modal-open');
-                            setTimeout(() => document.getElementById('recoveryModal').style.display = 'none', 200);
+                            const recoveryModal = document.getElementById('recoveryModal');
+                            
+                            // Remove Enter key handler
+                            if (recoveryModal._enterHandler) {
+                                recoveryModal.removeEventListener('keydown', recoveryModal._enterHandler);
+                                recoveryModal._enterHandler = null;
+                            }
+                            
+                            recoveryModal.classList.remove('modal-open');
+                            recoveryModal.setAttribute('aria-hidden', 'true');
+                            setTimeout(() => recoveryModal.style.display = 'none', 200);
                         }
 
                         // ALWAYS open save modal so user can save the recording
@@ -3916,8 +3943,17 @@
                     this.clearUploadQueue(currentSessionId);
                 }
                 
-                document.getElementById('recoveryModal').classList.remove('modal-open');
-                setTimeout(() => document.getElementById('recoveryModal').style.display = 'none', 200);
+                const modal = document.getElementById('recoveryModal');
+                
+                // Remove Enter key handler
+                if (modal._enterHandler) {
+                    modal.removeEventListener('keydown', modal._enterHandler);
+                    modal._enterHandler = null;
+                }
+                
+                modal.classList.remove('modal-open');
+                modal.setAttribute('aria-hidden', 'true');
+                setTimeout(() => modal.style.display = 'none', 200);
             },
             clearSession: function (sessionId) {
                 if (!db) return;
@@ -4362,8 +4398,11 @@
                 isPaused = false;
                 document.getElementById('recordButton').classList.add('recording-active');
                 document.getElementById('recordButton').disabled = true;
+                document.getElementById('recordButton').setAttribute('tabindex', '-1');
                 document.getElementById('pauseButton').disabled = false;
+                document.getElementById('pauseButton').setAttribute('tabindex', '0');
                 document.getElementById('stopButton').disabled = false;
+                document.getElementById('stopButton').setAttribute('tabindex', '0');
                 startTimer();
                 applyInputEQ();
                 
@@ -4385,10 +4424,13 @@
                 isPaused = false;
                 document.getElementById('recordButton').classList.remove('recording-active');
                 document.getElementById('recordButton').disabled = false;
+                document.getElementById('recordButton').setAttribute('tabindex', '0');
                 document.getElementById('pauseButton').disabled = true;
+                document.getElementById('pauseButton').setAttribute('tabindex', '-1');
                 document.getElementById('pauseButton').textContent = 'PAUSE';
                 document.getElementById('pauseButton').classList.remove('paused-active');
                 document.getElementById('stopButton').disabled = true;
+                document.getElementById('stopButton').setAttribute('tabindex', '-1');
                 stopTimer();
                 pausedTime = 0;
                 
@@ -4415,6 +4457,17 @@
 
             modal.style.display = 'flex';
             modal.setAttribute('aria-hidden', 'false');
+            
+            // Add Enter key handler for default action
+            const handleEnter = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                    e.preventDefault();
+                    confirmSave();
+                }
+            };
+            nameInput.addEventListener('keydown', handleEnter);
+            modal._enterHandler = handleEnter;
+            
             setTimeout(() => {
                 modal.classList.add('modal-open');
                 trapFocus(modal); // Enable focus trap
@@ -4435,6 +4488,12 @@
             
             // Clear pending recovery upload
             window.pendingRecoveryUpload = null;
+            
+            // Remove Enter key handler
+            if (modal._enterHandler) {
+                nameInput.removeEventListener('keydown', modal._enterHandler);
+                modal._enterHandler = null;
+            }
             
             modal.classList.remove('modal-open');
             modal.setAttribute('aria-hidden', 'true');
