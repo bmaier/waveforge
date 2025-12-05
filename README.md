@@ -4,7 +4,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green.svg)](https://fastapi.tiangolo.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](docs/LICENSE.md)
+[![License](https://img.shields.io/badge/License-Business_Source_License_1.1-orange.svg)](LICENSE.md)
 [![Accessibility](https://img.shields.io/badge/BITV_2.0-Compliant-success.svg)](docs/ACCESSIBILITY_COMPLIANCE.md)
 
 ## ✨ Features
@@ -12,6 +12,7 @@
 ### Core Capabilities
 - **🎤 Professional Audio Recording** - High-quality browser-based audio recording with Web Audio API
 - **🛡️ CrashGuard System** - Advanced crash recovery with automatic state restoration
+- **🔒 Single Tab Guard** - Prevents multiple instances running simultaneously (data protection)
 - **☁️ Cloud Synchronization** - Seamless upload of recordings with chunked transfer for large files
 - **🔄 TUS Resumable Uploads** - Industry-standard resumable uploads (tus.io) with automatic retry
 - **🌐 Multi-Language Support** - Full German (DE) and English (EN) localization
@@ -513,13 +514,21 @@ Contributions are welcome! Please follow these steps:
 
 ## 📄 License
 
-This project is licensed under the MIT License - see [LICENSE.md](docs/LICENSE.md) for details.
+This project is licensed under the **Business Source License 1.1** with dual-licensing options:
+
+- **Non-Commercial Use**: Apache License 2.0 (free for personal, research, educational use)
+- **Commercial Use (Unmodified)**: Free to use without source code modifications
+- **Commercial Use (Modified)**: Requires separate commercial license
+
+After 4 years from first public release, the software automatically converts to Apache License 2.0.
+
+See [LICENSE.md](LICENSE.md) for complete terms and conditions.
 
 ## 👤 Author
 
-**Berthold Maier**
+**N. Ennekes**
 - Version: 1.0.0
-- GitHub: [@bmaier](https://github.com/bmaier)
+- Copyright: © 2025 N. Ennekes, All Rights Reserved
 
 ## 🙏 Acknowledgments
 
@@ -606,4 +615,6 @@ Check pending uploads:
 
 ---
 
-**Made with ❤️ by Berthold Maier - Herrsching**
+**Made with ❤️ by N. Ennekes**
+
+© 2025 N. Ennekes. Licensed under Business Source License 1.1.
