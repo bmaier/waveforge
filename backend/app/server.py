@@ -23,6 +23,8 @@ load_dotenv()
 ALLOWED_HOSTS = json.loads(os.getenv("ALLOWED_HOSTS", '["localhost", "127.0.0.1", "testserver"]'))
 CORS_ORIGINS = json.loads(os.getenv("CORS_ORIGINS", '["http://localhost:8000"]'))
 SECRET_KEY = os.getenv("SECRET_KEY", "default_insecure_key_for_dev") # WARN: Change in prod!
+CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "1048576"))  # Default 1MB
+TUS_CHUNK_SIZE = int(os.getenv("TUS_CHUNK_SIZE", "524288"))  # Default 512KB for TUS sub-chunks
 
 app = FastAPI()
 
@@ -272,6 +274,19 @@ def assemble_file(session_id: str, file_name: str, metadata: dict = None):
         print(f"❌ Error assembling file: {e}")
 
 # 5. API Endpoints
+@app.get("/api/config")
+async def get_config():
+    """
+    Get server configuration for frontend.
+    Returns chunk sizes and other settings loaded from .env or defaults.
+    """
+    return {
+        "chunk_size": CHUNK_SIZE,
+        "tus_chunk_size": TUS_CHUNK_SIZE,
+        "upload_methods": ["tus", "legacy"],
+        "default_upload_method": "tus"
+    }
+
 @app.head("/health")
 @app.get("/health")
 async def health_check():

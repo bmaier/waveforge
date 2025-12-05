@@ -10,7 +10,7 @@
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
     <link rel="manifest" href="./manifest.json">
     <script src="./tailwind.min.js"></script>
-    <link href="/fonts.css" rel="stylesheet">
+    <link href="./fonts.css" rel="stylesheet">
 
     <style>
         :root {
@@ -305,6 +305,11 @@
             background: rgba(59, 130, 246, 0.08);
             border: 1px solid rgba(59, 130, 246, 0.2);
             border-radius: 6px;
+        }
+        
+        /* Hide upload progress info box in offline mode */
+        .upload-progress-info.upload-progress-element {
+            display: none;
         }
         
         .upload-progress-info.paused {
@@ -606,6 +611,11 @@
             vertical-align: middle;
             white-space: nowrap;
         }
+        
+        /* Hide upload badges in offline mode (will be hidden by upload-progress-element targeting) */
+        .upload-status-badge.upload-progress-element {
+            display: none;
+        }
 
         .status-uploading {
             background: rgba(59, 130, 246, 0.2);
@@ -722,8 +732,9 @@
                         type="button">
                         <span class="text-cyan-400" aria-hidden="true">ℹ</span> <span data-i18n="ui.info">INFO</span>
                     </button>
-                    <!-- Upload Settings Button -->
+                    <!-- Upload Settings Button (hidden in offline mode) -->
                     <button onclick="openUploadSettingsModal()"
+                        id="uploadSettingsBtn"
                         class="text-[10px] text-gray-500 hover:text-cyan-400 transition-colors flex items-center gap-1 border border-gray-800 rounded px-2 py-0.5 hover:border-cyan-500/50"
                         aria-label="Upload-Einstellungen ändern" data-i18n-attr="aria-label:aria.uploadSettings"
                         type="button">
@@ -764,7 +775,7 @@
                             <select id="recordingFormat" onchange="updateFormatWarning()"
                                 class="cyber-select text-xs border-none bg-transparent"
                                 aria-label="Aufnahmeformat auswählen">
-                                <option value="webm">WEBM (Opus Codec)</option>
+                                <option value="webm">WEBM</option>
                                 <option value="wav">WAV</option>
                                 <option value="mp3">MP3</option>
                             </select>
@@ -900,9 +911,9 @@
                             data-i18n="format.detecting">FORMAT: DETECTING...</div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <!-- Live Upload Indicator: Replaces UPLOADING text -->
+                        <!-- Live Upload Indicator: Replaces UPLOADING text (hidden in offline mode) -->
                         <button id="liveUploadIndicator" 
-                            class="text-[10px] px-2 py-1 rounded border cursor-pointer transition-all hover:opacity-80 hidden"
+                            class="text-[10px] px-2 py-1 rounded border cursor-pointer transition-all hover:opacity-80 hidden upload-progress-element"
                             role="button" 
                             aria-label="Upload status"
                             tabindex="0"
@@ -1189,7 +1200,7 @@
                             <li>• Session-Recovery bei Absturz</li>
                         </ul>
                     </div>
-                    <div class="bg-gray-800/30 border border-gray-700 p-3 rounded">
+                    <div id="cloudSyncBox" class="bg-gray-800/30 border border-gray-700 p-3 rounded">
                         <h4 class="font-bold text-gray-200 text-xs mb-2">☁ Cloud-Synchronisation</h4>
                         <ul class="text-xs text-gray-400 space-y-1">
                             <li>• Service Worker Background-Upload</li>
@@ -1601,13 +1612,23 @@
             },
             
             showFileProtocolWarning: function() {
+                // Hide upload-related UI elements in offline mode
+                const uploadSettingsBtn = document.getElementById('uploadSettingsBtn');
+                const cloudSyncBox = document.getElementById('cloudSyncBox');
+                if (uploadSettingsBtn) uploadSettingsBtn.style.display = 'none';
+                if (cloudSyncBox) cloudSyncBox.style.display = 'none';
+                
+                // Hide all upload progress elements
+                const progressElements = document.querySelectorAll('.upload-progress-element');
+                progressElements.forEach(el => el.style.display = 'none');
+                
                 // Show persistent warning banner for file:// mode
                 const banner = document.createElement('div');
                 banner.id = 'fileProtocolBanner';
                 banner.className = 'fixed top-0 left-0 right-0 bg-yellow-900/90 border-b-2 border-yellow-500 text-yellow-200 px-4 py-2 z-[9999] text-center text-sm font-mono';
                 banner.innerHTML = `
                     <span class="font-bold">⚠ OFFLINE MODE:</span> 
-                    Running from file:// - Server or Cloud Synchronisation Features Disabled. 
+                    Running from file:// - Cloud features disabled. 
                     <a href="#" onclick="RuntimeEnvironment.showOfflineModeHelp(); return false;" 
                        class="underline hover:text-yellow-100 ml-2">Learn more</a>
                 `;
@@ -1656,6 +1677,216 @@
                 localStorage: true,
                 downloadBlob: true
             };
+        }
+
+        // --- SINGLE TAB GUARD (Prevents multiple simultaneous instances) ---
+        const SingleTabGuard = {
+            LOCK_KEY: 'waveforge_tab_lock',
+            LOCK_TIMEOUT: 5000, // 5 seconds
+            tabId: null,
+            lockCheckInterval: null,
+            
+            init: function() {
+                // Generate unique tab ID
+                this.tabId = `tab_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                
+                // Try to acquire lock
+                if (!this.tryAcquireLock()) {
+                    this.showMultiTabWarning();
+                    return false;
+                }
+                
+                // Refresh lock periodically
+                this.startLockRefresh();
+                
+                // Release lock on page unload
+                window.addEventListener('beforeunload', () => this.releaseLock());
+                
+                // Listen for storage changes (another tab trying to acquire lock)
+                window.addEventListener('storage', (e) => {
+                    if (e.key === this.LOCK_KEY) {
+                        const newLockData = e.newValue ? JSON.parse(e.newValue) : null;
+                        if (newLockData && newLockData.tabId !== this.tabId) {
+                            this.showMultiTabWarning();
+                        }
+                    }
+                });
+                
+                console.log('✅ SingleTabGuard: Lock acquired for tab:', this.tabId);
+                return true;
+            },
+            
+            tryAcquireLock: function() {
+                const existingLock = localStorage.getItem(this.LOCK_KEY);
+                
+                if (!existingLock) {
+                    // No lock exists, acquire it
+                    localStorage.setItem(this.LOCK_KEY, JSON.stringify({
+                        tabId: this.tabId,
+                        timestamp: Date.now()
+                    }));
+                    return true;
+                }
+                
+                try {
+                    const lock = JSON.parse(existingLock);
+                    const age = Date.now() - lock.timestamp;
+                    
+                    // If lock is older than timeout, it's stale - take over
+                    if (age > this.LOCK_TIMEOUT) {
+                        console.warn('⚠️ Stale lock detected, taking over');
+                        localStorage.setItem(this.LOCK_KEY, JSON.stringify({
+                            tabId: this.tabId,
+                            timestamp: Date.now()
+                        }));
+                        return true;
+                    }
+                    
+                    // Lock is active, cannot acquire
+                    return false;
+                    
+                } catch (e) {
+                    console.error('Error parsing lock:', e);
+                    // Corrupted lock, take over
+                    localStorage.setItem(this.LOCK_KEY, JSON.stringify({
+                        tabId: this.tabId,
+                        timestamp: Date.now()
+                    }));
+                    return true;
+                }
+            },
+            
+            startLockRefresh: function() {
+                // Refresh lock every 2 seconds to prevent timeout
+                this.lockCheckInterval = setInterval(() => {
+                    const lock = localStorage.getItem(this.LOCK_KEY);
+                    
+                    if (lock) {
+                        try {
+                            const lockData = JSON.parse(lock);
+                            if (lockData.tabId === this.tabId) {
+                                // Update timestamp
+                                localStorage.setItem(this.LOCK_KEY, JSON.stringify({
+                                    tabId: this.tabId,
+                                    timestamp: Date.now()
+                                }));
+                            } else {
+                                // Another tab took over the lock
+                                this.showMultiTabWarning();
+                            }
+                        } catch (e) {
+                            console.error('Error refreshing lock:', e);
+                        }
+                    } else {
+                        // Lock was removed, try to reacquire
+                        if (!this.tryAcquireLock()) {
+                            this.showMultiTabWarning();
+                        }
+                    }
+                }, 2000);
+            },
+            
+            releaseLock: function() {
+                const lock = localStorage.getItem(this.LOCK_KEY);
+                if (lock) {
+                    try {
+                        const lockData = JSON.parse(lock);
+                        if (lockData.tabId === this.tabId) {
+                            localStorage.removeItem(this.LOCK_KEY);
+                            console.log('✅ Lock released for tab:', this.tabId);
+                        }
+                    } catch (e) {
+                        console.error('Error releasing lock:', e);
+                    }
+                }
+                
+                if (this.lockCheckInterval) {
+                    clearInterval(this.lockCheckInterval);
+                }
+            },
+            
+            showMultiTabWarning: function() {
+                // Stop lock refresh
+                if (this.lockCheckInterval) {
+                    clearInterval(this.lockCheckInterval);
+                    this.lockCheckInterval = null;
+                }
+                
+                // Disable all UI interactions
+                document.body.style.pointerEvents = 'none';
+                document.body.style.opacity = '0.3';
+                
+                // Show modal overlay
+                const overlay = document.createElement('div');
+                overlay.id = 'multiTabWarning';
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.95);
+                    z-index: 999999;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                
+                overlay.innerHTML = `
+                    <div style="background: linear-gradient(135deg, #1e1e2e 0%, #0a0a14 100%); padding: 40px; border-radius: 16px; max-width: 600px; border: 2px solid #ff3333; box-shadow: 0 0 40px rgba(255, 51, 51, 0.4); text-align: center;">
+                        <div style="font-size: 64px; margin-bottom: 20px; animation: pulse 1.5s ease-in-out infinite;">⚠️</div>
+                        <h2 style="color: #ff3333; font-size: 28px; font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px;">
+                            MULTIPLE TABS DETECTED
+                        </h2>
+                        <div style="color: #d1d5db; font-size: 16px; line-height: 1.8; margin-bottom: 30px;">
+                            <p style="margin-bottom: 16px;">WaveForge Pro kann nur in <strong style="color: white;">einem Browser-Tab</strong> gleichzeitig ausgeführt werden.</p>
+                            <p style="margin-bottom: 16px;">Dies verhindert Datenkonflikte und schützt Ihre Aufnahmen.</p>
+                            <div style="background: rgba(255, 51, 51, 0.1); border-left: 3px solid #ff3333; padding: 16px; margin: 20px 0; text-align: left; border-radius: 4px;">
+                                <strong style="color: #ff3333;">⚠️ WICHTIG:</strong>
+                                <ul style="margin: 12px 0 0 20px; padding: 0;">
+                                    <li style="margin-bottom: 8px;">Schließen Sie <strong>alle anderen Tabs</strong> mit WaveForge Pro</li>
+                                    <li style="margin-bottom: 8px;">Oder schließen Sie <strong>diesen Tab</strong>, wenn Sie in einem anderen Tab arbeiten möchten</li>
+                                    <li>Laden Sie die Seite danach neu</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <button onclick="window.location.reload()" style="background: #ff3333; color: white; border: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255, 51, 51, 0.3);" onmouseover="this.style.background='#cc0000'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='#ff3333'; this.style.transform='scale(1)'">
+                            SEITE NEU LADEN
+                        </button>
+                        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #374151;">
+                            <p style="color: #9ca3af; font-size: 12px; font-family: monospace;">
+                                Tab ID: ${this.tabId}<br>
+                                Konflikt erkannt: ${new Date().toLocaleTimeString()}
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                // Add pulse animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes pulse {
+                        0%, 100% { transform: scale(1); opacity: 1; }
+                        50% { transform: scale(1.1); opacity: 0.8; }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                document.body.appendChild(overlay);
+                
+                console.error('❌ Multiple tabs detected! This instance is now locked.');
+            }
+        };
+
+        // Initialize Single Tab Guard BEFORE any other initialization
+        try {
+            const tabLockAcquired = SingleTabGuard.init();
+            if (!tabLockAcquired) {
+                console.error('❌ Could not acquire tab lock - another instance is running');
+                // Don't throw error - showMultiTabWarning already displayed
+            }
+        } catch (err) {
+            console.error('❌ SingleTabGuard initialization failed:', err);
         }
 
         // --- 2. FEATURE FLAGS ---
@@ -2972,7 +3203,7 @@
                     // Add new badge if upload exists
                     if (upload) {
                         const badge = document.createElement('span');
-                        badge.className = `upload-status-badge status-${upload.status}`;
+                        badge.className = `upload-status-badge upload-progress-element status-${upload.status}`;
                         badge.setAttribute('role', 'status');
                         badge.setAttribute('aria-live', 'polite');
                         
@@ -3062,7 +3293,7 @@
                             }
                             
                             statusContainer.innerHTML = `
-                                <div class="upload-progress-info ${statusClass}">
+                                <div class="upload-progress-info upload-progress-element ${statusClass}">
                                     <div class="upload-icon-large ${iconClass}" id="fatal-icon-${sessionId}">
                                         <span aria-hidden="true">${iconSymbol}</span>
                                     </div>
@@ -4526,7 +4757,7 @@
                 // CONDITIONAL: Show upload button only if cloud upload is available
                 const uploadButtonHTML = (!ENV || ENV.cloudUpload !== false)
                     ? `<button class="up-btn-${t.id} w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:border-cyan-400 hover:text-cyan-400 upload-icon transition-all" title="Upload to Cloud" aria-label="In Cloud hochladen: ${t.name}" type="button"><span aria-hidden="true">☁</span></button>`
-                    : `<button class="w-8 h-8 rounded-full border border-gray-700 flex items-center justify-center text-gray-700 cursor-not-allowed opacity-30" title="Upload not available in offline mode" disabled><span aria-hidden="true">☁</span></button>`;
+                    : ``; // Hide completely in offline mode
 
                 el.innerHTML = `
                     <div class="flex justify-between items-center w-full">
@@ -4538,8 +4769,8 @@
                             <button class="del-btn-${t.id} w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:border-red-500 hover:text-red-500 transition-all" aria-label="Löschen: ${t.name}" type="button"><span aria-hidden="true">×</span></button>
                         </div>
                     </div>
-                    <div class="upload-status-bar" id="progress-bar-${t.id}"><div class="upload-status-fill" id="progress-${t.id}"></div></div>
-                    <div class="upload-status-expanded" id="upload-status-${t.id}">
+                    <div class="upload-status-bar upload-progress-element" id="progress-bar-${t.id}"><div class="upload-status-fill" id="progress-${t.id}"></div></div>
+                    <div class="upload-status-expanded upload-progress-element" id="upload-status-${t.id}">
                         <!-- Dynamically filled by UploadCoordinator -->
                     </div>
                 `;

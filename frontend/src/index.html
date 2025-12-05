@@ -769,14 +769,14 @@
                         type="button">
                         <span class="text-cyan-400" aria-hidden="true">ℹ</span> <span data-i18n="ui.info">INFO</span>
                     </button>
-                    <!-- Upload Settings Button (hidden in offline mode) -->
-                    <button onclick="openUploadSettingsModal()"
-                        id="uploadSettingsBtn"
+                    <!-- Settings Button (hidden in offline mode) -->
+                    <button onclick="openSettingsModal()"
+                        id="settingsBtn"
                         class="text-[10px] text-gray-500 hover:text-cyan-400 transition-colors flex items-center gap-1 border border-gray-800 rounded px-2 py-0.5 hover:border-cyan-500/50"
-                        aria-label="Upload-Einstellungen ändern" data-i18n-attr="aria-label:aria.uploadSettings"
+                        aria-label="Einstellungen öffnen" data-i18n-attr="aria-label:aria.settings"
                         type="button">
                         <span class="text-cyan-400" aria-hidden="true">⚙</span> <span
-                            data-i18n="ui.uploadSettings">UPLOAD</span>
+                            data-i18n="ui.settings">SETTINGS</span>
                     </button>
                 </div>
                 <div id="statusIndicator" class="text-xs digital-text text-cyan-400" role="status" aria-live="polite"
@@ -1102,57 +1102,129 @@
         </div>
     </div>
 
-    <!-- UPLOAD SETTINGS MODAL -->
-    <div id="uploadSettingsModal" class="modal-overlay license-modal" aria-hidden="true" style="display: none;">
-        <div class="modal-content text-gray-200 font-sans max-w-md w-full" role="dialog" aria-modal="true"
-            aria-labelledby="uploadSettingsModalTitle" aria-describedby="uploadSettingsDesc">
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="modal-overlay license-modal" aria-hidden="true" style="display: none;">
+        <div class="modal-content text-gray-200 font-sans max-w-2xl w-full" role="dialog" aria-modal="true"
+            aria-labelledby="settingsModalTitle" aria-describedby="settingsDesc">
             <div class="flex justify-between items-start mb-6 pb-3 border-b border-gray-700">
-                <h2 id="uploadSettingsModalTitle" class="text-xl font-bold font-mono tracking-widest text-cyan-400"
-                    data-i18n="modal.uploadSettings" tabindex="0">
-                    UPLOAD SETTINGS
+                <h2 id="settingsModalTitle" class="text-xl font-bold font-mono tracking-widest text-cyan-400"
+                    data-i18n="modal.settings" tabindex="0">
+                    EINSTELLUNGEN
                 </h2>
-                <button onclick="closeUploadSettingsModal()"
-                    class="text-gray-500 hover:text-white text-2xl leading-none" aria-label="Schließen"
+                <button onclick="closeSettingsModal()"
+                    class="text-gray-500 hover:text-white text-2xl leading-none" 
+                    title="Schließen" aria-label="Schließen"
                     data-i18n-attr="aria-label:ui.close" type="button" tabindex="0">&times;</button>
             </div>
 
-            <div class="mb-6">
-                <p id="uploadSettingsDesc" class="sr-only">Wählen Sie die Upload-Methode für Ihre Aufnahmen. TUS unterstützt das Fortsetzen unterbrochener Uploads.</p>
-                <h3 class="font-bold text-gray-200 mb-3" data-i18n="upload.method">Transfer Method</h3>
-                <p class="text-sm text-gray-400 mb-4" data-i18n="upload.desc">
-                    Choose the file upload method. TUS allows resuming interrupted uploads.
+            <p id="settingsDesc" class="sr-only">Konfigurieren Sie Upload-Methode und Chunk-Größe für optimale Performance.</p>
+
+            <!-- Upload Method Section -->
+            <fieldset class="mb-6 pb-6 border-b border-gray-700">
+                <legend class="font-bold text-gray-200 mb-3 text-base" data-i18n="settings.uploadMethod">
+                    <span class="text-cyan-400" aria-hidden="true">📤</span> Upload-Methode
+                </legend>
+                <p class="text-sm text-gray-400 mb-4" data-i18n="settings.uploadDesc">
+                    Wählen Sie die Transfer-Methode für Ihre Aufnahmen. TUS unterstützt das Fortsetzen unterbrochener Uploads.
                 </p>
 
                 <div class="space-y-3">
                     <label
-                        class="flex items-center p-3 border border-gray-700 rounded hover:bg-gray-800 cursor-pointer transition-colors">
-                        <input type="radio" name="uploadMethod" value="tus" class="form-radio text-cyan-400 h-5 w-5"
-                            checked>
-                        <div class="ml-3">
-                            <span class="block text-sm font-bold text-gray-200" data-i18n="upload.tus">TUS (Resumable,
-                                Recommended)</span>
+                        class="flex items-start p-3 border border-gray-700 rounded hover:bg-gray-800 cursor-pointer transition-colors">
+                        <input type="radio" name="uploadMethod" value="tus" 
+                            class="form-radio text-cyan-400 h-5 w-5 mt-0.5" 
+                            checked
+                            aria-describedby="tusDesc">
+                        <div class="ml-3 flex-1">
+                            <span class="block text-sm font-bold text-gray-200" data-i18n="upload.tus">TUS (Resumable)</span>
+                            <span id="tusDesc" class="block text-xs text-gray-500 mt-1" data-i18n="upload.tusDesc">
+                                Empfohlen: Unterstützt Pause/Resume bei Verbindungsabbruch
+                            </span>
                         </div>
                     </label>
 
                     <label
-                        class="flex items-center p-3 border border-gray-700 rounded hover:bg-gray-800 cursor-pointer transition-colors">
-                        <input type="radio" name="uploadMethod" value="legacy" class="form-radio text-pink-500 h-5 w-5">
-                        <div class="ml-3">
-                            <span class="block text-sm font-bold text-gray-200" data-i18n="upload.legacy">Legacy
-                                (Standard POST)</span>
+                        class="flex items-start p-3 border border-gray-700 rounded hover:bg-gray-800 cursor-pointer transition-colors">
+                        <input type="radio" name="uploadMethod" value="legacy" 
+                            class="form-radio text-pink-500 h-5 w-5 mt-0.5"
+                            aria-describedby="legacyDesc">
+                        <div class="ml-3 flex-1">
+                            <span class="block text-sm font-bold text-gray-200" data-i18n="upload.legacy">Legacy (Standard POST)</span>
+                            <span id="legacyDesc" class="block text-xs text-gray-500 mt-1" data-i18n="upload.legacyDesc">
+                                Einfacher Upload ohne Resume-Funktion
+                            </span>
                         </div>
                     </label>
                 </div>
-            </div>
+            </fieldset>
 
-            <div class="flex justify-end gap-3 pt-3 border-t border-gray-700">
-                <button onclick="closeUploadSettingsModal()"
-                    class="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors" data-i18n="ui.close" tabindex="0">
-                    Close
+            <!-- Chunk Size Section -->
+            <fieldset class="mb-6">
+                <legend class="font-bold text-gray-200 mb-3 text-base" data-i18n="settings.chunkSize">
+                    <span class="text-cyan-400" aria-hidden="true">📦</span> Chunk-Größe
+                </legend>
+                <p class="text-sm text-gray-400 mb-4" data-i18n="settings.chunkSizeDesc">
+                    Größe der Audio-Chunks während der Aufnahme. Kleinere Chunks = häufigere Uploads, größere Chunks = weniger Overhead.
+                </p>
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="chunkSizeSelect" class="block text-sm text-gray-300 mb-2" data-i18n="settings.chunkSizeLabel">
+                            Chunk-Größe auswählen:
+                        </label>
+                        <select id="chunkSizeSelect" 
+                            class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+                            aria-describedby="chunkSizeHelp">
+                            <option value="262144">256 KB (Sehr klein - für langsame Verbindungen)</option>
+                            <option value="524288">512 KB (Klein - Standard für TUS)</option>
+                            <option value="1048576" selected>1 MB (Empfohlen - gute Balance)</option>
+                            <option value="2097152">2 MB (Groß - für schnelle Verbindungen)</option>
+                            <option value="4194304">4 MB (Sehr groß - nur für sehr schnelle Verbindungen)</option>
+                            <option value="custom">Benutzerdefiniert...</option>
+                        </select>
+                        <p id="chunkSizeHelp" class="text-xs text-gray-500 mt-2" data-i18n="settings.chunkSizeHelp">
+                            Server-Standard wird verwendet, wenn keine Auswahl getroffen wird.
+                        </p>
+                    </div>
+
+                    <div id="customChunkSizeContainer" class="hidden">
+                        <label for="customChunkSize" class="block text-sm text-gray-300 mb-2" data-i18n="settings.customChunkSize">
+                            Benutzerdefinierte Größe (in Bytes):
+                        </label>
+                        <input type="number" id="customChunkSize" 
+                            min="65536" max="10485760" step="1024" placeholder="1048576"
+                            class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+                            aria-describedby="customChunkHelp">
+                        <p id="customChunkHelp" class="text-xs text-gray-500 mt-2" data-i18n="settings.customChunkHelp">
+                            Minimum: 64 KB (65536 Bytes), Maximum: 10 MB (10485760 Bytes)
+                        </p>
+                    </div>
+
+                    <div class="bg-gray-800/50 border border-gray-700 rounded p-3">
+                        <p class="text-xs text-gray-400" data-i18n="settings.chunkSizeInfo">
+                            <span class="text-cyan-400 font-bold">💡 Info:</span> Die aktuelle Chunk-Größe wird aus den Server-Einstellungen (.env) geladen. 
+                            Änderungen hier überschreiben die Server-Standardwerte für dieses Gerät.
+                        </p>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="flex justify-between items-center gap-3 pt-3 border-t border-gray-700">
+                <button onclick="resetToDefaults()"
+                    class="px-4 py-2 text-sm text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 rounded transition-colors" 
+                    title="Auf Standardwerte zurücksetzen" aria-label="Auf Standardwerte zurücksetzen"
+                    data-i18n="ui.resetDefaults" tabindex="0">
+                    <span aria-hidden="true">↺</span> Zurücksetzen
                 </button>
-                <button onclick="saveUploadSettings()"
-                    class="px-4 py-2 text-sm bg-cyan-600 hover:bg-cyan-500 text-white rounded font-bold transition-colors"
-                    data-i18n="ui.save" tabindex="0">
+                <div class="flex gap-3">
+                    <button onclick="closeSettingsModal()"
+                        class="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors" 
+                        data-i18n="ui.close" tabindex="0">
+                        Abbrechen
+                    </button>
+                    <button onclick="saveSettings()"
+                        class="px-4 py-2 text-sm bg-cyan-600 hover:bg-cyan-500 text-white rounded font-bold transition-colors"
+                        data-i18n="ui.save" tabindex="0">
                     Save
                 </button>
             </div>
@@ -1661,9 +1733,9 @@
             
             showFileProtocolWarning: function() {
                 // Hide upload-related UI elements in offline mode
-                const uploadSettingsBtn = document.getElementById('uploadSettingsBtn');
+                const settingsBtn = document.getElementById('settingsBtn');
                 const cloudSyncBox = document.getElementById('cloudSyncBox');
-                if (uploadSettingsBtn) uploadSettingsBtn.style.display = 'none';
+                if (settingsBtn) settingsBtn.style.display = 'none';
                 if (cloudSyncBox) cloudSyncBox.style.display = 'none';
                 
                 // Hide all upload progress elements
@@ -1727,6 +1799,47 @@
             };
         }
 
+        // --- PERFORMANCE MONITOR (Track CPU-intensive operations) ---
+        const PerformanceMonitor = {
+            activeIntervals: new Set(),
+            activeAnimations: new Set(),
+            
+            registerInterval: function(id, name) {
+                this.activeIntervals.add({id, name});
+                console.log(`⏱️ Performance: Registered interval "${name}"`);
+            },
+            
+            clearInterval: function(id, name) {
+                clearInterval(id);
+                this.activeIntervals = new Set([...this.activeIntervals].filter(i => i.id !== id));
+                console.log(`✓ Performance: Cleared interval "${name}"`);
+            },
+            
+            registerAnimation: function(id, name) {
+                this.activeAnimations.add({id, name});
+                console.log(`🎨 Performance: Registered animation "${name}"`);
+            },
+            
+            clearAnimation: function(id, name) {
+                if (id !== null) {
+                    cancelAnimationFrame(id);
+                    this.activeAnimations = new Set([...this.activeAnimations].filter(a => a.id !== id));
+                    console.log(`✓ Performance: Cleared animation "${name}"`);
+                }
+            },
+            
+            getStatus: function() {
+                console.log(`📊 Performance Status:`);
+                console.log(`  Active Intervals: ${this.activeIntervals.size}`);
+                this.activeIntervals.forEach(i => console.log(`    - ${i.name}`));
+                console.log(`  Active Animations: ${this.activeAnimations.size}`);
+                this.activeAnimations.forEach(a => console.log(`    - ${a.name}`));
+            }
+        };
+        
+        // Expose for debugging
+        window.performanceMonitor = PerformanceMonitor;
+
         // --- SINGLE TAB GUARD (Prevents multiple simultaneous instances) ---
         const SingleTabGuard = {
             LOCK_KEY: 'waveforge_tab_lock',
@@ -1746,6 +1859,7 @@
                 
                 // Refresh lock periodically
                 this.startLockRefresh();
+                PerformanceMonitor.registerInterval(this.lockCheckInterval, 'TabLockRefresh');
                 
                 // Release lock on page unload
                 window.addEventListener('beforeunload', () => this.releaseLock());
@@ -2087,7 +2201,9 @@
             toast.innerHTML = msg; // Support styled popups
             
             // Clear existing timeout
-            clearTimeout(toastTimeout);
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+            }
             
             // Hide after 5 seconds
             toastTimeout = setTimeout(() => {
@@ -2484,7 +2600,7 @@
                 const recoveryModal = document.getElementById('recoveryModal');
                 const deleteModal = document.getElementById('deleteModal');
                 const infoModal = document.getElementById('infoModal');
-                const uploadSettingsModal = document.getElementById('uploadSettingsModal');
+                const settingsModal = document.getElementById('settingsModal');
 
                 if (saveModal && saveModal.style.display === 'flex') {
                     closeSaveModal();
@@ -2495,8 +2611,8 @@
                     closeDeleteModal();
                 } else if (infoModal && infoModal.style.display === 'flex') {
                     closeInfoModal();
-                } else if (uploadSettingsModal && uploadSettingsModal.style.display === 'flex') {
-                    closeUploadSettingsModal();
+                } else if (settingsModal && settingsModal.style.display === 'flex') {
+                    closeSettingsModal();
                 }
             }
         });
@@ -2542,6 +2658,7 @@
         // --- SERVICE WORKER & UPLOAD MANAGER (NEW) ---
         const UploadManager = {
             retryInterval: null,
+            retryIntervalId: null, // Track interval for cleanup
             register: async function () {
                 // CRITICAL: Skip Service Worker registration in file:// mode
                 if (ENV && ENV.serviceWorker === false) {
@@ -2632,9 +2749,15 @@
                 }
             },
             startRetryLoop: function () {
+                // Stop existing interval if running
+                if (this.retryIntervalId) {
+                    clearInterval(this.retryIntervalId);
+                    console.log('✓ Stopped previous upload retry loop');
+                }
+                
                 // Periodically check queue and trigger upload
                 // This handles cases where server comes online LATER
-                setInterval(async () => {
+                this.retryIntervalId = setInterval(async () => {
                     if (navigator.onLine) {
                         const db = await new Promise((resolve) => {
                             const req = indexedDB.open('WaveForgeDB_V4', 3);
@@ -2649,12 +2772,25 @@
                                         // Items waiting! Trigger Sync.
                                         console.log(`📦 UploadManager: ${countReq.result} chunks in queue, triggering upload...`);
                                         this.triggerSync();
+                                    } else {
+                                        // Queue empty - stop retry loop to save CPU
+                                        console.log('✓ Upload queue empty - stopping retry loop');
+                                        UploadManager.stopRetryLoop();
                                     }
                                 }
                             }
                         }
                     }
                 }, 30000); // Check every 30 seconds (reduced CPU usage)
+                PerformanceMonitor.registerInterval(this.retryIntervalId, 'UploadRetryLoop');
+                console.log('✓ Upload retry loop started (30s interval)');
+            },
+            stopRetryLoop: function () {
+                if (this.retryIntervalId) {
+                    PerformanceMonitor.clearInterval(this.retryIntervalId, 'UploadRetryLoop');
+                    this.retryIntervalId = null;
+                    console.log('✓ Upload retry loop stopped (CPU-friendly)');
+                }
             },
             queueUpload: async function (id, blob, fileName, metadata = {}, sessionId = null) {
                 // CRITICAL: Block upload queue in file:// mode
@@ -2664,8 +2800,10 @@
                     return;
                 }
                 
-                const CHUNK_SIZE = 1024 * 1024; // 1MB chunks
+                // Use configured chunk size from settings
+                const CHUNK_SIZE = AppSettings.get('chunkSize');
                 const totalChunks = Math.ceil(blob.size / CHUNK_SIZE);
+                console.log(`📦 Using chunk size: ${(CHUNK_SIZE / 1024).toFixed(0)} KB (${totalChunks} chunks for ${(blob.size / 1024 / 1024).toFixed(2)} MB file)`);
 
                 // Use provided sessionId or generate new one for manual uploads
                 const uploadSessionId = sessionId || `manual_${Date.now()}`;
@@ -4353,6 +4491,7 @@
             if (visualizerAnimationId === null) {
                 visualizerActive = true;
                 visualizerAnimationId = requestAnimationFrame(drawVisualizer);
+                PerformanceMonitor.registerAnimation(visualizerAnimationId, 'Visualizer');
                 console.log('✓ Visualizer animation started');
             }
         }
@@ -4790,7 +4929,11 @@
                 }
             }
             isPlaying = false;
-            cancelAnimationFrame(playbackRafId);
+            if (playbackRafId !== null) {
+                PerformanceMonitor.clearAnimation(playbackRafId, 'PlaybackLoop');
+                playbackRafId = null;
+                console.log('✓ Playback animation stopped');
+            }
             updatePlayPauseButtonUI();
             if (reachedEnd) {
                 if (audioElement) audioElement.currentTime = 0;
@@ -4873,9 +5016,18 @@
                         playbackRafId = requestAnimationFrame(loop);
                     } else if (audioElement.ended) {
                         // Audio zu Ende
+                        playbackRafId = null; // Clear before stopping
                         stopAudio(true);
+                    } else {
+                        // Paused or stopped
+                        playbackRafId = null;
+                        console.log('✓ Playback loop ended naturally');
                     }
                 }
+            }
+            // Track playback loop
+            if (playbackRafId) {
+                PerformanceMonitor.registerAnimation(playbackRafId, 'PlaybackLoop');
             }
             loop();
         }
@@ -5014,15 +5166,32 @@
             }
         }
 
-        function startTimer() { startTime = Date.now() - pausedTime; timerInterval = setInterval(() => { document.getElementById('timerDisplay').textContent = new Date(Date.now() - startTime).toISOString().substr(11, 8); }, 100); }
-        function stopTimer() { clearInterval(timerInterval); }
+        function startTimer() { 
+            startTime = Date.now() - pausedTime; 
+            timerInterval = setInterval(() => { 
+                document.getElementById('timerDisplay').textContent = new Date(Date.now() - startTime).toISOString().substr(11, 8); 
+            }, 100); 
+            PerformanceMonitor.registerInterval(timerInterval, 'RecordingTimer');
+        }
+        function stopTimer() { 
+            if (timerInterval) {
+                PerformanceMonitor.clearInterval(timerInterval, 'RecordingTimer');
+                timerInterval = null;
+            }
+        }
         function pauseTimer() { 
-            clearInterval(timerInterval); 
+            if (timerInterval) {
+                PerformanceMonitor.clearInterval(timerInterval, 'RecordingTimer');
+                timerInterval = null;
+            }
             pausedTime = Date.now() - startTime;
         }
         function resumeTimer() { 
             startTime = Date.now() - pausedTime;
-            timerInterval = setInterval(() => { document.getElementById('timerDisplay').textContent = new Date(Date.now() - startTime).toISOString().substr(11, 8); }, 100); 
+            timerInterval = setInterval(() => { 
+                document.getElementById('timerDisplay').textContent = new Date(Date.now() - startTime).toISOString().substr(11, 8); 
+            }, 100); 
+            PerformanceMonitor.registerInterval(timerInterval, 'RecordingTimer');
         }
 
         function pauseRecording() {
@@ -5220,7 +5389,7 @@
                 if (e.key === 'Escape') {
                     if (modal.style.display === 'flex') closeSaveModal();
                     else if (infoModal.style.display === 'flex') closeInfoModal();
-                    else if (document.getElementById('uploadSettingsModal')?.style.display === 'flex') closeUploadSettingsModal();
+                    else if (document.getElementById('settingsModal')?.style.display === 'flex') closeSettingsModal();
                     else if (document.getElementById('deleteModal')?.style.display === 'flex') closeDeleteModal();
                     else if (document.getElementById('recoveryModal').style.display === 'flex') {
                         // Recovery modal doesn't have close function, but we can discard
@@ -5583,29 +5752,81 @@
         };
 
         // Upload Settings Logic
-        function openUploadSettingsModal() {
+        // === SETTINGS CONFIGURATION ===
+        const AppSettings = {
+            defaults: {
+                uploadMethod: 'tus',
+                chunkSize: 1048576 // 1MB default
+            },
+            
+            async loadFromServer() {
+                try {
+                    const response = await fetch('/api/config');
+                    if (response.ok) {
+                        const config = await response.json();
+                        this.defaults.chunkSize = config.chunk_size || 1048576;
+                        console.log('✓ Server config loaded:', config);
+                        return config;
+                    }
+                } catch (err) {
+                    console.warn('Could not load server config, using defaults:', err);
+                }
+                return this.defaults;
+            },
+            
+            get(key) {
+                const stored = localStorage.getItem(`waveforge_${key}`);
+                return stored ? (key === 'chunkSize' ? parseInt(stored) : stored) : this.defaults[key];
+            },
+            
+            set(key, value) {
+                localStorage.setItem(`waveforge_${key}`, value);
+            },
+            
+            reset(key) {
+                localStorage.removeItem(`waveforge_${key}`);
+            }
+        };
+
+        function openSettingsModal() {
             lastFocusedElement = document.activeElement; // Save current focus
-            const modal = document.getElementById('uploadSettingsModal');
+            const modal = document.getElementById('settingsModal');
             modal.style.display = 'flex';
             modal.setAttribute('aria-hidden', 'false');
 
-            // Load current setting
-            const currentMethod = localStorage.getItem('waveforge_upload_method') || 'tus';
+            // Load current settings
+            const currentMethod = AppSettings.get('uploadMethod');
+            const currentChunkSize = AppSettings.get('chunkSize');
+            
             const radio = document.querySelector(`input[name="uploadMethod"][value="${currentMethod}"]`);
             if (radio) radio.checked = true;
+            
+            const chunkSelect = document.getElementById('chunkSizeSelect');
+            if (chunkSelect) {
+                const matchingOption = Array.from(chunkSelect.options).find(opt => opt.value === String(currentChunkSize));
+                if (matchingOption) {
+                    chunkSelect.value = String(currentChunkSize);
+                } else {
+                    chunkSelect.value = 'custom';
+                    document.getElementById('customChunkSizeContainer').classList.remove('hidden');
+                    document.getElementById('customChunkSize').value = currentChunkSize;
+                }
+            }
 
             setTimeout(() => {
                 trapFocus(modal); // Enable focus trap
                 // Focus modal title
-                const modalTitle = modal.querySelector('#uploadSettingsModalTitle');
+                const modalTitle = modal.querySelector('#settingsModalTitle');
                 if (modalTitle) modalTitle.focus();
             }, 10);
         }
 
-        function closeUploadSettingsModal() {
-            const modal = document.getElementById('uploadSettingsModal');
+        function closeSettingsModal() {
+            const modal = document.getElementById('settingsModal');
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
+            // Hide custom chunk size input if visible
+            document.getElementById('customChunkSizeContainer').classList.add('hidden');
             // Restore focus
             if (lastFocusedElement) {
                 lastFocusedElement.focus();
@@ -5613,17 +5834,65 @@
             }
         }
 
-        function saveUploadSettings() {
-            const selected = document.querySelector('input[name="uploadMethod"]:checked').value;
-            localStorage.setItem('waveforge_upload_method', selected);
-            closeUploadSettingsModal();
-            // Reload page to apply changes if necessary, or just update global var
-            if (window.uploadManager) {
-                // If we had a global manager, we'd update it here.
-                // For now, the upload logic checks localStorage directly or we should update a global config.
-                console.log("Upload method updated to:", selected);
+        function saveSettings() {
+            // Save upload method
+            const selectedMethod = document.querySelector('input[name="uploadMethod"]:checked').value;
+            AppSettings.set('uploadMethod', selectedMethod);
+            
+            // Save chunk size
+            const chunkSelect = document.getElementById('chunkSizeSelect');
+            let chunkSize;
+            
+            if (chunkSelect.value === 'custom') {
+                chunkSize = parseInt(document.getElementById('customChunkSize').value);
+                if (isNaN(chunkSize) || chunkSize < 65536 || chunkSize > 10485760) {
+                    showToast('⚠️ Ungültige Chunk-Größe! Bitte zwischen 64 KB und 10 MB wählen.', true);
+                    return;
+                }
+            } else {
+                chunkSize = parseInt(chunkSelect.value);
+            }
+            
+            AppSettings.set('chunkSize', chunkSize);
+            
+            closeSettingsModal();
+            showToast('✓ Einstellungen erfolgreich gespeichert', false);
+            console.log(`Settings saved: Method=${selectedMethod}, ChunkSize=${chunkSize} bytes`);
+        }
+
+        function resetToDefaults() {
+            if (confirm('Möchten Sie wirklich alle Einstellungen auf die Standardwerte zurücksetzen?')) {
+                AppSettings.reset('uploadMethod');
+                AppSettings.reset('chunkSize');
+                closeSettingsModal();
+                showToast('✓ Einstellungen auf Standardwerte zurückgesetzt', false);
+                console.log('Settings reset to defaults');
             }
         }
+
+        // Handle chunk size select change to show/hide custom input
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load server configuration on startup
+            try {
+                await AppSettings.loadFromServer();
+                console.log('✓ Server configuration loaded successfully');
+            } catch (err) {
+                console.warn('⚠️ Could not load server configuration, using defaults');
+            }
+            
+            const chunkSelect = document.getElementById('chunkSizeSelect');
+            if (chunkSelect) {
+                chunkSelect.addEventListener('change', (e) => {
+                    const customContainer = document.getElementById('customChunkSizeContainer');
+                    if (e.target.value === 'custom') {
+                        customContainer.classList.remove('hidden');
+                        document.getElementById('customChunkSize').focus();
+                    } else {
+                        customContainer.classList.add('hidden');
+                    }
+                });
+            }
+        });
 
         let currentLanguage = 'de';
 
