@@ -11,6 +11,7 @@
 
 ### Core Capabilities
 - **🎤 Professional Audio Recording** - High-quality browser-based audio recording with Web Audio API
+- **⏸️ Pause/Resume Recording** - Pause recordings at any time and resume without data loss
 - **🛡️ CrashGuard System** - Advanced crash recovery with automatic state restoration
 - **🔒 Single Tab Guard** - Prevents multiple instances running simultaneously (data protection)
 - **☁️ Cloud Synchronization** - Seamless upload of recordings with chunked transfer for large files
@@ -28,6 +29,7 @@
 - **🔄 Resumable Uploads** - TUS protocol with automatic offset detection and resume capability
 - **📡 Offline Support** - Background sync when connection is restored
 - **⚡ Parallel Uploads** - Up to 3 concurrent chunk uploads
+- **⏸️ Pause/Resume** - MediaRecorder API with accurate timer tracking
 - **🔀 Hybrid Upload System** - TUS primary with custom chunking fallback
 - **📊 Real-time Waveform** - Live audio visualization
 - **✂️ Audio Editing** - Trim and modify recordings
@@ -100,6 +102,7 @@ That's it! The script will automatically:
 
 ✅ **Available Features:**
 - Audio Recording (Microphone) up to 8+ hours
+- Pause/Resume Recording (unlimited pause duration)
 - Web Audio API (EQ, Visualizer, Playback)
 - IndexedDB Storage (local persistence)
 - Local Download (WAV, WebM, MP3)
@@ -129,9 +132,17 @@ That's it! The script will automatically:
 
 2. **Yellow warning banner appears:** "⚠ OFFLINE MODE: Running from file:// - Cloud features disabled"
 
-3. **Use local features:** Record, playback, download - all work perfectly!
+3. **Use local features:** Record, pause/resume, playback, download - all work perfectly!
 
 4. **Upload buttons disabled:** Cloud icon (☁) is grayed out automatically
+
+### Recording Controls
+
+- **🔴 REC** - Start recording
+- **⏸️ PAUSE** - Pause recording (changes to ▶️ RESUME when paused)
+- **⏹ STOP** - Stop recording and save
+
+The pause/resume feature works seamlessly in both online and offline modes. Recordings can be paused indefinitely without data loss, and the timer accurately tracks only active recording time.
 
 ### Recommendation: Local Web Server
 
