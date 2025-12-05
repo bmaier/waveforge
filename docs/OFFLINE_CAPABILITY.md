@@ -2,27 +2,29 @@
 
 ## Übersicht
 
-WaveForge Pro ist jetzt vollständig offline-fähig! Alle externen CDN-Abhängigkeiten wurden durch lokale Ressourcen ersetzt.
+WaveForge Pro ist jetzt vollständig offline-fähig! Alle externen bhängigkeiten wurden durch lokale Ressourcen ersetzt und können ohne Internetverbindung geladen werden.
 
 ## Änderungen
 
 ### 1. Lokale JavaScript-Bibliotheken
 
-**Vorher (CDN):**
+Die Lokale Speicherung der folgenden Ressourcen ist notwendiger und erfordert eine manuelle Aktualisierung bei Versionsänderungen.
+
+**Online (CDN):**
 - `https://cdn.jsdelivr.net/npm/tus-js-client@3/dist/tus.min.js` (85 KB)
 - `https://cdn.tailwindcss.com` (403 KB)
 
-**Nachher (Lokal):**
+**Offline als Dateien (Lokal):**
 - `/frontend/src/tus.min.js` - TUS Upload Client
 - `/frontend/src/tailwind.min.js` - Tailwind CSS
 
 ### 2. Lokale Schriftarten
 
-**Vorher (Google Fonts CDN):**
+**Online (Google Fonts CDN):**
 - `https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono`
 - `https://fonts.gstatic.com/s/rajdhani/v17/...` (Font-Dateien)
 
-**Nachher (Lokal):**
+**Offline als Dateien (Lokal):**
 - `/frontend/src/fonts.css` - Font-Face Definitionen
 - `/frontend/src/fonts/rajdhani-300.ttf` (348 KB)
 - `/frontend/src/fonts/rajdhani-500.ttf` (348 KB)
@@ -31,14 +33,14 @@ WaveForge Pro ist jetzt vollständig offline-fähig! Alle externen CDN-Abhängig
 
 ### 3. Aktualisierte Content Security Policy
 
-**Vorher:**
+**Offline:**
 ```
 script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://fonts.googleapis.com;
 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
 font-src 'self' data: https://fonts.gstatic.com;
 ```
 
-**Nachher:**
+**Online:**
 ```
 script-src 'self' 'unsafe-inline';
 style-src 'self' 'unsafe-inline';
@@ -51,7 +53,7 @@ Keine externen Domains mehr erforderlich! 🎉
 
 ### ✅ Vollständige Offline-Fähigkeit
 - App funktioniert ohne Internetverbindung
-- Keine Abhängigkeit von externen CDNs
+- Keine Abhängigkeit von externen Clouds und CDNs
 - Kein "Loading failed" mehr bei Netzwerkproblemen
 
 ### ✅ Bessere Performance
@@ -61,7 +63,7 @@ Keine externen Domains mehr erforderlich! 🎉
 
 ### ✅ Bessere Sicherheit
 - Keine Third-Party-Domains in CSP
-- Kein Tracking durch externe CDNs
+- Kein Tracking durch externe Clouds und CDNs
 - Volle Kontrolle über alle Ressourcen
 
 ### ✅ Bessere Privatsphäre
@@ -70,7 +72,7 @@ Keine externen Domains mehr erforderlich! 🎉
 - DSGVO-konform ohne externe Requests
 
 ### ✅ Zuverlässigkeit
-- Funktioniert auch wenn CDNs down sind
+- Funktioniert auch wenn Clouds und CDNs down sind
 - Keine Abhängigkeit von Dritten
 - Stabile Versionierung (keine automatischen Updates)
 

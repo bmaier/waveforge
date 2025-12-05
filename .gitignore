@@ -62,6 +62,18 @@ htmlcov/
 *.cover
 .hypothesis/
 
+# Allure Reports
+allure-results/
+allure-report/
+tests/unit/allure-results/
+tests/unit/allure-report/
+tests/integration/allure-results/
+tests/integration/allure-report/
+tests/bdd/allure-results/
+tests/bdd/allure-report/
+tests/e2e/allure-results/
+tests/e2e/allure-report/
+
 # Uploaded data (but keep directory structure)
 backend/uploaded_data/*
 !backend/uploaded_data/.gitkeep

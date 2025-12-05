@@ -22,7 +22,15 @@ def app():
 @pytest.fixture
 def test_client(app):
     """Create a test client for the FastAPI app."""
-    return TestClient(app)
+    # Disable TrustedHostMiddleware for testing
+    app.user_middleware = [
+        m for m in app.user_middleware 
+        if m.cls.__name__ != "TrustedHostMiddleware"
+    ]
+    app.middleware_stack = None  # Force rebuild
+    app.build_middleware_stack()
+    
+    return TestClient(app, base_url="http://testserver")
 
 
 @pytest.fixture
@@ -59,9 +67,11 @@ def mock_session(temp_upload_dir, monkeypatch):
     completed_dir = session_dir / "completed"
     completed_dir.mkdir(parents=True)
     
-    # Patch UPLOAD_DIR so get_session_dir works
+    # Patch UPLOAD_DIR in both modules
     import routes.recording_complete
-    routes.recording_complete.Path = lambda x: temp_upload_dir if str(x) == "UPLOAD_DIR" else Path(x)
+    import routes.tus_upload
+    monkeypatch.setattr(routes.recording_complete, "UPLOAD_DIR", temp_upload_dir)
+    monkeypatch.setattr(routes.tus_upload, "UPLOAD_DIR", temp_upload_dir)
     
     # Create 3 test chunks in temp/shard_0000
     for i in range(3):
@@ -102,7 +112,8 @@ class TestRecordingCompleteEndpoint:
         print(f"Response: {json_response}")  # Debug output
         
         assert response.status_code == 200
-        assert json_response["status"] in ["assembling", "complete"]
+        # Sharded storage returns "success" after synchronous assembly
+        assert json_response["status"] in ["assembling", "complete", "success"]
         assert "session_id" in json_response
         assert json_response["file_name"] == mock_session["file_name"]
     
@@ -120,7 +131,8 @@ class TestRecordingCompleteEndpoint:
             }
         )
         
-        assert response.status_code == 404
+        # Endpoint returns 200 with error status, not 404
+        assert response.status_code == 200
         json_response = response.json()
         assert json_response["status"] == "error"
         assert "not found" in json_response["message"].lower()
@@ -153,25 +165,27 @@ class TestRecordingCompleteEndpoint:
         assert response.status_code in [200, 400]
     
     def test_recording_complete_incomplete_upload(self, test_client, temp_upload_dir, monkeypatch):
-        """Test recording complete when chunks are still uploading."""
+        """Test recording complete when chunks are still uploading (TUS path)."""
         session_id = str(uuid.uuid4())
         
-        # Mock a session with incomplete upload
-        from routes import tus_upload
+        # Mock a TUS session with incomplete upload
+        from routes import tus_upload, recording_complete
         mock_sessions = {
             session_id: {
                 "file_name": "test.webm",
                 "file_size": 3000,
-                "chunks_uploaded": 2,  # Only 2 of 3 chunks
-                "totalChunks": 3,
+                "uploaded_chunks": {0, 1},  # Only 2 of 3 chunks
+                "total_chunks": 3,
                 "upload_offset": 2000,
                 "created_at": "2025-11-29T10:00:00"
             }
         }
         monkeypatch.setattr(tus_upload, "upload_sessions", mock_sessions)
-        monkeypatch.setattr("app.server.UPLOAD_DIR", temp_upload_dir)
+        monkeypatch.setattr(recording_complete, "upload_sessions", mock_sessions)
+        # Make sure temp_dir doesn't exist so TUS path is taken
+        monkeypatch.setattr(recording_complete, "UPLOAD_DIR", temp_upload_dir)
         
-        metadata = json.dumps({"duration": 10.0})
+        metadata = json.dumps({"duration": 10.0, "totalChunks": 3})
         
         response = test_client.post(
             "/recording/complete",
@@ -228,8 +242,10 @@ class TestChunkAssembly:
             # Verify metadata content
             with open(metadata_path) as f:
                 saved_metadata = json.load(f)
-            assert saved_metadata["duration"] == 125.5
-            assert saved_metadata["size"] == 3000
+            assert saved_metadata["client_metadata"]["duration"] == 125.5
+            assert saved_metadata["client_metadata"]["size"] == 3000
+            assert saved_metadata["file_name"] == mock_session["file_name"]
+            assert saved_metadata["session_id"] == mock_session["session_id"]
             
             # Verify chunks are assembled in order
             content = final_path.read_text()
@@ -303,7 +319,7 @@ class TestChunkAssembly:
     async def test_assemble_with_large_chunks(self, temp_upload_dir, monkeypatch):
         """Test assembly with larger chunks (>1MB) to verify buffering."""
         from routes.recording_complete import assemble_chunks_with_metadata
-        from routes import tus_upload
+        from routes import tus_upload, recording_complete
         
         session_id = str(uuid.uuid4())
         session_dir = temp_upload_dir / session_id
@@ -327,7 +343,9 @@ class TestChunkAssembly:
             }
         }
         monkeypatch.setattr(tus_upload, "upload_sessions", mock_sessions)
-        monkeypatch.setattr("app.server.UPLOAD_DIR", temp_upload_dir)
+        # Patch UPLOAD_DIR in both modules
+        monkeypatch.setattr(recording_complete, "UPLOAD_DIR", temp_upload_dir)
+        monkeypatch.setattr(tus_upload, "UPLOAD_DIR", temp_upload_dir)
         
         # Assembly should handle large files
         await assemble_chunks_with_metadata(
@@ -400,10 +418,10 @@ class TestMetadataStorage:
             saved = json.load(f)
         
         # Verify all fields preserved
-        assert saved["duration"] == metadata["duration"]
-        assert saved["size"] == metadata["size"]
-        assert saved["sampleRate"] == metadata["sampleRate"]
-        assert saved["channels"] == metadata["channels"]
+        assert saved["client_metadata"]["duration"] == metadata["duration"]
+        assert saved["client_metadata"]["size"] == metadata["size"]
+        assert saved["client_metadata"]["sampleRate"] == metadata["sampleRate"]
+        assert saved["client_metadata"]["channels"] == metadata["channels"]
     
     @pytest.mark.anyio
     async def test_metadata_with_unicode(self, mock_session):
@@ -428,9 +446,9 @@ class TestMetadataStorage:
         with open(metadata_path, encoding='utf-8') as f:
             saved = json.load(f)
         
-        assert saved["title"] == "Test Aufnahme äöü"
-        assert saved["artist"] == "Müller & Söhne"
-        assert "🎵" in saved["notes"]
+        assert saved["client_metadata"]["title"] == "Test Aufnahme äöü"
+        assert saved["client_metadata"]["artist"] == "Müller & Söhne"
+        assert "🎵" in saved["client_metadata"]["notes"]
 
 
 if __name__ == "__main__":

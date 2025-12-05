@@ -7,9 +7,9 @@
     <meta name="description"
         content="WaveForge DAW - Professionelle Audio-Aufnahmesoftware mit CrashGuard und Cloud-Synchronisation">
     <title>WaveForge DAW - Preview Edition</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="manifest" href="/manifest.json">
-    <script src="/tailwind.min.js"></script>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="manifest" href="./manifest.json">
+    <script src="./tailwind.min.js"></script>
     <link href="/fonts.css" rel="stylesheet">
 
     <style>
@@ -722,9 +722,8 @@
                         type="button">
                         <span class="text-cyan-400" aria-hidden="true">ℹ</span> <span data-i18n="ui.info">INFO</span>
                     </button>
-                    <!-- Upload Settings Button (hidden in offline mode) -->
+                    <!-- Upload Settings Button -->
                     <button onclick="openUploadSettingsModal()"
-                        id="uploadSettingsBtn"
                         class="text-[10px] text-gray-500 hover:text-cyan-400 transition-colors flex items-center gap-1 border border-gray-800 rounded px-2 py-0.5 hover:border-cyan-500/50"
                         aria-label="Upload-Einstellungen ändern" data-i18n-attr="aria-label:aria.uploadSettings"
                         type="button">
@@ -1190,7 +1189,7 @@
                             <li>• Session-Recovery bei Absturz</li>
                         </ul>
                     </div>
-                    <div id="cloudSyncBox" class="bg-gray-800/30 border border-gray-700 p-3 rounded">
+                    <div class="bg-gray-800/30 border border-gray-700 p-3 rounded">
                         <h4 class="font-bold text-gray-200 text-xs mb-2">☁ Cloud-Synchronisation</h4>
                         <ul class="text-xs text-gray-400 space-y-1">
                             <li>• Service Worker Background-Upload</li>
@@ -1602,19 +1601,13 @@
             },
             
             showFileProtocolWarning: function() {
-                // Hide upload-related UI elements in offline mode
-                const uploadSettingsBtn = document.getElementById('uploadSettingsBtn');
-                const cloudSyncBox = document.getElementById('cloudSyncBox');
-                if (uploadSettingsBtn) uploadSettingsBtn.style.display = 'none';
-                if (cloudSyncBox) cloudSyncBox.style.display = 'none';
-                
                 // Show persistent warning banner for file:// mode
                 const banner = document.createElement('div');
                 banner.id = 'fileProtocolBanner';
                 banner.className = 'fixed top-0 left-0 right-0 bg-yellow-900/90 border-b-2 border-yellow-500 text-yellow-200 px-4 py-2 z-[9999] text-center text-sm font-mono';
                 banner.innerHTML = `
                     <span class="font-bold">⚠ OFFLINE MODE:</span> 
-                    Running from file:// - Cloud features disabled. 
+                    Running from file:// - Server or Cloud Synchronisation Features Disabled. 
                     <a href="#" onclick="RuntimeEnvironment.showOfflineModeHelp(); return false;" 
                        class="underline hover:text-yellow-100 ml-2">Learn more</a>
                 `;
@@ -4533,7 +4526,7 @@
                 // CONDITIONAL: Show upload button only if cloud upload is available
                 const uploadButtonHTML = (!ENV || ENV.cloudUpload !== false)
                     ? `<button class="up-btn-${t.id} w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:border-cyan-400 hover:text-cyan-400 upload-icon transition-all" title="Upload to Cloud" aria-label="In Cloud hochladen: ${t.name}" type="button"><span aria-hidden="true">☁</span></button>`
-                    : ``; // Hide completely in offline mode
+                    : `<button class="w-8 h-8 rounded-full border border-gray-700 flex items-center justify-center text-gray-700 cursor-not-allowed opacity-30" title="Upload not available in offline mode" disabled><span aria-hidden="true">☁</span></button>`;
 
                 el.innerHTML = `
                     <div class="flex justify-between items-center w-full">

@@ -37,5 +37,10 @@ mypy==1.8.0
 # Coverage Reporting
 coverage[toml]==7.4.0
 
+# Allure Reporting
+allure-pytest==2.13.2
+allure-behave==2.13.2
+allure-python-commons==2.13.2
+
 # Utilities
 python-dotenv==1.0.0

@@ -328,6 +328,88 @@ python3 -m uvicorn server:app --reload --host 0.0.0.0 --port 8000
 - JavaScript: ES6+
 - HTML/CSS: BEM methodology
 
+## 🧪 Testing
+
+WaveForge Pro has a comprehensive test suite with **Allure reporting** for all test types.
+
+### Quick Start
+```bash
+# Run all tests with Allure report
+./scripts/run-all-tests.sh
+
+# Run individual test suites
+./scripts/test-unit.sh           # Unit tests (25 passed, 1 skipped)
+./scripts/test-integration.sh    # Integration tests (14 passed)
+./scripts/test-bdd.sh            # BDD tests (58 scenarios, 506 steps)
+```
+
+### Test Coverage
+| Test Suite | Tests | Status | Documentation |
+|------------|-------|--------|---------------|
+| **Unit** | 26 | ✅ 25 passed, 1 skipped | Backend logic, routes, metadata |
+| **Integration** | 14 | ✅ 14 passed | End-to-end workflows |
+| **BDD** | 58 scenarios | ✅ 506 steps defined | User stories (Gherkin) |
+
+### Prerequisites
+```bash
+# Install Allure CLI
+brew install allure  # macOS
+# Or see docs/testing/ALLURE_REPORTING.md for other platforms
+
+# Install test dependencies
+pip install -r tests/requirements-test.txt
+playwright install  # For BDD/E2E tests
+```
+
+### Running Tests
+
+#### Unit Tests (No Services Required)
+```bash
+pytest tests/unit/ -v
+# Or with Allure: ./scripts/test-unit.sh
+```
+
+#### Integration Tests (No Services Required)
+```bash
+pytest tests/integration/ -v
+# Or with Allure: ./scripts/test-integration.sh
+```
+
+#### BDD Tests (Requires Running Services)
+```bash
+# Terminal 1: Start backend
+cd backend && python -m app.main
+
+# Terminal 2: Start frontend
+cd frontend && python -m http.server 8080
+
+# Terminal 3: Run tests
+./scripts/test-bdd.sh
+```
+
+### Viewing Allure Reports
+```bash
+# Live server (auto-opens browser)
+allure serve allure-results
+
+# Or generate static report
+allure generate allure-results --clean -o allure-report
+allure open allure-report
+```
+
+### Documentation
+- 📚 **[Testing Quick Start](docs/testing/QUICK_START.md)** - Get started in 5 minutes
+- 📊 **[Allure Reporting Guide](docs/testing/ALLURE_REPORTING.md)** - Comprehensive reporting documentation
+- ✅ **[Test Completion Summary](TEST_COMPLETION_SUMMARY.md)** - All test results and fixes
+
+### Test Features
+- ✅ **Allure Reports** - Beautiful HTML reports with trends, graphs, and history
+- ✅ **BDD/Gherkin** - User-story based tests with Behave
+- ✅ **Playwright** - Browser automation for E2E tests
+- ✅ **Pytest** - Modern Python testing framework
+- ✅ **Coverage Reports** - Code coverage tracking
+- ✅ **CI/CD Ready** - GitHub Actions integration examples
+
 ## 🐳 Docker Deployment
 
 ### Build and Run with Docker
