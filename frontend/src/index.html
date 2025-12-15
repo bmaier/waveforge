@@ -125,6 +125,26 @@
             font-size: 1.2rem;
         }
 
+        /* Header action buttons (Settings/Info) */
+        .header-action-btn {
+            background: #1f2a44;
+            color: #e5e7eb;
+            border: 1px solid #3b455c;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .header-action-btn:hover {
+            background: #2b3a5c;
+            color: #00f3ff;
+            border-color: #00f3ff;
+            box-shadow: 0 6px 16px rgba(0, 243, 255, 0.25);
+        }
+
+        .header-action-btn:focus-visible {
+            outline: 2px solid #00f3ff;
+            outline-offset: 2px;
+        }
+
         /* Modal Styles */
         .modal-overlay {
             position: fixed;
@@ -833,19 +853,17 @@
                     </select>
                     <!-- Settings Button (hidden in offline mode) -->
                     <button id="settingsBtn"
-                        class="text-[10px] text-gray-500 hover:text-cyan-400 transition-colors inline-flex items-center gap-1 border border-gray-800 rounded px-3 py-1 hover:border-cyan-500/50"
-                        style="background: rgba(0,255,255,0.3);"
+                        class="text-[10px] transition-colors inline-flex items-center gap-1 rounded px-3 py-1 header-action-btn"
                         aria-label="Einstellungen öffnen" data-i18n-attr="aria-label:aria.settings"
                         type="button">
-                        <span class="text-cyan-400" aria-hidden="true">⚙</span> <span
+                        <span class="text-slate-200" aria-hidden="true">⚙</span> <span
                             data-i18n="ui.settings">SETTINGS</span>
                     </button>
                     <button id="infoBtn"
-                        class="text-[10px] text-gray-500 hover:text-cyan-400 transition-colors inline-flex items-center gap-1 border border-gray-800 rounded px-3 py-1 hover:border-cyan-500/50"
-                        style="background: rgba(0,255,255,0.3);"
+                        class="text-[10px] transition-colors inline-flex items-center gap-1 rounded px-3 py-1 header-action-btn"
                         aria-label="Informationen und Compliance anzeigen" data-i18n-attr="aria-label:aria.info"
                         type="button">
-                        <span class="text-cyan-400" aria-hidden="true">ℹ</span> <span data-i18n="ui.info">INFO</span>
+                        <span class="text-slate-200" aria-hidden="true">ℹ</span> <span data-i18n="ui.info">INFO</span>
                     </button>
                 </div>
                 <div id="statusIndicator" class="text-xs digital-text text-cyan-400" role="status" aria-live="polite"
@@ -1225,6 +1243,25 @@
                         </div>
                     </label>
                 </div>
+            </fieldset>
+
+            <!-- Log Level Section -->
+            <fieldset class="mb-6 pb-6 border-b border-gray-700">
+                <legend class="font-bold text-gray-200 mb-3 text-base">
+                    <span class="text-cyan-400" aria-hidden="true">📜</span> Log-Level
+                </legend>
+                <p class="text-sm text-gray-400 mb-4">
+                    Steuert, welche Meldungen in der Browser-Konsole erscheinen. Standard: nur Fehler.
+                </p>
+
+                <label for="logLevelSelect" class="block text-sm text-gray-300 mb-2">Konsole:</label>
+                <select id="logLevelSelect"
+                    class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/50">
+                    <option value="error">Nur Fehler</option>
+                    <option value="warn">Warnungen & Fehler</option>
+                    <option value="info">Info, Warnungen & Fehler</option>
+                    <option value="debug">Alle Meldungen</option>
+                </select>
             </fieldset>
 
             <!-- Chunk Size Section -->
@@ -1764,6 +1801,42 @@
     </div>
 
     <script>
+        // Lightweight logger with runtime-configurable level
+        const Logger = (() => {
+            const levels = { error: 0, warn: 1, info: 2, debug: 3 };
+            let current = 'error';
+            const original = {
+                log: console.log.bind(console),
+                info: console.info.bind(console),
+                warn: console.warn.bind(console),
+                error: console.error.bind(console),
+                debug: console.debug ? console.debug.bind(console) : console.log.bind(console)
+            };
+
+            const apply = () => {
+                const threshold = levels[current] ?? levels.error;
+                console.log = threshold >= levels.info ? original.log : () => {};
+                console.info = threshold >= levels.info ? original.info : () => {};
+                console.warn = threshold >= levels.warn ? original.warn : () => {};
+                console.debug = threshold >= levels.debug ? original.debug : () => {};
+                console.error = original.error; // errors are always emitted
+            };
+
+            const api = {
+                setLevel(level) {
+                    current = levels[level] !== undefined ? level : 'error';
+                    apply();
+                    original.info(`Logger level set to: ${current}`);
+                },
+                getLevel() {
+                    return current;
+                }
+            };
+
+            // Apply default level on load
+            apply();
+            return api;
+        })();
         // --- 1. RUNTIME ENVIRONMENT DETECTION ---
         
         const RuntimeEnvironment = {
@@ -3382,6 +3455,7 @@
             
             onConnectionLost: function() {
                 console.log('📴 UploadCoordinator: Connection lost - pausing all uploads');
+                enterLowPowerMode('upload coordinator offline');
                 
                 // Pause all active uploads
                 for (const [sessionId, upload] of this.activeUploads.entries()) {
@@ -3394,6 +3468,7 @@
             
             onConnectionRestored: function() {
                 console.log('🌐 UploadCoordinator: Connection restored - resuming uploads');
+                exitLowPowerMode('upload coordinator online');
                 
                 // Resume all paused uploads
                 let hasResumed = false;
@@ -3707,6 +3782,7 @@
         window.addEventListener('online', async () => {
             console.log('🌐 Connection restored - resetting retry delays for immediate upload');
             UploadManager.setUploadStatus('idle');
+            exitLowPowerMode('network online');
             
             // Update Live Upload Indicator
             if (typeof LiveUploadIndicator !== 'undefined') {
@@ -3776,6 +3852,7 @@
         window.addEventListener('offline', () => {
             console.log('📴 Connection lost, uploads will resume when online');
             UploadManager.setUploadStatus('pending');
+            enterLowPowerMode('network offline');
             
             // Update Live Upload Indicator
             if (typeof LiveUploadIndicator !== 'undefined') {
@@ -4568,6 +4645,7 @@
         let visualizerActive = false; // Control visualizer animation (start as false to save CPU)
         let currentAudioBuffer = null, playbackSource = null, outputNodes = {}, isPlaying = false, playbackStartTime = 0, playbackOffset = 0, playbackRafId = null;
         let audioElement = null, mediaElementSource = null, currentBlobUrl = null;
+        let lowPowerMode = false, visualizerWasActive = false, audioWasRunning = false;
 
         function initAudioEngine() {
             if (!audioContext) {
@@ -4580,6 +4658,50 @@
             if (audioContext.state === 'suspended') audioContext.resume();
         }
 
+        function enterLowPowerMode(reason = 'offline') {
+            if (lowPowerMode) return;
+            lowPowerMode = true;
+            console.log(`🔻 Entering low-power mode (${reason})`);
+
+            // Pause visualizer animation and remember state
+            visualizerWasActive = visualizerActive && visualizerAnimationId !== null;
+            stopVisualizer();
+
+            // Suspend AudioContext if running to reduce CPU
+            if (audioContext && audioContext.state === 'running') {
+                audioWasRunning = true;
+                audioContext.suspend().catch(() => {});
+            } else {
+                audioWasRunning = false;
+            }
+
+            // Stop upload retry loop to avoid wakeups while offline
+            if (UploadManager && typeof UploadManager.stopRetryLoop === 'function') {
+                UploadManager.stopRetryLoop();
+            }
+        }
+
+        function exitLowPowerMode(reason = 'online') {
+            if (!lowPowerMode) return;
+            lowPowerMode = false;
+            console.log(`🔺 Exiting low-power mode (${reason})`);
+
+            // Resume AudioContext if we suspended it
+            if (audioWasRunning && audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().catch(() => {});
+            }
+
+            // Resume visualizer only if it was active before
+            if (visualizerWasActive) {
+                startVisualizer();
+            }
+
+            // Restart upload retry loop so pending uploads can continue
+            if (UploadManager && typeof UploadManager.startRetryLoop === 'function') {
+                UploadManager.startRetryLoop();
+            }
+        }
+
         function initVisualizer() {
             canvas = document.getElementById('visualizer');
             if (!canvas) return;
@@ -4588,12 +4710,42 @@
             canvas.width = canvas.getBoundingClientRect().width * dpr;
             canvas.height = canvas.getBoundingClientRect().height * dpr;
             canvasCtx.scale(dpr, dpr);
+            attachVisualizerHoverBoost();
             // Don't start animation here - only when recording starts (CPU-friendly)
         }
 
         let visualizerAnimationId = null; // Track animation frame ID
-        
-        function drawVisualizer() {
+        let visualizerTargetFps = 30; // Desired FPS for visualizer
+        let visualizerBaselineFps = 30; // Baseline FPS that can be reduced for power saving
+        let visualizerLastFrameTime = 0;
+        let visualizerSlowTimer = null;
+
+        function setVisualizerFps(fps, reason = 'default') {
+            visualizerTargetFps = Math.max(1, fps);
+            console.log(`🎛️ Visualizer FPS -> ${visualizerTargetFps} (${reason})`);
+        }
+
+        function scheduleVisualizerThrottle() {
+            if (visualizerSlowTimer) {
+                clearTimeout(visualizerSlowTimer);
+            }
+            visualizerSlowTimer = setTimeout(() => {
+                visualizerBaselineFps = 6; // Long-run idle FPS
+                setVisualizerFps(visualizerBaselineFps, 'long-run throttle');
+            }, 60000); // Slow down after 60s to save CPU
+        }
+
+        function attachVisualizerHoverBoost() {
+            if (!canvas) return;
+            canvas.addEventListener('mouseenter', () => {
+                setVisualizerFps(Math.max(visualizerTargetFps, 24), 'hover boost');
+            });
+            canvas.addEventListener('mouseleave', () => {
+                setVisualizerFps(visualizerBaselineFps, 'hover end');
+            });
+        }
+
+        function drawVisualizer(ts = 0) {
             if (!canvas || !canvasCtx || !analyser) return;
             
             // Stop drawing if visualizer is paused
@@ -4602,6 +4754,14 @@
                 visualizerAnimationId = null; // Clear animation ID
                 return;
             }
+
+            // Throttle rendering based on target FPS
+            const minDelta = 1000 / visualizerTargetFps;
+            if (visualizerLastFrameTime && (ts - visualizerLastFrameTime) < minDelta) {
+                visualizerAnimationId = requestAnimationFrame(drawVisualizer);
+                return;
+            }
+            visualizerLastFrameTime = ts;
             
             canvasCtx.clearRect(0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio);
             analyser.getByteFrequencyData(dataArray);
@@ -4621,6 +4781,10 @@
         function startVisualizer() {
             if (visualizerAnimationId === null) {
                 visualizerActive = true;
+                visualizerBaselineFps = 30;
+                setVisualizerFps(visualizerBaselineFps, 'start');
+                visualizerLastFrameTime = 0;
+                scheduleVisualizerThrottle();
                 visualizerAnimationId = requestAnimationFrame(drawVisualizer);
                 PerformanceMonitor.registerAnimation(visualizerAnimationId, 'Visualizer');
                 console.log('✓ Visualizer animation started');
@@ -4629,6 +4793,10 @@
         
         function stopVisualizer() {
             visualizerActive = false;
+            if (visualizerSlowTimer) {
+                clearTimeout(visualizerSlowTimer);
+                visualizerSlowTimer = null;
+            }
             if (visualizerAnimationId !== null) {
                 PerformanceMonitor.clearAnimation(visualizerAnimationId, 'Visualizer');
                 visualizerAnimationId = null;
@@ -5976,7 +6144,8 @@
         const AppSettings = {
             defaults: {
                 uploadMethod: 'tus',
-                chunkSize: 1048576 // 1MB default
+                chunkSize: 1048576, // 1MB default
+                logLevel: 'error'
             },
             
             async loadFromServer() {
@@ -6008,6 +6177,9 @@
             }
         };
 
+        // Apply persisted log level immediately (default: errors only)
+        Logger.setLevel(AppSettings.get('logLevel'));
+
         function openSettingsModal() {
             console.log('openSettingsModal called');
             // Immer zuerst beide Modals schließen
@@ -6028,6 +6200,7 @@
 
             const currentMethod = AppSettings.get('uploadMethod');
             const currentChunkSize = AppSettings.get('chunkSize');
+            const currentLogLevel = AppSettings.get('logLevel');
             
             const radio = document.querySelector(`input[name="uploadMethod"][value="${currentMethod}"]`);
             if (radio) radio.checked = true;
@@ -6042,6 +6215,11 @@
                     document.getElementById('customChunkSizeContainer').classList.remove('hidden');
                     document.getElementById('customChunkSize').value = currentChunkSize;
                 }
+            }
+
+            const logLevelSelect = document.getElementById('logLevelSelect');
+            if (logLevelSelect) {
+                logLevelSelect.value = currentLogLevel || 'error';
             }
 
             trapFocus(modal);
@@ -6092,18 +6270,26 @@
             }
             
             AppSettings.set('chunkSize', chunkSize);
+
+            // Save log level
+            const logLevelSelect = document.getElementById('logLevelSelect');
+            const logLevel = logLevelSelect ? logLevelSelect.value : 'error';
+            AppSettings.set('logLevel', logLevel);
+            Logger.setLevel(logLevel);
             
             closeSettingsModal();
             showToast('✓ Einstellungen erfolgreich gespeichert', false);
-            console.log(`Settings saved: Method=${selectedMethod}, ChunkSize=${chunkSize} bytes`);
+            console.log(`Settings saved: Method=${selectedMethod}, ChunkSize=${chunkSize} bytes, LogLevel=${logLevel}`);
         }
 
         function resetToDefaults() {
             if (confirm('Möchten Sie wirklich alle Einstellungen auf die Standardwerte zurücksetzen?')) {
                 AppSettings.reset('uploadMethod');
                 AppSettings.reset('chunkSize');
+                AppSettings.reset('logLevel');
                 closeSettingsModal();
                 showToast('✓ Einstellungen auf Standardwerte zurückgesetzt', false);
+                Logger.setLevel(AppSettings.defaults.logLevel);
                 console.log('Settings reset to defaults');
             }
         }

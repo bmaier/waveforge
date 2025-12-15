@@ -18,12 +18,24 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Ensure required CLIs are available
+if ! command -v pytest >/dev/null 2>&1; then
+    echo -e "${RED}pytest not found. Install test deps: pip install -r tests/requirements-test.txt${NC}"
+    exit 1
+fi
+
+if ! command -v behave >/dev/null 2>&1; then
+    echo -e "${RED}behave not found. Install test deps: pip install -r tests/requirements-test.txt${NC}"
+    exit 1
+fi
+
 # Clean previous results
 echo -e "${YELLOW}Cleaning previous test results...${NC}"
 rm -rf allure-results allure-report
 rm -rf tests/unit/allure-results tests/unit/allure-report
 rm -rf tests/integration/allure-results tests/integration/allure-report
 rm -rf tests/bdd/allure-results tests/bdd/allure-report
+mkdir -p allure-results
 echo ""
 
 # Run Unit Tests
@@ -54,7 +66,7 @@ echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     cd tests/bdd
     behave --format allure_behave.formatter:AllureFormatter \
-           --outdir ../../allure-results \
+           --outfile ../../allure-results \
            --format pretty || {
         echo -e "${RED}BDD tests failed!${NC}"
     }

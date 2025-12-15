@@ -325,6 +325,9 @@ async function uploadChunkCustom(item) {
             sessionId: item.sessionId,
             chunkIndex: item.chunkIndex
         });
+
+        // Return status to caller so we can skip extra verify/delete round-trips for already-existing chunks
+        return result.status;
     } catch (error) {
         clearTimeout(timeoutId);
         if (error.name === 'AbortError') {
@@ -497,46 +500,51 @@ async function processUploads() {
             // Service Worker always uses custom upload
             // TUS upload runs in main thread via tus-upload-manager.js
             console.log(`[SW] 📤 Sending chunk ${item.chunkIndex} to server (custom upload)...`);
-            await uploadChunkCustom(item);
+            const uploadStatus = await uploadChunkCustom(item);
 
-            // Success: Chunk uploaded, now verify it exists on server before removing from queue
-            console.log(`[SW] ✓ Chunk ${item.chunkIndex} uploaded successfully (session: ${item.sessionId})`);
-            console.log(`[SW] 🔍 Verifying chunk exists on server before removing from queue...`);
-            
-            // CRITICAL: Double-check that chunk actually exists on server with timeout
-            const verifyController = new AbortController();
-            const verifyTimeoutId = setTimeout(() => verifyController.abort(), 10000); // 10 second timeout for verify
-            
-            let verifyResponse;
-            try {
-                verifyResponse = await fetch(`/api/verify/${item.sessionId}/${item.chunkIndex}`, {
-                    signal: verifyController.signal
-                });
-                clearTimeout(verifyTimeoutId);
-            } catch (verifyError) {
-                clearTimeout(verifyTimeoutId);
-                if (verifyError.name === 'AbortError') {
-                    console.error(`[SW] ⏱️ Verify timeout for chunk ${item.chunkIndex}`);
-                    throw new Error(`Verify timeout after 10 seconds`);
+            // Success: Chunk uploaded, now verify only if the server actually wrote it
+            // If server says "already exists", skip extra verify and just remove from queue
+            if (uploadStatus !== 'chunk_already_exists') {
+                console.log(`[SW] ✓ Chunk ${item.chunkIndex} uploaded successfully (session: ${item.sessionId})`);
+                console.log(`[SW] 🔍 Verifying chunk exists on server before removing from queue...`);
+
+                // CRITICAL: Double-check that chunk actually exists on server with timeout
+                const verifyController = new AbortController();
+                const verifyTimeoutId = setTimeout(() => verifyController.abort(), 10000); // 10 second timeout for verify
+
+                let verifyResponse;
+                try {
+                    verifyResponse = await fetch(`/api/verify/${item.sessionId}/${item.chunkIndex}`, {
+                        signal: verifyController.signal
+                    });
+                    clearTimeout(verifyTimeoutId);
+                } catch (verifyError) {
+                    clearTimeout(verifyTimeoutId);
+                    if (verifyError.name === 'AbortError') {
+                        console.error(`[SW] ⏱️ Verify timeout for chunk ${item.chunkIndex}`);
+                        throw new Error(`Verify timeout after 10 seconds`);
+                    }
+                    throw verifyError;
                 }
-                throw verifyError;
-            }
-            
-            if (!verifyResponse.ok) {
-                console.error(`[SW] ⚠️ Verify request failed with status ${verifyResponse.status}`);
-                throw new Error(`Failed to verify chunk ${item.chunkIndex} on server (HTTP ${verifyResponse.status})`);
-            }
-            
-            const verifyResult = await verifyResponse.json();
-            if (!verifyResult.exists) {
-                console.error(`[SW] ❌ CRITICAL: Chunk ${item.chunkIndex} NOT found on server after upload!`);
-                if (verifyResult.path) {
-                    console.error(`[SW] Expected path: ${verifyResult.path}`);
+                
+                if (!verifyResponse.ok) {
+                    console.error(`[SW] ⚠️ Verify request failed with status ${verifyResponse.status}`);
+                    throw new Error(`Failed to verify chunk ${item.chunkIndex} on server (HTTP ${verifyResponse.status})`);
                 }
-                throw new Error(`Chunk ${item.chunkIndex} not found on server after upload - will retry`);
+                
+                const verifyResult = await verifyResponse.json();
+                if (!verifyResult.exists) {
+                    console.error(`[SW] ❌ CRITICAL: Chunk ${item.chunkIndex} NOT found on server after upload!`);
+                    if (verifyResult.path) {
+                        console.error(`[SW] Expected path: ${verifyResult.path}`);
+                    }
+                    throw new Error(`Chunk ${item.chunkIndex} not found on server after upload - will retry`);
+                }
+                
+                console.log(`[SW] ✅ Chunk ${item.chunkIndex} verified on server (${verifyResult.size} bytes)`);
+            } else {
+                console.log(`[SW] ✅ Skipping verify; server already has chunk ${item.chunkIndex}`);
             }
-            
-            console.log(`[SW] ✅ Chunk ${item.chunkIndex} verified on server (${verifyResult.size} bytes)`);
             
             // IMPORTANT: Save fileName and metadata BEFORE removing chunk from queue
             const fileName = item.fileName;
@@ -544,7 +552,7 @@ async function processUploads() {
             const totalChunks = item.totalChunks;
             
             console.log(`[SW] 🗑 Removing chunk from queue - ID: "${item.id}"`);
-            
+
             try {
                 await removeFromQueue(db, item.id);
                 console.log(`[SW] ✅ Successfully removed chunk ${item.chunkIndex} from queue`);
