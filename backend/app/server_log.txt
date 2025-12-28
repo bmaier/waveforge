@@ -1,0 +1,1335 @@
+INFO:     Will watch for changes in these directories: ['/Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/app']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [75464] using WatchFiles
+📂 UPLOAD_DIR configured: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data
+--- WAVEFORGE PRO SERVER ---
+Frontend Source: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/frontend/src
+Static Assets:   /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/frontend/public
+Storage Path:    /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data
+
+🌐 Server URLs:
+   Local:   http://localhost:8000
+   Network: http://0.0.0.0:8000
+
+📝 Note: In production, use HTTPS with TLS/SSL certificates
+         (automatically handled by Kubernetes Ingress)
+INFO:     Started server process [75469]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+📂 UPLOAD_DIR configured: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data
+INFO:     127.0.0.1:56077 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56077 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56081 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56082 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56083 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56077 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56082 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56083 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56083 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56083 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56119 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56119 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56123 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56124 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56125 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56124 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56119 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56125 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56125 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56125 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56152 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56152 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56156 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56157 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56158 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56158 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56157 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56152 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56157 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56157 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56178 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56178 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56182 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56183 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56184 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56184 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56183 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56178 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56184 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56183 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56204 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56204 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56208 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56210 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56204 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56210 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56209 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56252 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56252 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56256 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56257 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56258 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56257 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56252 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56258 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56258 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56258 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56293 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56293 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56295 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56295 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56298 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56295 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56293 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56298 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56293 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56293 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56344 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56344 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56348 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56349 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56350 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56344 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56350 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56349 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56349 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56349 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56389 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56389 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56394 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56393 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56395 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56394 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56389 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56395 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56395 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56395 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56426 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56426 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56430 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56431 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56432 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56432 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56426 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56431 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56431 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56431 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56474 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56474 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56478 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56479 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56480 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56479 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56480 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56474 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56480 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56480 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56509 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56509 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56512 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56514 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56515 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56509 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56514 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56515 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56512 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56515 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56556 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56556 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56560 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56561 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56562 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56561 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56556 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56562 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56562 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56562 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56574 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56574 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56578 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56579 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56580 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56574 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56579 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56580 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56580 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56580 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56612 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56612 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56614 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56617 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56618 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56618 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56617 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56612 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56614 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56618 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56627 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56627 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56631 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56632 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56633 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56627 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56633 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56632 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56632 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56632 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56667 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56667 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56669 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56672 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56673 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56667 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56672 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56673 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56673 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56673 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56682 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56682 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56686 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56687 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56688 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56682 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56687 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56688 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56688 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56688 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56693 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56693 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56697 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56698 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56699 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56693 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56698 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56699 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56698 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56698 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56721 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56721 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56725 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56726 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56727 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56726 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56721 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56727 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56721 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56721 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56731 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56731 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56735 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56736 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56737 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56731 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56736 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56737 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56737 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56737 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56774 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56774 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56776 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56779 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56780 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56779 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56774 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56780 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56780 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56780 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56784 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56784 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56787 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56789 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56790 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56790 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56784 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56789 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56789 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56789 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56794 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56794 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56798 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56799 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56800 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56794 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56799 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56800 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56800 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56800 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56822 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56822 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56826 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56827 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56828 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56827 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56828 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56822 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56828 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56828 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56845 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56846 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56848 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56846 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56848 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56848 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56848 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56848 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56848 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56848 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56867 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56867 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56870 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56872 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56873 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56873 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56872 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56867 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56872 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56876 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56876 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56881 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56882 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56883 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56876 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56882 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56883 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56883 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56883 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56898 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56898 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56902 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56903 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56904 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56898 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56904 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56903 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56903 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56903 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56973 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56973 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56977 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56978 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56979 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56973 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56979 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56978 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56978 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56978 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57086 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57086 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57088 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57091 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57088 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57086 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57088 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57091 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57088 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57088 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57159 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57159 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57163 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57164 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57165 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57159 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57164 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57165 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57165 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57165 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57227 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57227 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57229 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57232 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57233 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57233 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57232 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57227 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57227 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57227 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57358 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57358 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57361 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57364 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57365 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57365 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57358 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57364 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57358 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57358 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57416 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57416 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57420 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57421 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57422 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57421 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57422 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57416 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57422 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57422 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57452 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57452 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57456 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57457 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57458 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57457 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57452 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57458 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57458 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57458 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57507 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57507 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57511 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57512 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57513 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57512 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57513 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57507 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57513 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57513 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57826 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57826 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57828 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57831 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57832 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57826 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57831 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57828 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57832 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57831 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57887 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57887 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57892 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57893 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57894 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57887 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57893 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57892 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57892 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57892 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57958 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57958 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57962 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57963 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57964 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57964 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57963 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57958 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57963 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57963 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766934521194_fdafbrbsy (7370 bytes)
+INFO:     127.0.0.1:57963 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57963 - "GET /api/verify/sess_1766934521194_fdafbrbsy/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766934521194_fdafbrbsy (16438 bytes)
+INFO:     127.0.0.1:57963 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57963 - "GET /api/verify/sess_1766934521194_fdafbrbsy/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766934521194_fdafbrbsy (16438 bytes)
+INFO:     127.0.0.1:57963 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57963 - "GET /api/verify/sess_1766934521194_fdafbrbsy/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766934521194_fdafbrbsy (16438 bytes)
+INFO:     127.0.0.1:57963 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57963 - "GET /api/verify/sess_1766934521194_fdafbrbsy/3 HTTP/1.1" 200 OK
+[Custom] Saved chunk 4 for session sess_1766934521194_fdafbrbsy (16438 bytes)
+INFO:     127.0.0.1:57963 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57963 - "GET /api/verify/sess_1766934521194_fdafbrbsy/4 HTTP/1.1" 200 OK
+[Custom] Saved chunk 5 for session sess_1766934521194_fdafbrbsy (965 bytes)
+INFO:     127.0.0.1:57963 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57963 - "GET /api/verify/sess_1766934521194_fdafbrbsy/5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57963 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766934521194_fdafbrbsy/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766934521194_fdafbrbsy/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766934521194_fdafbrbsy/completed/online_recording.webm
+INFO:     127.0.0.1:57995 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57995 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57997 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58000 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58001 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58000 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58001 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57995 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57995 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57995 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766934552895_4xma6bedr (7370 bytes)
+INFO:     127.0.0.1:57995 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57995 - "GET /api/verify/sess_1766934552895_4xma6bedr/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766934552895_4xma6bedr (16438 bytes)
+INFO:     127.0.0.1:57995 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57995 - "GET /api/verify/sess_1766934552895_4xma6bedr/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766934552895_4xma6bedr (16438 bytes)
+INFO:     127.0.0.1:57995 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57995 - "GET /api/verify/sess_1766934552895_4xma6bedr/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766934552895_4xma6bedr (16438 bytes)
+INFO:     127.0.0.1:57995 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57995 - "GET /api/verify/sess_1766934552895_4xma6bedr/3 HTTP/1.1" 200 OK
+[Custom] Saved chunk 4 for session sess_1766934552895_4xma6bedr (16438 bytes)
+INFO:     127.0.0.1:57995 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57995 - "GET /api/verify/sess_1766934552895_4xma6bedr/4 HTTP/1.1" 200 OK
+[Custom] Saved chunk 5 for session sess_1766934552895_4xma6bedr (965 bytes)
+INFO:     127.0.0.1:57995 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57995 - "GET /api/verify/sess_1766934552895_4xma6bedr/5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57995 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766934552895_4xma6bedr/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766934552895_4xma6bedr/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766934552895_4xma6bedr/completed/online_recording.webm
+INFO:     127.0.0.1:58288 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58288 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58292 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58293 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58288 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58293 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766934892709_8cth0w4nn (7370 bytes)
+INFO:     127.0.0.1:58294 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "GET /api/verify/sess_1766934892709_8cth0w4nn/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766934892709_8cth0w4nn (16438 bytes)
+INFO:     127.0.0.1:58294 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "GET /api/verify/sess_1766934892709_8cth0w4nn/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766934892709_8cth0w4nn (16438 bytes)
+INFO:     127.0.0.1:58294 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "GET /api/verify/sess_1766934892709_8cth0w4nn/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766934892709_8cth0w4nn (16438 bytes)
+INFO:     127.0.0.1:58294 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "GET /api/verify/sess_1766934892709_8cth0w4nn/3 HTTP/1.1" 200 OK
+[Custom] Saved chunk 4 for session sess_1766934892709_8cth0w4nn (16438 bytes)
+INFO:     127.0.0.1:58294 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "GET /api/verify/sess_1766934892709_8cth0w4nn/4 HTTP/1.1" 200 OK
+[Custom] Saved chunk 5 for session sess_1766934892709_8cth0w4nn (965 bytes)
+INFO:     127.0.0.1:58294 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "GET /api/verify/sess_1766934892709_8cth0w4nn/5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58294 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766934892709_8cth0w4nn/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766934892709_8cth0w4nn/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766934892709_8cth0w4nn/completed/online_recording.webm
+INFO:     127.0.0.1:58504 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58504 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58506 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58509 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58510 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58509 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58510 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58504 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58510 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58510 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766935162447_jy4toiy1p (7370 bytes)
+INFO:     127.0.0.1:58510 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58510 - "GET /api/verify/sess_1766935162447_jy4toiy1p/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766935162447_jy4toiy1p (16438 bytes)
+INFO:     127.0.0.1:58510 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58510 - "GET /api/verify/sess_1766935162447_jy4toiy1p/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766935162447_jy4toiy1p (16438 bytes)
+INFO:     127.0.0.1:58510 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58510 - "GET /api/verify/sess_1766935162447_jy4toiy1p/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766935162447_jy4toiy1p (16438 bytes)
+INFO:     127.0.0.1:58510 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58510 - "GET /api/verify/sess_1766935162447_jy4toiy1p/3 HTTP/1.1" 200 OK
+[Custom] Saved chunk 4 for session sess_1766935162447_jy4toiy1p (16438 bytes)
+INFO:     127.0.0.1:58510 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58510 - "GET /api/verify/sess_1766935162447_jy4toiy1p/4 HTTP/1.1" 200 OK
+[Custom] Saved chunk 5 for session sess_1766935162447_jy4toiy1p (965 bytes)
+INFO:     127.0.0.1:58510 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58510 - "GET /api/verify/sess_1766935162447_jy4toiy1p/5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58510 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766935162447_jy4toiy1p/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766935162447_jy4toiy1p/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766935162447_jy4toiy1p/completed/online_recording.webm
+INFO:     127.0.0.1:58719 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58719 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58722 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58723 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58725 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58719 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58723 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58725 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58725 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58725 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766935397843_vwc9ojqtn (7370 bytes)
+INFO:     127.0.0.1:58725 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58725 - "GET /api/verify/sess_1766935397843_vwc9ojqtn/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766935397843_vwc9ojqtn (16438 bytes)
+INFO:     127.0.0.1:58725 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58725 - "GET /api/verify/sess_1766935397843_vwc9ojqtn/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766935397843_vwc9ojqtn (16438 bytes)
+INFO:     127.0.0.1:58725 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58725 - "GET /api/verify/sess_1766935397843_vwc9ojqtn/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766935397843_vwc9ojqtn (16438 bytes)
+INFO:     127.0.0.1:58725 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58725 - "GET /api/verify/sess_1766935397843_vwc9ojqtn/3 HTTP/1.1" 200 OK
+[Custom] Saved chunk 4 for session sess_1766935397843_vwc9ojqtn (16438 bytes)
+INFO:     127.0.0.1:58725 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58725 - "GET /api/verify/sess_1766935397843_vwc9ojqtn/4 HTTP/1.1" 200 OK
+[Custom] Saved chunk 5 for session sess_1766935397843_vwc9ojqtn (965 bytes)
+INFO:     127.0.0.1:58725 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58725 - "GET /api/verify/sess_1766935397843_vwc9ojqtn/5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58725 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766935397843_vwc9ojqtn/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766935397843_vwc9ojqtn/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766935397843_vwc9ojqtn/completed/online_recording.webm
+INFO:     127.0.0.1:59345 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59345 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59348 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59350 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59351 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59345 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59351 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59350 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59351 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59351 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936167561_q4g0r4gmz (7370 bytes)
+INFO:     127.0.0.1:59351 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59351 - "GET /api/verify/sess_1766936167561_q4g0r4gmz/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936167561_q4g0r4gmz (16438 bytes)
+INFO:     127.0.0.1:59351 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59351 - "GET /api/verify/sess_1766936167561_q4g0r4gmz/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766936167561_q4g0r4gmz (16438 bytes)
+INFO:     127.0.0.1:59351 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59351 - "GET /api/verify/sess_1766936167561_q4g0r4gmz/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766936167561_q4g0r4gmz (16438 bytes)
+INFO:     127.0.0.1:59351 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59351 - "GET /api/verify/sess_1766936167561_q4g0r4gmz/3 HTTP/1.1" 200 OK
+[Custom] Saved chunk 4 for session sess_1766936167561_q4g0r4gmz (16438 bytes)
+INFO:     127.0.0.1:59351 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59351 - "GET /api/verify/sess_1766936167561_q4g0r4gmz/4 HTTP/1.1" 200 OK
+[Custom] Saved chunk 5 for session sess_1766936167561_q4g0r4gmz (965 bytes)
+INFO:     127.0.0.1:59351 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59351 - "GET /api/verify/sess_1766936167561_q4g0r4gmz/5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59351 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936167561_q4g0r4gmz/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936167561_q4g0r4gmz/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936167561_q4g0r4gmz/completed/online_recording.webm
+INFO:     127.0.0.1:59570 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59570 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59574 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59575 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59576 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59575 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59576 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59570 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59576 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59576 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936387767_1ldaxv8a9 (7370 bytes)
+INFO:     127.0.0.1:59576 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59576 - "GET /api/verify/sess_1766936387767_1ldaxv8a9/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936387767_1ldaxv8a9 (16438 bytes)
+INFO:     127.0.0.1:59576 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59576 - "GET /api/verify/sess_1766936387767_1ldaxv8a9/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766936387767_1ldaxv8a9 (16438 bytes)
+INFO:     127.0.0.1:59576 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59576 - "GET /api/verify/sess_1766936387767_1ldaxv8a9/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766936387767_1ldaxv8a9 (16438 bytes)
+INFO:     127.0.0.1:59576 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59576 - "GET /api/verify/sess_1766936387767_1ldaxv8a9/3 HTTP/1.1" 200 OK
+[Custom] Saved chunk 4 for session sess_1766936387767_1ldaxv8a9 (16438 bytes)
+INFO:     127.0.0.1:59576 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59576 - "GET /api/verify/sess_1766936387767_1ldaxv8a9/4 HTTP/1.1" 200 OK
+[Custom] Saved chunk 5 for session sess_1766936387767_1ldaxv8a9 (965 bytes)
+INFO:     127.0.0.1:59576 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59576 - "GET /api/verify/sess_1766936387767_1ldaxv8a9/5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59576 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936387767_1ldaxv8a9/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936387767_1ldaxv8a9/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936387767_1ldaxv8a9/completed/online_recording.webm
+INFO:     127.0.0.1:59641 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59641 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59643 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59646 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59647 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59641 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59646 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59647 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59641 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59647 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936453320_4o7c75033 (7370 bytes)
+INFO:     127.0.0.1:59647 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59647 - "GET /api/verify/sess_1766936453320_4o7c75033/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936453320_4o7c75033 (16438 bytes)
+INFO:     127.0.0.1:59647 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59647 - "GET /api/verify/sess_1766936453320_4o7c75033/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766936453320_4o7c75033 (16438 bytes)
+INFO:     127.0.0.1:59647 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59647 - "GET /api/verify/sess_1766936453320_4o7c75033/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766936453320_4o7c75033 (16438 bytes)
+INFO:     127.0.0.1:59647 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59647 - "GET /api/verify/sess_1766936453320_4o7c75033/3 HTTP/1.1" 200 OK
+[Custom] Saved chunk 4 for session sess_1766936453320_4o7c75033 (16438 bytes)
+INFO:     127.0.0.1:59647 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59647 - "GET /api/verify/sess_1766936453320_4o7c75033/4 HTTP/1.1" 200 OK
+[Custom] Saved chunk 5 for session sess_1766936453320_4o7c75033 (1947 bytes)
+INFO:     127.0.0.1:59647 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59647 - "GET /api/verify/sess_1766936453320_4o7c75033/5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59647 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936453320_4o7c75033/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936453320_4o7c75033/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936453320_4o7c75033/completed/online_recording.webm
+INFO:     127.0.0.1:59704 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59704 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59708 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59709 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59710 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59710 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59704 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59709 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59709 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59709 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936506571_audouvk88 (7370 bytes)
+INFO:     127.0.0.1:59709 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59709 - "GET /api/verify/sess_1766936506571_audouvk88/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936506571_audouvk88 (16438 bytes)
+INFO:     127.0.0.1:59709 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59709 - "GET /api/verify/sess_1766936506571_audouvk88/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766936506571_audouvk88 (16438 bytes)
+INFO:     127.0.0.1:59709 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59709 - "GET /api/verify/sess_1766936506571_audouvk88/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766936506571_audouvk88 (16438 bytes)
+INFO:     127.0.0.1:59709 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59709 - "GET /api/verify/sess_1766936506571_audouvk88/3 HTTP/1.1" 200 OK
+[Custom] Saved chunk 4 for session sess_1766936506571_audouvk88 (16438 bytes)
+INFO:     127.0.0.1:59709 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59709 - "GET /api/verify/sess_1766936506571_audouvk88/4 HTTP/1.1" 200 OK
+[Custom] Saved chunk 5 for session sess_1766936506571_audouvk88 (965 bytes)
+INFO:     127.0.0.1:59709 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59709 - "GET /api/verify/sess_1766936506571_audouvk88/5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59709 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936506571_audouvk88/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936506571_audouvk88/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936506571_audouvk88/completed/online_recording.webm
+INFO:     127.0.0.1:59750 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59750 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59754 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59755 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59756 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59750 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59755 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59756 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59756 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59756 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936532143_aparv7eeg (7370 bytes)
+INFO:     127.0.0.1:59756 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59756 - "GET /api/verify/sess_1766936532143_aparv7eeg/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936532143_aparv7eeg (16438 bytes)
+INFO:     127.0.0.1:59756 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59756 - "GET /api/verify/sess_1766936532143_aparv7eeg/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766936532143_aparv7eeg (16438 bytes)
+INFO:     127.0.0.1:59756 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59756 - "GET /api/verify/sess_1766936532143_aparv7eeg/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766936532143_aparv7eeg (16438 bytes)
+INFO:     127.0.0.1:59756 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59756 - "GET /api/verify/sess_1766936532143_aparv7eeg/3 HTTP/1.1" 200 OK
+[Custom] Saved chunk 4 for session sess_1766936532143_aparv7eeg (16438 bytes)
+INFO:     127.0.0.1:59756 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59756 - "GET /api/verify/sess_1766936532143_aparv7eeg/4 HTTP/1.1" 200 OK
+[Custom] Saved chunk 5 for session sess_1766936532143_aparv7eeg (965 bytes)
+INFO:     127.0.0.1:59756 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59756 - "GET /api/verify/sess_1766936532143_aparv7eeg/5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59756 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936532143_aparv7eeg/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936532143_aparv7eeg/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936532143_aparv7eeg/completed/online_recording.webm
+INFO:     127.0.0.1:59766 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59766 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59770 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59771 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59772 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59771 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59772 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59766 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59772 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59772 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936542243_35gnhwy08 (7370 bytes)
+INFO:     127.0.0.1:59772 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59772 - "GET /api/verify/sess_1766936542243_35gnhwy08/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936542243_35gnhwy08 (16438 bytes)
+INFO:     127.0.0.1:59772 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59772 - "GET /api/verify/sess_1766936542243_35gnhwy08/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766936542243_35gnhwy08 (15471 bytes)
+INFO:     127.0.0.1:59772 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59772 - "GET /api/verify/sess_1766936542243_35gnhwy08/2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59804 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59804 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59808 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59809 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59810 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59804 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59809 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59810 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59809 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59809 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936577106_s7betn73z (7370 bytes)
+INFO:     127.0.0.1:59809 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59809 - "GET /api/verify/sess_1766936577106_s7betn73z/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936577106_s7betn73z (16438 bytes)
+INFO:     127.0.0.1:59809 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59809 - "GET /api/verify/sess_1766936577106_s7betn73z/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766936577106_s7betn73z (13539 bytes)
+INFO:     127.0.0.1:59809 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59809 - "GET /api/verify/sess_1766936577106_s7betn73z/2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59809 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936577106_s7betn73z/completed/offline_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936577106_s7betn73z/completed/offline_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936577106_s7betn73z/completed/offline_recording.webm
+INFO:     127.0.0.1:59838 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59838 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59842 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59843 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59844 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59838 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59843 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59844 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59844 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59844 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936611874_scfvvvcm6 (7370 bytes)
+INFO:     127.0.0.1:59844 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59844 - "GET /api/verify/sess_1766936611874_scfvvvcm6/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936611874_scfvvvcm6 (16437 bytes)
+INFO:     127.0.0.1:59844 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59844 - "GET /api/verify/sess_1766936611874_scfvvvcm6/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59844 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936611874_scfvvvcm6/completed/test_playback.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936611874_scfvvvcm6/completed/test_playback.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936611874_scfvvvcm6/completed/test_playback.webm
+INFO:     127.0.0.1:59848 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59848 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59852 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59853 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59854 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59853 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59854 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59848 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59854 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59854 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936617224_vlnbd7gi7 (7370 bytes)
+INFO:     127.0.0.1:59854 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59854 - "GET /api/verify/sess_1766936617224_vlnbd7gi7/0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59884 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59884 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59886 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59889 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59886 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59884 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59889 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59886 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59886 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59886 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936653074_1o57q7o93 (7370 bytes)
+INFO:     127.0.0.1:59886 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59886 - "GET /api/verify/sess_1766936653074_1o57q7o93/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936653074_1o57q7o93 (16438 bytes)
+INFO:     127.0.0.1:59886 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59886 - "GET /api/verify/sess_1766936653074_1o57q7o93/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59886 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59886 - "GET /api/config HTTP/1.1" 200 OK
+[Custom] Chunk 0 already exists for session sess_1766936653074_1o57q7o93
+INFO:     127.0.0.1:59886 - "POST /upload/chunk HTTP/1.1" 200 OK
+[Custom] Chunk 1 already exists for session sess_1766936653074_1o57q7o93
+INFO:     127.0.0.1:59886 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59886 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59903 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59903 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59907 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59908 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59909 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59908 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59903 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59909 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59909 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59911 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59911 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59915 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59916 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59917 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59916 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59911 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59917 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59917 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59917 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936668625_0fxku2y3q (6403 bytes)
+INFO:     127.0.0.1:59917 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59917 - "GET /api/verify/sess_1766936668625_0fxku2y3q/0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59994 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59994 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59996 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59999 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60000 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59994 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59999 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60000 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60000 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60000 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936741079_yblwrmcvs (7688 bytes)
+INFO:     127.0.0.1:60000 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60000 - "GET /api/verify/sess_1766936741079_yblwrmcvs/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936741079_yblwrmcvs (16438 bytes)
+INFO:     127.0.0.1:60000 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60000 - "GET /api/verify/sess_1766936741079_yblwrmcvs/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766936741079_yblwrmcvs (16438 bytes)
+INFO:     127.0.0.1:60000 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60000 - "GET /api/verify/sess_1766936741079_yblwrmcvs/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766936741079_yblwrmcvs (1947 bytes)
+INFO:     127.0.0.1:60000 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60000 - "GET /api/verify/sess_1766936741079_yblwrmcvs/3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60000 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936741079_yblwrmcvs/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936741079_yblwrmcvs/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936741079_yblwrmcvs/completed/online_recording.webm
+INFO:     127.0.0.1:60013 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60013 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60015 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60015 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60018 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60015 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60018 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60013 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60013 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60013 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936749498_vry70qf0u (7370 bytes)
+INFO:     127.0.0.1:60013 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60013 - "GET /api/verify/sess_1766936749498_vry70qf0u/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936749498_vry70qf0u (14505 bytes)
+INFO:     127.0.0.1:60013 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60013 - "GET /api/verify/sess_1766936749498_vry70qf0u/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60013 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936749498_vry70qf0u/completed/metadata_test.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936749498_vry70qf0u/completed/metadata_test.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936749498_vry70qf0u/completed/metadata_test.webm
+INFO:     127.0.0.1:60046 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60046 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60051 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60052 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60053 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60046 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60053 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60052 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60053 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60053 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936784600_mjf3xuqwc (7370 bytes)
+INFO:     127.0.0.1:60053 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60053 - "GET /api/verify/sess_1766936784600_mjf3xuqwc/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936784600_mjf3xuqwc (15471 bytes)
+INFO:     127.0.0.1:60053 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60053 - "GET /api/verify/sess_1766936784600_mjf3xuqwc/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60053 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936784600_mjf3xuqwc/completed/offline_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936784600_mjf3xuqwc/completed/offline_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936784600_mjf3xuqwc/completed/offline_recording.webm
+INFO:     127.0.0.1:60083 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60083 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60085 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60088 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60085 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60083 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60085 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60088 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60088 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60088 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936818942_375os8ei9 (7370 bytes)
+INFO:     127.0.0.1:60088 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60088 - "GET /api/verify/sess_1766936818942_375os8ei9/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766936818942_375os8ei9 (16437 bytes)
+INFO:     127.0.0.1:60088 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60088 - "GET /api/verify/sess_1766936818942_375os8ei9/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60088 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936818942_375os8ei9/completed/test_playback.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936818942_375os8ei9/completed/test_playback.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936818942_375os8ei9/completed/test_playback.webm
+INFO:     127.0.0.1:60093 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60093 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60095 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60098 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60099 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60098 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60093 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60099 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60099 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60099 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936823269_e0xfwit45 (7370 bytes)
+INFO:     127.0.0.1:60099 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60099 - "GET /api/verify/sess_1766936823269_e0xfwit45/0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60131 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60131 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60135 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60136 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60137 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60137 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60136 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60131 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60136 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60136 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936859365_w0evp7yml (7370 bytes)
+INFO:     127.0.0.1:60136 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60136 - "GET /api/verify/sess_1766936859365_w0evp7yml/0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60136 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60136 - "GET /api/config HTTP/1.1" 200 OK
+[Custom] Chunk 0 already exists for session sess_1766936859365_w0evp7yml
+INFO:     127.0.0.1:60136 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60136 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936859365_w0evp7yml/completed/recovered_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936859365_w0evp7yml/completed/recovered_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936859365_w0evp7yml/completed/recovered_recording.webm
+INFO:     127.0.0.1:60136 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60154 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60154 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60158 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60159 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60160 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60154 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60160 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60159 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60159 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60159 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766936873565_6n6jw7kv2 (7369 bytes)
+INFO:     127.0.0.1:60159 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60159 - "GET /api/verify/sess_1766936873565_6n6jw7kv2/0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60159 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936873565_6n6jw7kv2/completed/ui_test.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936873565_6n6jw7kv2/completed/ui_test.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766936873565_6n6jw7kv2/completed/ui_test.webm
+INFO:     127.0.0.1:60287 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60287 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60292 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60293 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60294 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60287 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60294 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60293 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60293 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60293 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60345 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60345 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60349 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60350 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60351 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60351 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60350 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60345 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60350 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60350 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766937011870_3f0kd8ji8 (7370 bytes)
+INFO:     127.0.0.1:60350 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60350 - "GET /api/verify/sess_1766937011870_3f0kd8ji8/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766937011870_3f0kd8ji8 (14505 bytes)
+INFO:     127.0.0.1:60350 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60350 - "GET /api/verify/sess_1766937011870_3f0kd8ji8/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60350 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937011870_3f0kd8ji8/completed/metadata_test.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937011870_3f0kd8ji8/completed/metadata_test.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937011870_3f0kd8ji8/completed/metadata_test.webm
+INFO:     127.0.0.1:60385 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60385 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60388 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60390 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60391 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60391 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60390 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60385 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60391 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60391 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766937046991_opuhu9e9o (7370 bytes)
+INFO:     127.0.0.1:60391 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60391 - "GET /api/verify/sess_1766937046991_opuhu9e9o/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766937046991_opuhu9e9o (15471 bytes)
+INFO:     127.0.0.1:60391 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60391 - "GET /api/verify/sess_1766937046991_opuhu9e9o/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60391 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937046991_opuhu9e9o/completed/offline_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937046991_opuhu9e9o/completed/offline_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937046991_opuhu9e9o/completed/offline_recording.webm
+INFO:     127.0.0.1:60414 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60414 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60417 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60418 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60422 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60422 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60418 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60414 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60418 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60418 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766937081223_c1rw8c4dr (7370 bytes)
+INFO:     127.0.0.1:60418 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60418 - "GET /api/verify/sess_1766937081223_c1rw8c4dr/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766937081223_c1rw8c4dr (16437 bytes)
+INFO:     127.0.0.1:60418 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60418 - "GET /api/verify/sess_1766937081223_c1rw8c4dr/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60418 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937081223_c1rw8c4dr/completed/test_playback.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937081223_c1rw8c4dr/completed/test_playback.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937081223_c1rw8c4dr/completed/test_playback.webm
+INFO:     127.0.0.1:60426 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60426 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60430 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60431 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60432 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60431 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60432 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60426 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60432 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60432 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766937085671_npdikrcvg (7370 bytes)
+INFO:     127.0.0.1:60432 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60432 - "GET /api/verify/sess_1766937085671_npdikrcvg/0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60458 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60458 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60461 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60463 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60464 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60458 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60463 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60464 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60464 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60464 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766937121993_omlfgxczo (7370 bytes)
+INFO:     127.0.0.1:60464 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60464 - "GET /api/verify/sess_1766937121993_omlfgxczo/0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60464 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60464 - "GET /api/config HTTP/1.1" 200 OK
+[Custom] Chunk 0 already exists for session sess_1766937121993_omlfgxczo
+INFO:     127.0.0.1:60464 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60464 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937121993_omlfgxczo/completed/recovered_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937121993_omlfgxczo/completed/recovered_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937121993_omlfgxczo/completed/recovered_recording.webm
+INFO:     127.0.0.1:60464 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60477 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60477 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60479 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60479 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60483 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60479 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60483 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60477 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60477 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60477 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766937135923_htsekatnk (6403 bytes)
+INFO:     127.0.0.1:60477 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60477 - "GET /api/verify/sess_1766937135923_htsekatnk/0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60477 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937135923_htsekatnk/completed/ui_test.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937135923_htsekatnk/completed/ui_test.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766937135923_htsekatnk/completed/ui_test.webm
+INFO:     127.0.0.1:52700 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52700 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52704 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52705 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52706 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52706 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52705 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52700 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52705 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52705 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766948856489_dfluy50nb (7370 bytes)
+INFO:     127.0.0.1:52705 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52705 - "GET /api/verify/sess_1766948856489_dfluy50nb/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766948856489_dfluy50nb (16438 bytes)
+INFO:     127.0.0.1:52705 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52705 - "GET /api/verify/sess_1766948856489_dfluy50nb/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766948856489_dfluy50nb (16438 bytes)
+INFO:     127.0.0.1:52705 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52705 - "GET /api/verify/sess_1766948856489_dfluy50nb/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766948856489_dfluy50nb (1947 bytes)
+INFO:     127.0.0.1:52705 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52705 - "GET /api/verify/sess_1766948856489_dfluy50nb/3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52705 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948856489_dfluy50nb/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948856489_dfluy50nb/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948856489_dfluy50nb/completed/online_recording.webm
+INFO:     127.0.0.1:52726 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52726 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52730 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52731 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52732 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52731 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52726 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52732 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52732 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52732 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766948872406_j5ow3fkzu (7370 bytes)
+INFO:     127.0.0.1:52732 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52732 - "GET /api/verify/sess_1766948872406_j5ow3fkzu/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766948872406_j5ow3fkzu (16438 bytes)
+INFO:     127.0.0.1:52732 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52732 - "GET /api/verify/sess_1766948872406_j5ow3fkzu/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766948872406_j5ow3fkzu (16438 bytes)
+INFO:     127.0.0.1:52732 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52732 - "GET /api/verify/sess_1766948872406_j5ow3fkzu/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766948872406_j5ow3fkzu (1947 bytes)
+INFO:     127.0.0.1:52732 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52732 - "GET /api/verify/sess_1766948872406_j5ow3fkzu/3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52732 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948872406_j5ow3fkzu/completed/online_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948872406_j5ow3fkzu/completed/online_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948872406_j5ow3fkzu/completed/online_recording.webm
+INFO:     127.0.0.1:52742 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52744 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52742 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52747 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52748 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52742 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52747 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52748 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52748 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52748 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766948880661_x8xe1znw9 (7370 bytes)
+INFO:     127.0.0.1:52748 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52748 - "GET /api/verify/sess_1766948880661_x8xe1znw9/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766948880661_x8xe1znw9 (15471 bytes)
+INFO:     127.0.0.1:52748 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52748 - "GET /api/verify/sess_1766948880661_x8xe1znw9/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52748 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948880661_x8xe1znw9/completed/metadata_test.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948880661_x8xe1znw9/completed/metadata_test.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948880661_x8xe1znw9/completed/metadata_test.webm
+INFO:     127.0.0.1:52779 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52779 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52782 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52785 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52786 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52786 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52779 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52785 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52785 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52785 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766948915764_hrmy2xf8s (7370 bytes)
+INFO:     127.0.0.1:52785 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52785 - "GET /api/verify/sess_1766948915764_hrmy2xf8s/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766948915764_hrmy2xf8s (16437 bytes)
+INFO:     127.0.0.1:52785 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52785 - "GET /api/verify/sess_1766948915764_hrmy2xf8s/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52785 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948915764_hrmy2xf8s/completed/offline_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948915764_hrmy2xf8s/completed/offline_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948915764_hrmy2xf8s/completed/offline_recording.webm
+INFO:     127.0.0.1:52832 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52832 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52836 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52837 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52838 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52838 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52837 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52832 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52838 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52838 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766948949928_ez4593rln (7370 bytes)
+INFO:     127.0.0.1:52838 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52838 - "GET /api/verify/sess_1766948949928_ez4593rln/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766948949928_ez4593rln (16438 bytes)
+INFO:     127.0.0.1:52838 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52838 - "GET /api/verify/sess_1766948949928_ez4593rln/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766948949928_ez4593rln (965 bytes)
+INFO:     127.0.0.1:52838 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52838 - "GET /api/verify/sess_1766948949928_ez4593rln/2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52838 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948949928_ez4593rln/completed/test_playback.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948949928_ez4593rln/completed/test_playback.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948949928_ez4593rln/completed/test_playback.webm
+INFO:     127.0.0.1:52846 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52846 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52850 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52851 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52852 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52851 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52846 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52852 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52852 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52852 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766948954287_pjkg3kahj (7370 bytes)
+INFO:     127.0.0.1:52852 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52852 - "GET /api/verify/sess_1766948954287_pjkg3kahj/0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52878 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52878 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52880 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52883 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52884 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52883 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52878 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52884 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52884 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52884 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766948990543_7ytv15zk8 (7370 bytes)
+INFO:     127.0.0.1:52884 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52884 - "GET /api/verify/sess_1766948990543_7ytv15zk8/0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52884 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52884 - "GET /api/config HTTP/1.1" 200 OK
+[Custom] Chunk 0 already exists for session sess_1766948990543_7ytv15zk8
+INFO:     127.0.0.1:52884 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52884 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948990543_7ytv15zk8/completed/recovered_recording.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948990543_7ytv15zk8/completed/recovered_recording.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766948990543_7ytv15zk8/completed/recovered_recording.webm
+INFO:     127.0.0.1:52884 - "GET /sw.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52925 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52925 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52929 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52931 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52932 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52925 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52931 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52932 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52932 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52932 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766949004593_mzayqvc4h (7369 bytes)
+INFO:     127.0.0.1:52932 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52932 - "GET /api/verify/sess_1766949004593_mzayqvc4h/0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52932 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766949004593_mzayqvc4h/completed/ui_test.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766949004593_mzayqvc4h/completed/ui_test.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766949004593_mzayqvc4h/completed/ui_test.webm
+INFO:     127.0.0.1:52977 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /tailwind.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52979 - "GET /tus.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /fonts.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52981 - "GET /tus-upload-manager.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52981 - "GET /fonts/sharetechmono-400.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /fonts/rajdhani-700.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52979 - "GET /fonts/rajdhani-500.ttf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52983 - "GET /manifest.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /public/favicon.svg HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52977 - "GET /favicon.svg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /sw.js HTTP/1.1" 200 OK
+[Custom] Saved chunk 0 for session sess_1766949061004_me9l4yc9x (14352 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/0 HTTP/1.1" 200 OK
+[Custom] Saved chunk 1 for session sess_1766949061004_me9l4yc9x (16438 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/1 HTTP/1.1" 200 OK
+[Custom] Saved chunk 2 for session sess_1766949061004_me9l4yc9x (16438 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/2 HTTP/1.1" 200 OK
+[Custom] Saved chunk 3 for session sess_1766949061004_me9l4yc9x (16438 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/3 HTTP/1.1" 200 OK
+[Custom] Saved chunk 4 for session sess_1766949061004_me9l4yc9x (16438 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/4 HTTP/1.1" 200 OK
+[Custom] Saved chunk 5 for session sess_1766949061004_me9l4yc9x (16438 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/5 HTTP/1.1" 200 OK
+[Custom] Saved chunk 6 for session sess_1766949061004_me9l4yc9x (16438 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/6 HTTP/1.1" 200 OK
+[Custom] Saved chunk 7 for session sess_1766949061004_me9l4yc9x (16438 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/7 HTTP/1.1" 200 OK
+[Custom] Saved chunk 8 for session sess_1766949061004_me9l4yc9x (3880 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/8 HTTP/1.1" 200 OK
+[Custom] Saved chunk 9 for session sess_1766949061004_me9l4yc9x (16438 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/9 HTTP/1.1" 200 OK
+[Custom] Saved chunk 10 for session sess_1766949061004_me9l4yc9x (12558 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/10 HTTP/1.1" 200 OK
+[Custom] Saved chunk 11 for session sess_1766949061004_me9l4yc9x (16438 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/11 HTTP/1.1" 200 OK
+[Custom] Saved chunk 12 for session sess_1766949061004_me9l4yc9x (12573 bytes)
+INFO:     127.0.0.1:52977 - "POST /upload/chunk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "GET /api/verify/sess_1766949061004_me9l4yc9x/12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52977 - "POST /recording/complete HTTP/1.1" 200 OK
+[TUS] Assembling 0 chunks into /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766949061004_me9l4yc9x/completed/Sequence 20:11:19.webm
+✓ Metadata saved: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766949061004_me9l4yc9x/completed/Sequence 20:11:19.webm.meta.json
+[TUS] Assembly complete: /Users/A3694852/Documents/dev/AI/WavePro/WaveProSmall/waveforge/backend/uploaded_data/sess_1766949061004_me9l4yc9x/completed/Sequence 20:11:19.webm
+INFO:     127.0.0.1:53012 - "GET /public/favicon.svg HTTP/1.1" 404 Not Found

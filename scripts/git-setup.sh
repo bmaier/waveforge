@@ -28,8 +28,8 @@ fi
 # Step 2: Configure Git (if not set)
 if [ -z "$(git config user.name)" ]; then
     echo -e "${YELLOW}→ Configuring Git user...${NC}"
-    git config user.name "Berthold Maier"
-    git config user.email "berthold.maier@gmail.com"  # Update this!
+    git config user.name "WaveForge"
+    git config user.email "waveforge@waveforge.pro"  # Update this!
     echo -e "${GREEN}✓ Git user configured${NC}"
     echo -e "${YELLOW}  Note: Update email in .git/config if needed${NC}"
 else

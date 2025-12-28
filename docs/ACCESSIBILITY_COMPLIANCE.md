@@ -340,4 +340,4 @@ When adding new features:
 
 **Implementation Date**: December 2024  
 **Last Updated**: December 2025  
-**Developer**: Berthold Maier
+**Developer**: WaveForge

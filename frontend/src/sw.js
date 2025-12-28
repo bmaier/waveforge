@@ -35,11 +35,11 @@ function openDB() {
 // Queue Assembly Signal for Retry
 async function queueAssemblySignal(sessionId, fileName, metadata) {
     console.log(`[SW] 📥 Queuing assembly signal for session ${sessionId}`);
-    
+
     const db = await openDB();
     const tx = db.transaction(STORE_UPLOAD_QUEUE, 'readwrite');
     const store = tx.objectStore(STORE_UPLOAD_QUEUE);
-    
+
     const queueItem = {
         id: `assembly_${sessionId}_${Date.now()}`,
         type: 'assembly_signal',
@@ -50,7 +50,7 @@ async function queueAssemblySignal(sessionId, fileName, metadata) {
         nextRetryAt: 0,
         queuedAt: Date.now()
     };
-    
+
     await new Promise((resolve, reject) => {
         const req = store.add(queueItem);
         req.onsuccess = () => {
@@ -82,21 +82,21 @@ async function removeFromQueue(db, id) {
             const tx = db.transaction(STORE_UPLOAD_QUEUE, 'readwrite');
             const store = tx.objectStore(STORE_UPLOAD_QUEUE);
             const deleteRequest = store.delete(id);
-            
+
             deleteRequest.onsuccess = () => {
                 console.log(`[SW] 🗑️ Delete request successful for: "${id}"`);
             };
-            
+
             deleteRequest.onerror = (e) => {
                 console.error(`[SW] ❌ Delete request failed:`, e);
                 reject(e);
             };
-            
+
             tx.oncomplete = () => {
                 console.log(`[SW] ✅ Transaction complete - chunk deleted`);
                 resolve();
             };
-            
+
             tx.onerror = (e) => {
                 console.error(`[SW] ❌ Transaction error:`, e);
                 reject(e);
@@ -117,14 +117,14 @@ async function updateRetryCount(db, id, retryCount, nextRetryAt) {
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
     });
-    
+
     if (item) {
         item.retryCount = retryCount;
         item.nextRetryAt = nextRetryAt;
         item.lastError = new Date().toISOString();
         store.put(item);
     }
-    
+
     return new Promise(resolve => tx.oncomplete = resolve);
 }
 
@@ -140,10 +140,12 @@ async function broadcastStatus(msg) {
     clients.forEach(client => client.postMessage(msg));
 }
 
+
+
 // Check if we can reach the server
 async function checkServerConnection() {
     try {
-        const response = await fetch('/health', { 
+        const response = await fetch('/health', {
             method: 'HEAD',
             cache: 'no-cache'
         });
@@ -156,12 +158,12 @@ async function checkServerConnection() {
 // Start periodic connection check when offline
 function startConnectionCheck() {
     if (connectionCheckInterval) return; // Already running
-    
+
     console.log('[SW] 🔴 Starting connection check (every 1 second)');
     connectionCheckInterval = setInterval(async () => {
         console.log('[SW] 🔍 Checking server connection...');
         const online = await checkServerConnection();
-        
+
         if (online) {
             console.log('[SW] ✅ Connection restored! Resuming uploads...');
             isOffline = false;
@@ -186,14 +188,14 @@ function stopConnectionCheck() {
 // TUS Upload Handler
 async function handleTUSChunkUpload(data) {
     const { sessionId, chunkIndex, totalChunks, blob, recordingName, format, fileId, uploadMethod } = data;
-    
+
     console.log(`[SW] Handling TUS chunk upload: ${chunkIndex}/${totalChunks} via ${uploadMethod}`);
-    
+
     // Add to upload queue
     const db = await openDB();
     const tx = db.transaction(STORE_UPLOAD_QUEUE, 'readwrite');
     const store = tx.objectStore(STORE_UPLOAD_QUEUE);
-    
+
     const queueItem = {
         id: `${sessionId}_${chunkIndex}`,
         sessionId,
@@ -208,12 +210,12 @@ async function handleTUSChunkUpload(data) {
         nextRetryAt: 0,
         addedAt: Date.now()
     };
-    
+
     store.put(queueItem);
-    
+
     await new Promise(resolve => tx.oncomplete = resolve);
     db.close();
-    
+
     // Trigger upload processing
     processUploads();
 }
@@ -224,10 +226,10 @@ async function handleCheckStatus(data) {
     const db = await openDB();
     const queue = await getUploadQueue(db);
     db.close();
-    
-    const sessionChunks = queue.filter(item => item.sessionId === sessionId);
-    const uploaded = queue.filter(item => item.sessionId === sessionId && item.uploaded).length;
-    
+
+    const sessionChunks = queue.filter(item => item.sessionId === sessionId && item.type !== 'assembly_signal');
+    const uploaded = queue.filter(item => item.sessionId === sessionId && item.type !== 'assembly_signal' && item.uploaded).length;
+
     broadcastStatus({
         type: 'UPLOAD_STATUS',
         sessionId,
@@ -244,20 +246,20 @@ async function handleCancelUpload(data) {
     const { sessionId } = data;
     const db = await openDB();
     const queue = await getUploadQueue(db);
-    
+
     // Remove all chunks for this session
     const tx = db.transaction(STORE_UPLOAD_QUEUE, 'readwrite');
     const store = tx.objectStore(STORE_UPLOAD_QUEUE);
-    
+
     for (const item of queue) {
         if (item.sessionId === sessionId) {
             store.delete(item.id);
         }
     }
-    
+
     await new Promise(resolve => tx.oncomplete = resolve);
     db.close();
-    
+
     console.log(`[SW] Cancelled all uploads for session ${sessionId}`);
 }
 
@@ -266,7 +268,7 @@ async function handleCheckPendingUploads() {
     const db = await openDB();
     const queue = await getUploadQueue(db);
     db.close();
-    
+
     broadcastStatus({
         type: 'PENDING_UPLOADS_COUNT',
         count: queue.length
@@ -282,29 +284,34 @@ async function uploadChunkCustom(item) {
     formData.append('session_id', String(item.sessionId));
     formData.append('chunk_index', String(item.chunkIndex));
     formData.append('file', item.blob);
-    
+
+    // Send extra info for session persistence
+    if (item.totalChunks) formData.append('total_chunks', String(item.totalChunks));
+    if (item.recordingName) formData.append('recording_name', String(item.recordingName));
+    if (item.format) formData.append('format', String(item.format));
+
     // CRITICAL: Use AbortController for timeout to prevent hanging requests
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-    
+
     try {
         const response = await fetch('/upload/chunk', {
             method: 'POST',
             body: formData,
             signal: controller.signal
         });
-        
+
         clearTimeout(timeoutId); // Clear timeout if request completes
-        
+
         if (!response.ok) {
             const errorText = await response.text();
             console.error(`[SW Custom] Server error ${response.status}: ${errorText}`);
             throw new Error(`Server error: ${response.status}`);
         }
-        
+
         // CRITICAL: Validate server response to ensure chunk was actually saved
         const result = await response.json();
-        
+
         if (result.status === 'chunk_already_exists') {
             console.log(`[SW Custom] ✓ Chunk ${item.chunkIndex} already exists on server (idempotent retry)`);
         } else if (result.status === 'chunk_received') {
@@ -313,13 +320,13 @@ async function uploadChunkCustom(item) {
             console.error(`[SW Custom] ⚠️ Unexpected server response:`, result);
             throw new Error(`Unexpected server response: ${result.status}`);
         }
-        
+
         // Verify the response matches what we sent
         if (result.chunk_index !== item.chunkIndex) {
             console.error(`[SW Custom] ❌ Chunk index mismatch! Sent ${item.chunkIndex}, server confirmed ${result.chunk_index}`);
             throw new Error(`Chunk index mismatch: sent ${item.chunkIndex}, got ${result.chunk_index}`);
         }
-        
+
         broadcastStatus({
             type: 'CHUNK_UPLOADED',
             sessionId: item.sessionId,
@@ -340,8 +347,8 @@ async function uploadChunkCustom(item) {
 
 // Main Upload Logic
 async function processUploads() {
-    console.log('[SW] processUploads() called');
-    
+    console.log('processUploads() called');
+
     // Check if processing is stuck (timeout)
     if (isProcessingUploads) {
         const now = Date.now();
@@ -354,35 +361,40 @@ async function processUploads() {
             return;
         }
     }
-    
+
     // Skip if we're in offline mode
     if (isOffline) {
         console.log('[SW] ⏸ Offline mode - uploads paused');
         return;
     }
-    
+
     isProcessingUploads = true;
     uploadStartTime = Date.now();
     console.log('[SW] 🔒 Upload processing locked');
-    
+
     const db = await openDB();
     const queue = await getUploadQueue(db);
 
-    console.log(`[SW] Found ${queue.length} chunks in upload queue`);
-    if (queue.length === 0) return;
+    console.log(`Found ${queue.length} chunks in upload queue`);
+    if (queue.length === 0) {
+        db.close();
+        isProcessingUploads = false;
+        uploadStartTime = null;
+        return;
+    }
 
     // Filter: Only process chunks that are ready to retry
     const now = Date.now();
     const readyQueue = queue.filter(item => {
         const nextRetryAt = item.nextRetryAt || 0;
-        
+
         // Skip if not yet time to retry (unless retry time is 0, meaning never tried)
         if (nextRetryAt > 0 && nextRetryAt > now) {
             const waitTime = Math.round((nextRetryAt - now) / 1000);
             console.log(`[SW] Chunk ${item.chunkIndex} (session ${item.sessionId}) waiting ${waitTime}s before retry`);
             return false;
         }
-        
+
         return true;
     });
 
@@ -397,17 +409,17 @@ async function processUploads() {
         // First compare sessionId
         if (a.sessionId < b.sessionId) return -1;
         if (a.sessionId > b.sessionId) return 1;
-        
+
         // CRITICAL: Assembly signals must be processed LAST (after all chunks)
         // If a is assembly but b is not, a comes after
         if (a.type === 'assembly_signal' && b.type !== 'assembly_signal') return 1;
         // If b is assembly but a is not, b comes after
         if (b.type === 'assembly_signal' && a.type !== 'assembly_signal') return -1;
-        
+
         // If same session and both are chunks, sort by chunkIndex
         return (a.chunkIndex || 0) - (b.chunkIndex || 0);
     });
-    
+
     console.log('[SW] Upload order:', readyQueue.map(i => `${i.sessionId}:${i.chunkIndex}`).join(', '));
 
     for (const item of readyQueue) {
@@ -417,84 +429,84 @@ async function processUploads() {
                 const retryCount = item.retryCount || 0;
                 const retryInfo = retryCount > 0 ? ` (attempt ${retryCount + 1})` : '';
                 console.log(`[SW] 📢 Processing assembly signal for session ${item.sessionId}${retryInfo}`);
-                
+
                 // CRITICAL: Check if any chunks for this session are still in queue OR being retried
                 const allItems = await getUploadQueue(db);
-                const remainingChunks = allItems.filter(i => 
-                    i.sessionId === item.sessionId && 
+                const remainingChunks = allItems.filter(i =>
+                    i.sessionId === item.sessionId &&
                     i.type !== 'assembly_signal'
                 );
-                
+
                 if (remainingChunks.length > 0) {
                     // Check if any chunks are waiting for retry (have future nextRetryAt)
                     const now = Date.now();
                     const waitingChunks = remainingChunks.filter(c => (c.nextRetryAt || 0) > now);
                     const readyChunks = remainingChunks.filter(c => (c.nextRetryAt || 0) <= now);
-                    
+
                     console.log(`[SW] ⏸⏸⏸ ASSEMBLY SIGNAL DELAYED - ${remainingChunks.length} chunks still in queue for session ${item.sessionId}`);
-                    console.log(`[SW] 📋 Ready to upload: [${readyChunks.map(c => c.chunkIndex).sort((a,b) => a-b).join(', ')}]`);
-                    console.log(`[SW] ⏳ Waiting for retry: [${waitingChunks.map(c => c.chunkIndex).sort((a,b) => a-b).join(', ')}]`);
-                    console.log(`[SW] 📋 Total pending: [${remainingChunks.map(c => c.chunkIndex).sort((a,b) => a-b).join(', ')}]`);
+                    console.log(`[SW] 📋 Ready to upload: [${readyChunks.map(c => c.chunkIndex).sort((a, b) => a - b).join(', ')}]`);
+                    console.log(`[SW] ⏳ Waiting for retry: [${waitingChunks.map(c => c.chunkIndex).sort((a, b) => a - b).join(', ')}]`);
+                    console.log(`[SW] 📋 Total pending: [${remainingChunks.map(c => c.chunkIndex).sort((a, b) => a - b).join(', ')}]`);
                     console.log(`[SW] ⏰ Assembly will retry in 5 seconds once all chunks are uploaded`);
-                    
+
                     // Update retry time to check again later (after chunks are done)
                     const retryDelay = 5000;
                     await updateRetryCount(db, item.id, retryCount, Date.now() + retryDelay);
-                    
+
                     // Schedule retry to check again after chunks are uploaded
                     setTimeout(() => {
                         console.log(`[SW] ⏰ Retrying assembly signal check for session ${item.sessionId}`);
                         processUploads();
                     }, retryDelay);
-                    
+
                     continue; // Skip to next item - will retry when chunks are done
                 }
-                
+
                 console.log(`[SW] ✓ All chunks uploaded for session ${item.sessionId}, sending assembly signal...`);
-                
+
                 const formData = new FormData();
                 formData.append('session_id', item.sessionId);
                 formData.append('file_name', item.fileName);
                 formData.append('metadata', JSON.stringify(item.metadata));
-                
+
                 const response = await fetch('/recording/complete', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`Server error: ${response.status}`);
                 }
-                
+
                 const result = await response.json();
                 console.log(`[SW] ✓ Assembly signal acknowledged:`, result);
-                
+
                 // Success: Remove from queue
                 await removeFromQueue(db, item.id);
                 console.log(`[SW] ✅ Assembly signal removed from queue`);
-                
+
                 // Notify main thread
                 broadcastStatus({
                     type: 'ASSEMBLY_COMPLETE',
                     sessionId: item.sessionId,
                     fileName: item.fileName
                 });
-                
+
                 continue; // Skip to next item
             }
-            
+
             // Regular chunk upload processing
             const retryCount = item.retryCount || 0;
             const retryInfo = retryCount > 0 ? ` (attempt ${retryCount + 1})` : '';
             const uploadMethod = item.uploadMethod || 'custom';
-            console.log(`[SW] Uploading chunk ${item.chunkIndex} for session ${item.sessionId}${retryInfo} via ${uploadMethod}`);
+            console.log(`Uploading chunk ${item.chunkIndex} for session ${item.sessionId}${retryInfo} via ${uploadMethod}`);
 
             // Notify UI
-            broadcastStatus({ 
-                type: 'UPLOAD_PROGRESS', 
+            broadcastStatus({
+                type: 'UPLOAD_PROGRESS',
                 sessionId: item.sessionId,
-                fileId: item.fileId, 
-                progress: (item.chunkIndex + 1) / item.totalChunks 
+                fileId: item.fileId,
+                progress: (item.chunkIndex + 1) / item.totalChunks
             });
 
             // Service Worker always uses custom upload
@@ -526,12 +538,12 @@ async function processUploads() {
                     }
                     throw verifyError;
                 }
-                
+
                 if (!verifyResponse.ok) {
                     console.error(`[SW] ⚠️ Verify request failed with status ${verifyResponse.status}`);
                     throw new Error(`Failed to verify chunk ${item.chunkIndex} on server (HTTP ${verifyResponse.status})`);
                 }
-                
+
                 const verifyResult = await verifyResponse.json();
                 if (!verifyResult.exists) {
                     console.error(`[SW] ❌ CRITICAL: Chunk ${item.chunkIndex} NOT found on server after upload!`);
@@ -540,17 +552,17 @@ async function processUploads() {
                     }
                     throw new Error(`Chunk ${item.chunkIndex} not found on server after upload - will retry`);
                 }
-                
+
                 console.log(`[SW] ✅ Chunk ${item.chunkIndex} verified on server (${verifyResult.size} bytes)`);
             } else {
                 console.log(`[SW] ✅ Skipping verify; server already has chunk ${item.chunkIndex}`);
             }
-            
+
             // IMPORTANT: Save fileName and metadata BEFORE removing chunk from queue
             const fileName = item.fileName;
             const metadata = item.metadata;
             const totalChunks = item.totalChunks;
-            
+
             console.log(`[SW] 🗑 Removing chunk from queue - ID: "${item.id}"`);
 
             try {
@@ -561,12 +573,12 @@ async function processUploads() {
                 console.error(`[SW] ❌ Chunk ID was: "${item.id}"`);
                 throw err; // Re-throw to trigger retry logic
             }
-            
+
             // Count total chunks for this session (including this one + remaining in queue)
             const allRemainingChunks = await getUploadQueue(db);
-            const sessionChunksRemaining = allRemainingChunks.filter(c => c.sessionId === item.sessionId);
+            const sessionChunksRemaining = allRemainingChunks.filter(c => c.sessionId === item.sessionId && c.type !== 'assembly_signal');
             const totalChunksForSession = item.chunkIndex + 1 + sessionChunksRemaining.length;
-            
+
             // Notify UploadCoordinator about chunk upload
             broadcastStatus({
                 type: 'CHUNK_UPLOADED',
@@ -574,26 +586,26 @@ async function processUploads() {
                 chunkIndex: item.chunkIndex,
                 totalChunks: totalChunksForSession
             });
-            
+
             // Clear blob reference to free memory
             item.blob = null;
 
             // Check if all chunks for this session are uploaded (reuse the already fetched data)
             const sessionChunks = sessionChunksRemaining;
-            
+
             if (sessionChunks.length === 0) {
                 console.log(`[SW] ✅ All chunks uploaded for session ${item.sessionId}`);
-                broadcastStatus({ 
-                    type: 'SESSION_UPLOAD_COMPLETE', 
+                broadcastStatus({
+                    type: 'SESSION_UPLOAD_COMPLETE',
                     sessionId: item.sessionId,
                     fileName: fileName,
                     metadata: metadata,
                     totalChunks: totalChunks
                 });
                 // Keep legacy UPLOAD_COMPLETE for compatibility
-                broadcastStatus({ 
-                    type: 'UPLOAD_COMPLETE', 
-                    sessionId: item.sessionId 
+                broadcastStatus({
+                    type: 'UPLOAD_COMPLETE',
+                    sessionId: item.sessionId
                 });
             } else {
                 console.log(`[SW] 📊 Session ${item.sessionId}: ${sessionChunks.length} chunks remaining`);
@@ -602,13 +614,13 @@ async function processUploads() {
         } catch (error) {
             const retryCount = (item.retryCount || 0) + 1;
             console.warn(`[SW] Upload failed for chunk ${item.chunkIndex} (session ${item.sessionId}, attempt ${retryCount}):`, error.message);
-            
+
             // Check if this is a connection error (server unreachable)
-            const isConnectionError = error.message.includes('Failed to fetch') || 
-                                     error.message.includes('NetworkError') ||
-                                     error.message.includes('Server error: 5') ||
-                                     error.message.includes('fetch');
-            
+            const isConnectionError = error.message.includes('Failed to fetch') ||
+                error.message.includes('NetworkError') ||
+                error.message.includes('Server error: 5') ||
+                error.message.includes('fetch');
+
             // Check for fatal errors (non-recoverable - but only for data corruption, NOT retry count)
             // CRITICAL: Never remove chunks from queue due to retry count - they must be uploaded!
             const isFatalError = !isConnectionError && (
@@ -619,13 +631,13 @@ async function processUploads() {
                 error.message.includes('Corrupted')
                 // NOTE: We removed "retryCount >= 20" - chunks should NEVER be deleted due to retries
             );
-            
+
             if (isFatalError) {
                 console.error(`[SW] 💀 Fatal error detected - stopping retries for chunk ${item.chunkIndex}`);
-                
+
                 // Remove from queue - no more retries
                 await removeFromQueue(db, item.id);
-                
+
                 // Notify UI about fatal error
                 broadcastStatus({
                     type: 'UPLOAD_FATAL_ERROR',
@@ -634,10 +646,10 @@ async function processUploads() {
                     error: error.message,
                     isFatal: true
                 });
-                
+
                 continue; // Skip to next item
             }
-            
+
             // SAFETY CHECK: If too many retries, increase backoff but KEEP in queue
             if (retryCount >= 20) {
                 console.warn(`[SW] ⚠️ Chunk ${item.chunkIndex} has failed ${retryCount} times - extending retry delay`);
@@ -646,7 +658,7 @@ async function processUploads() {
                 await updateRetryCount(db, item.id, retryCount, Date.now() + longBackoff);
                 continue; // Skip this attempt, will retry later
             }
-            
+
             // Notify UploadCoordinator about error (only after multiple failures)
             if (retryCount >= 3) {
                 broadcastStatus({
@@ -657,62 +669,62 @@ async function processUploads() {
                     isFatal: false
                 });
             }
-            
+
             if (isConnectionError) {
                 console.log('[SW] 🔴 Connection error detected - entering offline mode');
                 isOffline = true;
-                
+
                 // Update retry time to prevent immediate retry
                 await updateRetryCount(db, item.id, retryCount, Date.now() + 60000);
-                
+
                 // Broadcast offline status
-                broadcastStatus({ 
+                broadcastStatus({
                     type: 'UPLOAD_OFFLINE',
                     sessionId: item.sessionId
                 });
-                
+
                 // Start connection check
                 startConnectionCheck();
-                
+
                 // Stop processing - will resume when connection is restored
                 console.log('[SW] ⏸ Pausing all uploads until connection is restored');
                 break;
             }
-            
+
             // For non-connection errors (e.g., server errors), use exponential backoff
             let retryDelay;
             if (retryCount > MAX_CONSECUTIVE_FAILURES) {
                 retryDelay = MAX_RETRY_DELAY;
-                console.log(`[SW] Chunk ${item.chunkIndex}: Many failures detected, using max delay (${MAX_RETRY_DELAY/1000}s)`);
+                console.log(`[SW] Chunk ${item.chunkIndex}: Many failures detected, using max delay (${MAX_RETRY_DELAY / 1000}s)`);
             } else {
                 retryDelay = getRetryDelay(retryCount);
             }
-            
+
             const nextRetryAt = Date.now() + retryDelay;
-            
-            console.log(`[SW] Chunk ${item.chunkIndex} will retry in ${Math.round(retryDelay/1000)}s (kept in queue)`);
+
+            console.log(`[SW] Chunk ${item.chunkIndex} will retry in ${Math.round(retryDelay / 1000)}s (kept in queue)`);
             await updateRetryCount(db, item.id, retryCount, nextRetryAt);
-            
+
             // Silent status update - no toast
-            broadcastStatus({ 
+            broadcastStatus({
                 type: 'UPLOAD_PENDING',
                 sessionId: item.sessionId,
                 hasPendingChunks: true
             });
-            
+
             // Schedule automatic retry ONCE
             setTimeout(() => {
                 console.log(`[SW] Auto-retry for chunk ${item.chunkIndex}`);
                 processUploads();
             }, retryDelay);
-            
+
             // CRITICAL: Stop processing to avoid overlapping retries
             // This ensures chunks are uploaded sequentially and in order
             console.log('[SW] Stopping current batch to retry failed chunk');
             break;
         }
     }
-    
+
     // Close DB connection and release lock
     try {
         db.close();
@@ -729,8 +741,18 @@ async function processUploads() {
 // Message handler for force-unlock
 self.addEventListener('message', async (event) => {
     console.log('[SW] Received message:', event.data);
-    
+
     if (event.data.type === 'PROCESS_UPLOADS') {
+        // CRITICAL: Check connection before processing (same as TRIGGER_UPLOAD)
+        console.log('[SW] 🔔 PROCESS_UPLOADS received - checking connection first');
+        const online = await checkServerConnection();
+        if (online && isOffline) {
+            console.log('[SW] ✅ Connection restored (was offline) - resetting offline flag');
+            isOffline = false;
+            stopConnectionCheck();
+            broadcastStatus({ type: 'CONNECTION_RESTORED' });
+        }
+
         if (event.data.force) {
             console.log('[SW] 🔓 Force unlocking upload processing');
             isProcessingUploads = false;
@@ -772,12 +794,22 @@ self.addEventListener('periodicsync', (event) => {
 
 self.addEventListener('message', async (event) => {
     const { type, data } = event.data;
-    
+
     if (event.data === 'TRIGGER_UPLOAD' || type === 'TRIGGER_UPLOAD') {
+        // CRITICAL: Force connection check before processing
+        // This handles the case where network was restored but SW still thinks it's offline
+        console.log('[SW] 🔔 TRIGGER_UPLOAD received - checking connection first');
+        const online = await checkServerConnection();
+        if (online && isOffline) {
+            console.log('[SW] ✅ Connection restored (was offline) - resetting offline flag');
+            isOffline = false;
+            stopConnectionCheck();
+            broadcastStatus({ type: 'CONNECTION_RESTORED' });
+        }
         processUploads();
         return;
     }
-    
+
     switch (type) {
         case 'QUEUE_ASSEMBLY_SIGNAL':
             console.log('[SW] Received QUEUE_ASSEMBLY_SIGNAL request');
@@ -789,27 +821,27 @@ self.addEventListener('message', async (event) => {
             console.log('[SW] Assembly signal queued, triggering processUploads');
             await processUploads();
             break;
-            
+
         case 'UPLOAD_CHUNK_TUS':
             await handleTUSChunkUpload(data);
             break;
-            
+
         case 'CHECK_UPLOAD_STATUS':
             await handleCheckStatus(data);
             break;
-            
+
         case 'CANCEL_UPLOAD':
             await handleCancelUpload(data);
             break;
-            
+
         case 'RETRY_FAILED_UPLOADS':
             await processUploads();
             break;
-            
+
         case 'CHECK_PENDING_UPLOADS':
             await handleCheckPendingUploads();
             break;
-            
+
         default:
             console.warn('[SW] Unknown message type:', type);
     }

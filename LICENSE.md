@@ -1,7 +1,7 @@
 BUSINESS SOURCE LICENSE 1.1
 Software: WaveForge Audio Recorder
 
-Copyright (c) 2025 N. Ennekes, All Rights Reserved.
+Copyright (c) 2025 N. E, All Rights Reserved.
 
 I. Bedingungen (Terms)
 

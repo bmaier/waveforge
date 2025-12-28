@@ -537,9 +537,8 @@ See [LICENSE.md](LICENSE.md) for complete terms and conditions.
 
 ## 👤 Author
 
-**N. Ennekes**
 - Version: 1.0.0
-- Copyright: © 2025 N. Ennekes, All Rights Reserved
+- Copyright: © 2025 N. E, All Rights Reserved
 
 ## 🙏 Acknowledgments
 
@@ -626,6 +625,6 @@ Check pending uploads:
 
 ---
 
-**Made with ❤️ by N. Ennekes**
+**Made with ❤️ by Nina **
 
-© 2025 N. Ennekes. Licensed under Business Source License 1.1.
+© 2025 Licensed under Apache 2.0 / Business Source License 1.1.

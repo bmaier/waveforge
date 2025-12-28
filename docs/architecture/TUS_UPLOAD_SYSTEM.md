@@ -998,4 +998,4 @@ This architecture ensures that users never lose recordings due to technical issu
 
 **Last Updated**: November 28, 2024  
 **Version**: 1.0.0  
-**Author**: Berthold Maier
+**Author**: WaveForge

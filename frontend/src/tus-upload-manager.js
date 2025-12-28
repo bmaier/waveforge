@@ -11,10 +11,10 @@ class TusUploadManager {
         this.eventListeners = {};
         this.uploadStatus = {};
         this.pendingUploads = 0;
-        
+
         console.log('[TUS Manager] Initialized with method:', this.uploadMethod);
     }
-    
+
     /**
      * Initialize Service Worker and message handlers
      */
@@ -23,12 +23,12 @@ class TusUploadManager {
             try {
                 const registration = await navigator.serviceWorker.ready;
                 this.serviceWorker = registration.active;
-                
+
                 // Listen for messages from Service Worker
                 navigator.serviceWorker.addEventListener('message', this.handleMessage.bind(this));
-                
+
                 console.log('[TUS Manager] Service Worker ready');
-                
+
                 // Check for pending uploads
                 await this.checkPendingUploads();
             } catch (error) {
@@ -36,7 +36,7 @@ class TusUploadManager {
             }
         }
     }
-    
+
     /**
      * Set upload method (tus or custom)
      */
@@ -45,26 +45,26 @@ class TusUploadManager {
             console.error('[TUS Manager] Invalid upload method:', method);
             return;
         }
-        
+
         this.uploadMethod = method;
         localStorage.setItem('uploadMethod', method);
         console.log('[TUS Manager] Upload method set to:', method);
         this.emit('methodChanged', { method });
     }
-    
+
     /**
      * Get current upload method
      */
     getUploadMethod() {
         return this.uploadMethod;
     }
-    
+
     /**
      * Upload a chunk using the configured method
      */
     async uploadChunk(sessionId, chunkIndex, totalChunks, blob, recordingName, format, fileId) {
         console.log(`[TUS Manager] Uploading chunk ${chunkIndex}/${totalChunks} via ${this.uploadMethod}`);
-        
+
         if (this.serviceWorker) {
             // Send to Service Worker for background upload
             this.serviceWorker.postMessage({
@@ -86,7 +86,7 @@ class TusUploadManager {
             await this.uploadChunkDirect(sessionId, chunkIndex, totalChunks, blob, recordingName, format);
         }
     }
-    
+
     /**
      * Upload chunk directly (fallback when SW unavailable)
      */
@@ -99,7 +99,7 @@ class TusUploadManager {
             }
         } catch (error) {
             console.error('[TUS Manager] Direct upload failed:', error);
-            
+
             // If TUS failed, try custom as fallback
             if (this.uploadMethod === 'tus') {
                 console.log('[TUS Manager] Falling back to custom upload');
@@ -107,7 +107,7 @@ class TusUploadManager {
             }
         }
     }
-    
+
     /**
      * Upload chunk using TUS protocol
      */
@@ -127,7 +127,7 @@ class TusUploadManager {
             }
         });
     }
-    
+
     /**
      * Perform TUS upload
      */
@@ -164,10 +164,10 @@ class TusUploadManager {
                 resolve();
             }
         });
-        
+
         upload.start();
     }
-    
+
     /**
      * Upload chunk using custom method (fallback)
      */
@@ -176,19 +176,22 @@ class TusUploadManager {
         formData.append('session_id', sessionId);
         formData.append('chunk_index', chunkIndex);
         formData.append('file', blob);
-        
+        formData.append('total_chunks', totalChunks);
+        formData.append('recording_name', recordingName);
+        formData.append('format', format);
+
         const response = await fetch('/upload/chunk', {
             method: 'POST',
             body: formData
         });
-        
+
         if (!response.ok) {
             throw new Error(`Upload failed: ${response.status}`);
         }
-        
+
         this.emit('chunkUploaded', { sessionId, chunkIndex, totalChunks });
     }
-    
+
     /**
      * Get upload status for a session
      */
@@ -199,10 +202,10 @@ class TusUploadManager {
                 data: { sessionId }
             });
         }
-        
+
         return this.uploadStatus[sessionId] || { uploaded: 0, total: 0 };
     }
-    
+
     /**
      * Cancel all uploads for a session
      */
@@ -213,10 +216,10 @@ class TusUploadManager {
                 data: { sessionId }
             });
         }
-        
+
         this.emit('sessionCancelled', { sessionId });
     }
-    
+
     /**
      * Retry failed uploads
      */
@@ -227,7 +230,7 @@ class TusUploadManager {
             });
         }
     }
-    
+
     /**
      * Check for pending uploads
      */
@@ -238,61 +241,61 @@ class TusUploadManager {
             });
         }
     }
-    
+
     /**
      * Handle messages from Service Worker
      */
     handleMessage(event) {
         const { type, data } = event.data;
-        
+
         switch (type) {
             case 'UPLOAD_PROGRESS':
                 this.updateProgressUI(data);
                 this.emit('progress', data);
                 break;
-                
+
             case 'UPLOAD_COMPLETE':
                 console.log('[TUS Manager] Session complete:', data.sessionId);
                 this.emit('sessionComplete', data);
                 break;
-                
+
             case 'UPLOAD_OFFLINE':
                 console.log('[TUS Manager] Uploads paused (offline)');
                 this.emit('offline', data);
                 break;
-                
+
             case 'CONNECTION_RESTORED':
                 console.log('[TUS Manager] Connection restored, resuming uploads');
                 this.emit('online', data);
                 break;
-                
+
             case 'UPLOAD_PENDING':
                 this.emit('pending', data);
                 break;
-                
+
             case 'UPLOAD_STATUS':
                 this.uploadStatus[data.sessionId] = data.status;
                 this.emit('status', data);
                 break;
-                
+
             case 'PENDING_UPLOADS_COUNT':
                 this.pendingUploads = data.count;
                 this.emit('pendingCount', data);
                 break;
-                
+
             case 'CHUNK_UPLOADED':
                 this.emit('chunkUploaded', data);
                 break;
-                
+
             case 'CHUNK_FAILED':
                 this.emit('chunkFailed', data);
                 break;
-                
+
             default:
                 console.warn('[TUS Manager] Unknown message type:', type);
         }
     }
-    
+
     /**
      * Update progress UI
      */
@@ -300,7 +303,7 @@ class TusUploadManager {
         // Emit progress event for UI to handle
         this.emit('progress', data);
     }
-    
+
     /**
      * Event listener registration
      */
@@ -310,25 +313,25 @@ class TusUploadManager {
         }
         this.eventListeners[event].push(callback);
     }
-    
+
     /**
      * Remove event listener
      */
     off(event, callback) {
         if (!this.eventListeners[event]) return;
-        
+
         const index = this.eventListeners[event].indexOf(callback);
         if (index > -1) {
             this.eventListeners[event].splice(index, 1);
         }
     }
-    
+
     /**
      * Emit event
      */
     emit(event, data) {
         if (!this.eventListeners[event]) return;
-        
+
         this.eventListeners[event].forEach(callback => {
             try {
                 callback(data);
@@ -337,13 +340,13 @@ class TusUploadManager {
             }
         });
     }
-    
+
     /**
      * Handle session complete
      */
     async handleSessionComplete(sessionId) {
         console.log('[TUS Manager] Triggering assembly for session:', sessionId);
-        
+
         try {
             // Trigger server-side assembly
             await this.assembleRecording(sessionId);
@@ -352,7 +355,7 @@ class TusUploadManager {
             this.emit('error', { sessionId, error: 'Assembly failed' });
         }
     }
-    
+
     /**
      * Trigger server-side assembly of uploaded chunks
      */
@@ -364,14 +367,14 @@ class TusUploadManager {
             },
             body: JSON.stringify({ sessionId })
         });
-        
+
         if (!response.ok) {
             throw new Error(`Assembly failed: ${response.status}`);
         }
-        
+
         const result = await response.json();
         console.log('[TUS Manager] Assembly complete:', result);
-        
+
         return result;
     }
 }
