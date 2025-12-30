@@ -27,25 +27,19 @@ class TranscriptionManager {
     }
 
     checkEligibility() {
-        // Only enabled for WAV and if we are online
-        const isWav = this.formatSelect && this.formatSelect.value === 'wav';
+        // Only enabled checking online status
+        // We now support WebM via backend conversion
         const isOnline = navigator.onLine;
 
         if (this.toggle) {
-            if (!isWav) {
-                this.toggle.disabled = true;
-                this.toggle.checked = false;
-                this.isEnabled = false;
-                this.toggle.parentElement.title = "Live Transcription requires WAV format";
-            } else if (!isOnline) {
+            if (!isOnline) {
                 this.toggle.disabled = true;
                 this.toggle.checked = false;
                 this.isEnabled = false;
                 this.toggle.parentElement.title = "Live Transcription requires Internet connection";
             } else {
                 this.toggle.disabled = false;
-                this.toggle.parentElement.title = "Enable Live Transcription";
-                // Restore previous state if was enabled? No, safer to default off or keep current check
+                this.toggle.parentElement.title = "Enable Live Transcription (Gemini AI)";
                 this.isEnabled = this.toggle.checked;
             }
         }
