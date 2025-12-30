@@ -13,7 +13,7 @@ from pathlib import Path
 from starlette.middleware.base import BaseHTTPMiddleware
 
 # Import routers
-from routes import tus_upload, recording_complete
+from routes import tus_upload, recording_complete, transcription
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -36,7 +36,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; media-src 'self' blob: data:; connect-src 'self';"
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; media-src 'self' blob: data:; connect-src 'self' ws: wss:;"
         return response
 
 app.add_middleware(SecurityHeadersMiddleware)
@@ -50,6 +50,7 @@ app.add_middleware(
 # Include routers
 app.include_router(tus_upload.router, tags=["TUS Upload"])
 app.include_router(recording_complete.router, tags=["Recording"])
+app.include_router(transcription.router, tags=["Transcription"])
 
 # 2. CORS Configuration
 app.add_middleware(

@@ -829,6 +829,143 @@
                 transform: scale(0.95);
             }
         }
+
+        /* Transcription UI */
+        .transcript-container {
+            margin-top: 1rem;
+            background: rgba(10, 10, 15, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            display: none;
+            /* Hidden by default */
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .transcript-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+            border-color: rgba(6, 182, 212, 0.3);
+            /* Cyan border when active */
+        }
+
+        .transcript-line {
+            margin-bottom: 0.5rem;
+            color: #d1d5db;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: flex;
+            gap: 0.5rem;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .speaker-label {
+            font-weight: 600;
+            color: #06b6d4;
+            /* Cyan-500 */
+            flex-shrink: 0;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding-top: 2px;
+        }
+
+        .transcript-text {
+            flex-grow: 1;
+        }
+
+        .transcript-placeholder {
+            color: #6b7280;
+            font-style: italic;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .live-transcript-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+            animation: pulse-upload 2s infinite;
+        }
+
+        /* Toggle Switch for Live Transcript */
+        .transcript-toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: 1rem;
+            padding-left: 1rem;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-checkbox {
+            appearance: none;
+            width: 2.25rem;
+            height: 1.15rem;
+            background: #374151;
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s, opacity 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-checkbox:checked {
+            background: #0891b2;
+            /* Cyan-600 */
+            border-color: #0891b2;
+        }
+
+        .toggle-checkbox::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            width: 0.9rem;
+            height: 0.9rem;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-checkbox:checked::after {
+            transform: translateX(1.1rem);
+        }
+
+        .toggle-checkbox:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #1f2937;
+        }
+
+        /* Post-process button style */
+        .btn-transcribe {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #9ca3af;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            margin-left: 8px;
+        }
+
+        .btn-transcribe:hover {
+            background: rgba(6, 182, 212, 0.1);
+            color: #22d3ee;
+            border-color: rgba(6, 182, 212, 0.3);
+        }
     </style>
 </head>
 
@@ -913,6 +1050,15 @@
                                 <option value="wav">WAV</option>
                                 <option value="mp3">MP3</option>
                             </select>
+
+                            <!-- Live Transcript Toggle -->
+                            <div class="transcript-toggle-wrapper" id="transcriptToggleContainer"
+                                title="Live Transcription (Online only, WAV only)">
+                                <input type="checkbox" id="liveTranscriptToggle" class="toggle-checkbox"
+                                    onchange="toggleLiveTranscript(this)" disabled>
+                                <label for="liveTranscriptToggle"
+                                    class="text-xs text-gray-400 cursor-pointer select-none">Live Text</label>
+                            </div>
                         </div>
                         <div id="ramWarning" class="text-[9px] font-mono text-green-400 pl-1">
                             ✓ LOW RAM MODE (Safe for 8h+)
@@ -1043,6 +1189,19 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Transcript Section -->
+            <div id="transcriptDisplay" class="transcript-container" aria-live="polite">
+                <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-1">
+                    <span class="text-xs font-mono text-cyan-400">TRANSCRIPT</span>
+                    <span id="liveBadge" class="live-transcript-badge hidden">LIVE</span>
+                </div>
+                <div id="transcriptContent">
+                    <div class="transcript-placeholder">
+                        Start recording with "Live Text" enabled (WAV mode) to see transcription here...
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- RIGHT: Library / Playlist -->
@@ -5036,6 +5195,10 @@
                         if (e.data.size > 0) {
                             CrashGuard.logChunk(e.data);
 
+                            if (window.TranscriptionManager) {
+                                window.TranscriptionManager.sendAudioChunk(e.data);
+                            }
+
                             // CRITICAL: Update chunk count IMMEDIATELY when chunk is generated
                             // This ensures the counter updates even when server is offline
                             if (typeof LiveUploadIndicator !== 'undefined' && currentSessionId === LiveUploadIndicator.currentSessionId) {
@@ -5081,6 +5244,10 @@
                     startTimer();
                     applyInputEQ();                // Initialize live upload indicator for this recording session
                     LiveUploadIndicator.onRecordingStart(currentSessionId);
+
+                    if (window.TranscriptionManager) {
+                        window.TranscriptionManager.startParams(currentSessionId);
+                    }
                 } catch (err) { console.error(err); showToast("Mic Error", true); }
             }
 
@@ -5095,6 +5262,10 @@
                     }
                     isRecording = false;
                     isPaused = false;
+
+                    if (window.TranscriptionManager) {
+                        window.TranscriptionManager.stop();
+                    }
                     document.getElementById('recordButton').classList.remove('recording-active');
                     document.getElementById('recordButton').disabled = false;
                     document.getElementById('recordButton').setAttribute('tabindex', '0');
@@ -5589,6 +5760,7 @@
                         <div class="flex gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
                             <button class="play-btn-${t.id} w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:border-cyan-400 hover:text-cyan-400 hover:shadow-[0_0_10px_rgba(0,243,255,0.3)] transition-all" title="Abspielen: ${t.name}" aria-label="Abspielen: ${t.name}" type="button"><span aria-hidden="true">▶</span></button>
                             ${uploadButtonHTML}
+                            <button class="transcribe-btn-${t.id} btn-transcribe" data-session="${t.sessionId}" title="Transkription erstellen" aria-label="Transkription erstellen" type="button">TXT</button>
                             <button class="dl-btn-${t.id} px-2 h-8 rounded border border-gray-600 flex items-center justify-center hover:border-green-400 hover:text-green-400 text-[10px] font-mono transition-all" title="Herunterladen: ${t.name}" aria-label="Herunterladen: ${t.name}" type="button">DL</button>
                             <button class="del-btn-${t.id} w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:border-red-500 hover:text-red-500 transition-all" title="Löschen: ${t.name}" aria-label="Löschen: ${t.name}" type="button"><span aria-hidden="true">×</span></button>
                         </div>
@@ -5600,6 +5772,16 @@
                 `;
                     c.appendChild(el);
                     el.querySelector(`.play-btn-${t.id}`).onclick = () => loadTrack(t.id, t.name, t.blob);
+
+                    el.querySelector(`.transcribe-btn-${t.id}`).onclick = (e) => {
+                        e.stopPropagation();
+                        if (window.TranscriptionManager) {
+                            window.TranscriptionManager.triggerPostProcess(t.sessionId);
+                        } else {
+                            showToast("Transcription service unavailable", true);
+                        }
+                    };
+
                     el.querySelector(`.dl-btn-${t.id}`).onclick = () => { const u = URL.createObjectURL(t.blob); const a = document.createElement('a'); a.href = u; a.download = `${t.name}.${ext}`; a.click(); URL.revokeObjectURL(u); };
                     el.querySelector(`.del-btn-${t.id}`).onclick = () => openDeleteModal(t.id, t.name);
 
@@ -6570,7 +6752,8 @@
 
         <!-- TUS Upload Client (for main thread uploads) -->
         <script src="./tus.min.js"></script>
-        <script src="./tus-upload-manager.js"></script>
+        <script src="tus-upload-manager.js"></script>
+        <script src="transcription-manager.js"></script>
 </body>
 
 </html>
